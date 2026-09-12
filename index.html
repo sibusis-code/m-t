@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&amp;T Academy — AI Skills, Built In-House</title>
+<meta name="description" content="M&amp;T Academy is our in-house training academy — accredited qualifications and short courses open to every M&amp;T employee, fully funded, online or in person.">
+<link rel="stylesheet" href="styles.css?v=20260910">
+</head>
+<body>
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="./" class="brand"><img src="mt-logo.webp" alt="M&amp;T Development"><span class="brand-word">M&amp;T</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="./" data-nav="home" class="active">Home</a>
+      <a href="about" data-nav="about">About</a>
+      <a href="courses" data-nav="courses">Courses</a>
+      <a href="trainers" data-nav="trainers">Trainers</a>
+      <a href="graduates" data-nav="graduates">Graduates</a>
+      <a href="contact" data-nav="contact">Contact</a>
+      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
+      <a href="contact" class="nav-cta">Upskill Yourself</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</nav>
+<!-- Hero. This is the 3 Jul layout (commit a4939c3) brought back on 9 Sep 2026:
+     Kgomotso sent the old screenshot and asked for it on every academy —
+     "simple and to the point". A photograph, one line, one search field, two
+     pills, nothing else.
+
+     The accreditation card that used to sit beside the headline is gone with
+     it. Nothing was lost: the QCTO → SAQA → Provider chain it explained is on
+     /courses, which is where its own link already pointed.
+
+     TO RESKIN THIS: change the photograph on .hero-photo and the two lines of
+     copy. Nothing else in the hero belongs to one academy. The photograph is
+     the same stock image on every site for now — swap in a real one from this
+     academy the moment there is one. -->
+<header class="hero" id="home">
+  <div class="hero-photo" style="background-image:url(https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&amp;fit=crop&amp;w=1800&amp;q=80)"></div>
+  <div class="hero-inner">
+    <h1>Welcome to M&amp;T Academy</h1>
+    <!-- A plain GET to /courses, so it still works with JavaScript off. The
+         catalogue reads ?q= on load and opens filtered across every school —
+         see the seed at the bottom of courses-index.js. -->
+    <form class="hero-search" action="courses" method="get" role="search">
+      <input type="search" name="q" placeholder="What do you want to learn?" aria-label="Search courses">
+      <button class="go" type="submit" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+    </form>
+    <div class="hero-cta">
+      <a href="courses" class="btn btn-soft">Explore our courses</a>
+      <a href="contact" class="btn btn-white">Talk to our team</a>
+    </div>
+  </div>
+  <div class="hero-curve" aria-hidden="true"><svg viewBox="0 0 1440 70" preserveAspectRatio="none"><path d="M0,70 L0,34 C280,72 620,72 720,50 C860,20 1180,6 1440,44 L1440,70 Z" fill="#ffffff"/></svg></div>
+</header>
+<!-- Skills Building. Kgomotso's wording, in this site's voice — see the note
+     beside .pillar in styles.css for what changed from the card she sent and
+     why. Brand-neutral on purpose: this band is identical on all five
+     academies, so it is one edit here and a copy across. -->
+<section class="pillar">
+  <div class="wrap pillar-inner">
+    <div class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="m8.5 8.5 2 2 4-4"/><path d="M8 13.5h5"/><circle cx="17" cy="18" r="3.2"/><path d="m15.4 20.6-.4 2.4 2-1.1 2 1.1-.4-2.4"/></svg></div>
+    <div>
+      <span class="eyebrow">Skills Building</span>
+      <p>Upskilling, reskilling and workforce training — so you are ready for the job you want next, or the business you want to start.</p>
+    </div>
+  </div>
+</section>
+<!-- Intake band. Centenary Networks confirmed the start date on 12 Aug 2026; it
+     is the provider's date, not our arithmetic, and it is the one thing on this
+     page with a deadline — hence as high as it is. The Skills Building band
+     above it went in on 10 Sep 2026 and pushed it one section down. The per-module dates
+     on /pm-schedule remain indicative, and that page still says so. -->
+<section class="intake">
+  <div class="wrap intake-grid reveal">
+    <div class="intake-when">
+      <span class="intake-eyebrow"><span class="dot"></span> Registration open</span>
+      <div class="intake-day">10</div>
+      <div class="intake-mon">September 2026</div>
+    </div>
+    <div class="intake-body">
+      <span class="intake-tag">Accredited · NQF 5</span>
+      <h2>The Project Manager qualification starts on 10 September</h2>
+      <p>The registered project-management qualification — 240 credits at NQF Level 5, online or in person, assessed by Centenary Networks. Register now to hold your place.</p>
+      <ul class="intake-facts">
+        <li>SAQA ID 101869</li>
+        <li>240 credits</li>
+        <li>Online or in person</li>
+        <li>Funded by M&amp;T</li>
+      </ul>
+      <div class="btn-row">
+        <a href="contact?course=Occupational%20Certificate%3A%20Project%20Manager" class="btn btn-primary">Register Now</a>
+        <a href="course?c=project-management" class="btn btn-ghost">See what it covers</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section>
+  <div class="wrap">
+    <!-- NO NAMED LEADER, AND NO PHOTOGRAPH — ON PURPOSE (12 Sep 2026)
+         Every other academy's version of this block carries a named chief executive
+         with a photograph. This site was cloned from Equinix, whose block named
+         Equinix's CEO; a find-and-replace on the company name would have left a real
+         person captioned as M&T's chief executive. (That is what happened on the
+         Tracker site, which was cloned the same way.)
+         Nobody has supplied M&T's leadership, a photograph, or approved words, so
+         this block speaks only in the academy's own voice: no name, no title, no
+         portrait, and nothing in the first person. When M&T send a message they
+         have approved, put the photo column back (drop .gm-solo), add the .sig
+         block with their name, and only then set the eyebrow to
+         "A message from <first name>". -->
+    <div class="gm gm-solo reveal">
+      <div>
+        <span class="eyebrow">Why this academy exists</span>
+        <blockquote>
+          <p class="big">Our People, Our Greatest Asset.</p>
+          <p>M&amp;T Academy exists because the people doing the work are what the company is built on — whatever the role, whatever the starting point. What you come away with is yours to keep: an accredited qualification counts with another employer and towards further study, not only here.</p>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="courses" class="section-soft">
+  <div class="wrap">
+    <div class="sec-head center reveal"><span class="eyebrow">Our Courses</span><h2>What's in the catalogue</h2><p><strong>The Occupational Certificate: Project Manager</strong> is the accredited qualification, and it is first below. Ask HR for anything that is not listed.</p></div>
+    <div class="course-grid">
+
+<!-- Card 1 — Project Manager. First on purpose: it is the accredited qualification, so it is the first card on the page. -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1c1508 0%,#5c3a12 45%,#a86a1f 78%,#3e4096 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><line x1="92" y1="36" x2="92" y2="152" stroke="#fff" stroke-width="1" opacity=".55"/><line x1="92" y1="152" x2="336" y2="152" stroke="#fff" stroke-width="1" opacity=".55"/><rect x="102" y="48" width="118" height="12" rx="4" fill="#5b5fc7" opacity=".85"/><rect x="140" y="70" width="152" height="12" rx="4" fill="#fff" opacity=".45"/><rect x="182" y="92" width="92" height="12" rx="4" fill="#1f8a70" opacity=".85"/><rect x="214" y="114" width="106" height="12" rx="4" fill="#fff" opacity=".3"/><path d="M320 120 l-8 -8 M320 120 l8 -8" stroke="#fff" stroke-width="1.4" opacity=".5" stroke-linecap="round"/><circle cx="320" cy="128" r="7" fill="#3e4096"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg> PROJECT MANAGEMENT</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <button type="button" class="acc-badge local"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>Locally accredited<span class="acc-pop"><strong>On the National Qualifications Framework</strong>The QCTO designs and quality-assures this qualification, SAQA registers it on the NQF with its own ID, and only an accredited provider may deliver it. That is what makes the certificate count with another employer, or towards further study — not just inside M&amp;T.</span></button>
+          <h4>Occupational Certificate: Project Manager</h4>
+          <p><strong>Starts 10 September 2026.</strong> The registered NQF 5 qualification — 240 credits across knowledge, practical and workplace modules. The formal route for anyone running projects at M&amp;T. <a href="pm-pathway" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">Already done the Google certificate?</a></p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Register Now</span>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 — AI &amp; Software Development. One of the three lines Centenary
+           is selling; see the focus tiles at the top of the catalogue. The eight
+           modules are OURS, unlike Project Manager's, and are awaiting sign-off. -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#101826 0%,#1b2b45 42%,#243a5e 70%,var(--accent) 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.42"><rect x="58" y="34" width="176" height="112" rx="8" fill="none" stroke="#fff" stroke-width="1.2"/><line x1="58" y1="58" x2="234" y2="58" stroke="#fff" stroke-width="1" opacity=".5"/><circle cx="72" cy="46" r="3.4" fill="var(--accent)"/><circle cx="84" cy="46" r="3.4" fill="var(--green)" opacity=".85"/><circle cx="96" cy="46" r="3.4" fill="#fff" opacity=".45"/><path d="M104 84 l-16 16 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><path d="M188 84 l16 16 -16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/><line x1="132" y1="120" x2="160" y2="80" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><rect x="72" y="70" width="52" height="7" rx="3" fill="#fff" opacity=".28"/><circle cx="304" cy="90" r="30" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/><circle cx="304" cy="90" r="8" fill="var(--accent)"/><circle cx="266" cy="62" r="4.5" fill="var(--green)"/><circle cx="346" cy="68" r="4.5" fill="var(--green)"/><circle cx="272" cy="126" r="4.5" fill="#fff" opacity=".65"/><circle cx="344" cy="120" r="4.5" fill="#fff" opacity=".65"/><line x1="304" y1="90" x2="266" y2="62" stroke="var(--green)" stroke-width="1"/><line x1="304" y1="90" x2="346" y2="68" stroke="var(--green)" stroke-width="1"/><line x1="304" y1="90" x2="272" y2="126" stroke="#fff" stroke-width="1" opacity=".5"/><line x1="304" y1="90" x2="344" y2="120" stroke="#fff" stroke-width="1" opacity=".5"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> SOFTWARE DEVELOPMENT</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>AI &amp; Software Development</h4>
+          <p>Build software, and build it with AI. Eight modules from how a codebase works to shipping an AI-powered feature — no development background needed.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Available Now</span>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 70%,#3e4096 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.35"><circle cx="200" cy="90" r="60" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="35" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="10" fill="#3e4096"/><line x1="140" y1="90" x2="365" y2="90" stroke="#fff" stroke-width=".8"/><line x1="200" y1="30" x2="200" y2="150" stroke="#fff" stroke-width=".8"/><circle cx="280" cy="55" r="4" fill="#5b5fc7"/><circle cx="130" cy="120" r="4" fill="#5b5fc7"/><circle cx="320" cy="130" r="4" fill="#1f8a70"/><line x1="200" y1="90" x2="280" y2="55" stroke="#5b5fc7" stroke-width=".8"/><line x1="200" y1="90" x2="130" y2="120" stroke="#5b5fc7" stroke-width=".8"/><line x1="200" y1="90" x2="320" y2="130" stroke="#1f8a70" stroke-width=".8"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> BUSINESS</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>AI Fundamentals for the Workplace</h4>
+          <p>A practical introduction to AI for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Available Now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#0d2b0d 0%,#1a4a1a 40%,#2d7a2d 70%,#1f8a70 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="60" y="40" width="280" height="100" rx="8" fill="none" stroke="#fff" stroke-width="1"/><rect x="80" y="58" width="80" height="10" rx="3" fill="#fff" opacity=".5"/><rect x="80" y="76" width="120" height="8" rx="3" fill="#fff" opacity=".3"/><rect x="80" y="92" width="100" height="8" rx="3" fill="#fff" opacity=".3"/><rect x="80" y="108" width="60" height="8" rx="3" fill="#1f8a70" opacity=".8"/><rect x="260" y="58" width="60" height="72" rx="4" fill="#5b5fc7" opacity=".2"/><path d="M270 90 l10-15 10 8 10-20 10 10" fill="none" stroke="#5b5fc7" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> BUSINESS</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>AI Tools for Productivity</h4>
+          <p>Hands-on training in the AI tools transforming day-to-day work — writing assistants, research tools, data tools, and workflow automation.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Available Now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#2a1a0a 0%,#5c3a12 40%,#a06020 70%,#3e4096 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="55" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M175 70 l50 0 l-10 20 l-30 0 z" fill="#fff" opacity=".2"/><path d="M155 90 q0 -40 45 -40" fill="none" stroke="#5b5fc7" stroke-width="2" stroke-dasharray="4 3"/><path d="M245 90 q0 40 -45 40" fill="none" stroke="#5b5fc7" stroke-width="2" stroke-dasharray="4 3"/><circle cx="200" cy="90" r="8" fill="#3e4096"/><line x1="200" y1="82" x2="200" y2="60" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="98" x2="212" y2="110" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> COMPLIANCE</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>Responsible & Ethical AI Use</h4>
+          <p>Using AI safely at work: data privacy, accuracy, bias, and the practical do's and don'ts of AI in a professional setting.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Available Now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#0a1628 0%,#1e3a5f 50%,#2d6a9f 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><circle cx="200" cy="90" r="45" fill="none" stroke="#fff" stroke-width="1"/><circle cx="200" cy="90" r="15" fill="#3e4096" opacity=".7"/><line x1="155" y1="90" x2="125" y2="70" stroke="#fff" stroke-width="1"/><circle cx="115" cy="65" r="12" fill="none" stroke="#5b5fc7" stroke-width="1.5"/><line x1="155" y1="90" x2="125" y2="115" stroke="#fff" stroke-width="1"/><circle cx="115" cy="120" r="12" fill="none" stroke="#5b5fc7" stroke-width="1.5"/><line x1="245" y1="90" x2="275" y2="70" stroke="#fff" stroke-width="1"/><circle cx="285" cy="65" r="12" fill="none" stroke="#1f8a70" stroke-width="1.5"/><line x1="245" y1="90" x2="275" y2="115" stroke="#fff" stroke-width="1"/><circle cx="285" cy="120" r="12" fill="none" stroke="#1f8a70" stroke-width="1.5"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> LEADERSHIP</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>AI for Leaders & Managers</h4>
+          <p>For M&amp;T managers and team leads: spotting AI opportunities in your department, leading AI-enabled teams, and driving responsible adoption across the business.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Available Now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="ccard reveal">
+        <div class="ccard-img">
+          <div class="ccard-img-inner" style="background:linear-gradient(135deg,#1a0d2e 0%,#3d1a6e 50%,#6b35b8 100%)">
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:.4"><rect x="80" y="50" width="100" height="80" rx="6" fill="none" stroke="#fff" stroke-width="1"/><rect x="220" y="50" width="100" height="80" rx="6" fill="none" stroke="#fff" stroke-width="1"/><line x1="180" y1="90" x2="220" y2="90" stroke="#5b5fc7" stroke-width="2" stroke-dasharray="4 3"/><rect x="90" y="62" width="80" height="8" rx="2" fill="#fff" opacity=".4"/><rect x="90" y="78" width="60" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="90" y="92" width="70" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="90" y="106" width="50" height="6" rx="2" fill="#1f8a70" opacity=".6"/><rect x="230" y="62" width="80" height="8" rx="2" fill="#fff" opacity=".4"/><rect x="230" y="78" width="60" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="230" y="92" width="70" height="6" rx="2" fill="#fff" opacity=".25"/><rect x="230" y="106" width="50" height="6" rx="2" fill="#3e4096" opacity=".6"/></svg>
+          </div>
+        </div>
+        <div class="ccard-body">
+          <div class="ccard-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> COMPUTER SCIENCE</div>
+          <div class="ccard-mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg> ONLINE OR IN PERSON</div>
+          <h4>AI & New Venture Creation</h4>
+          <p>Explore how AI is enabling new business models and entrepreneurial opportunities across Africa's growing digital economy.</p>
+          <div class="ccard-foot">
+            <span class="price">Fully funded by M&amp;T</span>
+            <span class="avail">Coming Soon</span>
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div style="text-align:center;margin-top:38px"><a href="courses" class="btn btn-primary">Browse all courses</a></div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Our next intake is open</h2>
+    <p>Register your interest with HR and we'll confirm your place on the next intake.</p>
+    <a href="contact" class="btn btn-primary">Upskill Yourself</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand"><img src="mt-logo.webp" alt="M&amp;T Development"><span class="brand-word">M&amp;T</span></div>
+      <div class="foot-nav">
+        <a href="./">Home</a>
+        <a href="about">About</a>
+        <a href="courses">Courses</a>
+        <a href="trainers">Trainers</a>
+        <a href="graduates">Graduates</a>
+        <a href="profile">Profile</a>
+        <a href="contact">Contact</a>
+        <a href="privacy">Privacy</a>
+      </div>
+    </div>
+    <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">
+      <strong>Accreditation</strong>
+      <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
+    </div>
+    <p class="disclaimer">M&amp;T Academy is the in-house training academy of M&amp;T, for M&amp;T employees. Our catalogue is a mix: items are non-accredited professional short courses unless explicitly marked as an accredited qualification, and not everything in it is listed on this site yet. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. Videos and downloadable resources shown are placeholders for demonstration. M&amp;T Academy operates in association with Centenary Networks. © 2026 M&amp;T Development. All rights reserved.</p>
+  </div>
+</footer>
+<script src="site.js?v=20260820"></script>
+<script src="profile.js?v=20260820"></script>
+<script src="locks.js?v=20260820"></script>
+<script src="cards.js?v=20260820"></script>
+<script src="assistant.js?v=20260820"></script>
+</body></html>

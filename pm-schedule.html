@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Manager study plan — M&amp;T Academy</title>
+<meta name="description" content="The Occupational Certificate: Project Manager is self-paced. This planner turns a weekly time commitment into module dates and calendar invites, so the time is booked rather than intended.">
+<link rel="stylesheet" href="styles.css?v=20260910">
+</head>
+<body>
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="./" class="brand"><img src="mt-logo.webp" alt="M&amp;T Development"></a>
+    <div class="nav-links" id="navLinks">
+      <a href="./" data-nav="home">Home</a>
+      <a href="about" data-nav="about">About</a>
+      <a href="courses" data-nav="courses">Courses</a>
+      <a href="trainers" data-nav="trainers">Trainers</a>
+      <a href="graduates" data-nav="graduates">Graduates</a>
+      <a href="contact" data-nav="contact">Contact</a>
+      <a href="profile" data-nav="profile" class="nav-profile" title="Your profile"><span class="np-av" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="np-label">Profile</span></a>
+      <a href="contact" class="nav-cta">Upskill Yourself</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px;display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</nav>
+
+<section class="section-dark page-top">
+  <div class="wrap">
+    <div class="sec-head sec-head-wide reveal">
+      <span class="eyebrow">Project Manager NQF 5 · study plan</span>
+      <h2 class="lede-h">The programme is self-paced. That works far better with a plan behind it.</h2>
+      <p>Self-paced means nobody sets your dates — which is freedom until it quietly becomes two years of good intentions. Set the pace you can genuinely commit to below and this works out when each module lands, then hands you calendar invites so the time is booked rather than hoped for.</p>
+    </div>
+    <div class="sg-assure reveal">
+      <span class="lbl">For managers and HR</span>
+      This page exists to answer one question honestly: what does this qualification actually ask of somebody's week? Change the hours and watch the finish date move. It is the same arithmetic whether you like the answer or not, and it is better known now than in month nine.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sg-card reveal" style="max-width:900px;margin:0 auto">
+      <div class="sg-stepnum">Set the pace</div>
+      <h3>What can each learner realistically commit?</h3>
+      <p class="sg-intro">The eleven knowledge modules carry <strong>80 credits</strong>. South Africa's NQF counts one credit as ten notional learning hours, so that is <strong>800 hours</strong> of study, reading, activities and assessment on the registered figures.</p>
+      <div class="two">
+        <div class="field">
+          <label for="pStart">Start date</label>
+          <input type="date" id="pStart" value="2026-09-10">
+          <span class="sg-hint">The intake starts <strong>10 September 2026</strong>, confirmed by Centenary Networks. Change it only if you are planning around a later start.</span>
+        </div>
+        <div class="field">
+          <label for="pHours">Hours per week</label>
+          <select id="pHours">
+            <option value="4">4 hours — half a day</option>
+            <option value="6">6 hours</option>
+            <option value="8" selected>8 hours — a full day a week</option>
+            <option value="10">10 hours</option>
+            <option value="12">12 hours</option>
+            <option value="15">15 hours — two days a week</option>
+            <option value="20">20 hours — half time</option>
+          </select>
+          <span class="sg-hint">Study time, not time at your desk.</span>
+        </div>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="pSessions">Split across</label>
+          <select id="pSessions">
+            <option value="1">1 session a week</option>
+            <option value="2" selected>2 sessions a week</option>
+            <option value="3">3 sessions a week</option>
+          </select>
+          <span class="sg-hint">How the weekly hours are blocked out in the diary.</span>
+        </div>
+        <div class="field">
+          <label for="pTime">Sessions start at</label>
+          <input type="time" id="pTime" value="09:00">
+          <span class="sg-hint">Local time, in each learner's own calendar.</span>
+        </div>
+      </div>
+      <div class="sg-actions" style="margin-top:8px">
+        <button class="btn btn-primary" id="pIcs">Download calendar invites</button>
+        <a class="btn btn-ghost-dark" href="pm-progress">Track my progress</a>
+        <button class="btn btn-ghost-dark" id="pPrint">Print / save as PDF</button>
+      </div>
+      <p class="sg-hint" id="pIcsNote" style="margin-top:14px">Downloads one <code>.ics</code> file — a block per module plus the recurring study sessions. Opens in Outlook, Google Calendar or Apple Calendar.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-soft">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">The result</span>
+      <h2 id="pHead">Your plan</h2>
+      <p id="pSummary"></p>
+    </div>
+    <div class="stats-row reveal" id="pStats"></div>
+    <div class="scrollx reveal" style="margin-top:30px">
+      <table class="ptable" id="pTable"></table>
+    </div>
+    <p class="sg-caveat reveal" style="max-width:860px;margin-top:28px" id="pCaveat"></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Reading this honestly</span>
+      <h2>Four things this plan is not</h2>
+    </div>
+    <div class="features">
+      <div class="feat reveal">
+        <h3>Not the provider's dates</h3>
+        <p>Centenary sets the official programme calendar — the registered documents leave duration blank on purpose. Everything here is arithmetic on the registered credits, for planning. Confirm real dates with the provider before anything goes in a contract or a WSP.</p>
+      </div>
+      <div class="feat reveal">
+        <h3>Not a deadline</h3>
+        <p>The programme is self-paced. Nothing here is enforced and nobody fails for drifting off it. Its whole purpose is to make drift visible early, while there is still time to do something about it.</p>
+      </div>
+      <div class="feat reveal">
+        <h3>Not the whole qualification</h3>
+        <p>These eleven modules are the 80-credit knowledge component. The 13 practical modules and 4 workplace modules — the other 160 credits — run alongside as logbooks signed off by a mentor, on their own timeline.</p>
+      </div>
+      <div class="feat reveal">
+        <h3>Not a completion record</h3>
+        <p>Finishing this plan is not the same as being found competent. Module assessments are marked by the provider, and the qualification is awarded only after the external assessment (EISA) set by the QCTO.</p>
+      </div>
+    </div>
+    <p class="sg-caveat reveal" style="max-width:860px;margin-top:28px"><strong>About notional hours.</strong> Ten hours per credit is how the NQF sizes a qualification — it covers everything a typical learner needs, including reading, activities, revision and assessment. It is a planning figure rather than a stopwatch: an experienced project administrator will move faster than someone new to the field, and Recognition of Prior Learning can remove whole modules from this plan. If the finish date above looks long, <a href="rpl" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">RPL</a> and the <a href="pm-pathway" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">Google pathway</a> are the two levers that genuinely shorten it.</p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Ready to start?</h2>
+    <p>Download the calendar, put it in your diary, and tell HR which pace you have committed to.</p>
+    <a href="course?c=project-management" class="btn btn-primary">See the qualification</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand"><img src="mt-logo.webp" alt="M&amp;T Development"></div>
+      <div class="foot-nav">
+        <a href="./">Home</a>
+        <a href="about">About</a>
+        <a href="courses">Courses</a>
+        <a href="trainers">Trainers</a>
+        <a href="graduates">Graduates</a>
+        <a href="profile">Profile</a>
+        <a href="contact">Contact</a>
+        <a href="privacy">Privacy</a>
+      </div>
+    </div>
+    <div class="foot-accred" style="max-width:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:22px;margin-bottom:20px">
+      <strong>Accreditation</strong>
+      <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
+    </div>
+    <p class="disclaimer">M&amp;T Academy is the in-house training academy of M&amp;T, for M&amp;T employees. The Occupational Certificate: Project Manager (SAQA 101869) is delivered self-paced. Dates on this page are calculated from the registered credit values for planning purposes and are not the provider's official programme calendar; Centenary Networks confirms programme dates, assesses modules, and the qualification is awarded by the QCTO following the external integrated summative assessment. M&amp;T Academy operates in association with Centenary Networks. © 2026 M&amp;T Development. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="pm-modules.js?v=20260820"></script>
+<script src="pm-schedule.js?v=20260820"></script>
+<script>
+(function(){
+  const S=window.PM_SCHEDULE, MODS=window.PM_MODULES;
+  if(!S||!MODS) return;
+  const ESC=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const $=id=>document.getElementById(id);
+  const els=['pStart','pHours','pSessions','pTime'].map($);
+
+  function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+
+  function render(){
+    const plan=S.planModules(MODS,$('pStart').value,+$('pHours').value);
+    if(!plan){ $('pSummary').textContent='Choose a start date to see the plan.'; return; }
+
+    const years=plan.totalWeeks/52;
+    const dur = years>=1 ? years.toFixed(1)+' years' : Math.round(plan.totalWeeks/4.35)+' months';
+
+    $('pHead').textContent='Eleven modules, '+plural(plan.totalWeeks,'week');
+    $('pSummary').innerHTML=
+      'At <strong>'+plan.hoursPerWeek+' hours a week</strong>, the knowledge component runs from '+
+      '<strong>'+S.human(plan.start)+'</strong> to <strong>'+S.human(plan.end)+'</strong> — about '+
+      dur+'. That is the 80-credit theory only; the practical and workplace modules run alongside it.';
+
+    $('pStats').innerHTML=[
+      [plan.rows.length,'modules'],
+      [plan.totalCredits,'credits'],
+      [plan.totalHours.toLocaleString('en-ZA'),'notional hours'],
+      [plan.totalWeeks,'weeks at this pace'],
+      [S.human(plan.end),'finishes']
+    ].map(s=>'<div class="stat"><div class="n">'+ESC(String(s[0]))+'</div><div class="l">'+s[1]+'</div></div>').join('');
+
+    $('pTable').innerHTML=
+      '<thead><tr><th>#</th><th>Module</th><th class="num">Credits</th><th class="num">Notional hrs</th>'+
+      '<th class="num">Weeks</th><th>Starts</th><th>Finishes</th></tr></thead><tbody>'+
+      plan.rows.map((r,i)=>
+        '<tr><td class="num">'+(i+1)+'</td>'+
+        '<td><a href="module?m='+r.id+'"><strong>'+ESC(r.id)+'</strong> '+ESC(r.title)+'</a></td>'+
+        '<td class="num">'+r.credits+'</td>'+
+        '<td class="num">'+r.hours+'</td>'+
+        '<td class="num">'+r.weeks+'</td>'+
+        '<td class="num">'+S.human(r.from)+'</td>'+
+        '<td class="num">'+S.human(r.to)+'</td></tr>').join('')+
+      '</tbody>';
+
+    /* The provider has confirmed the START date but not a module-by-module
+       calendar, and those are two different claims. Saying so on every render is
+       the difference between a planning aid and an implied commitment — so the
+       confirmed part is named as theirs and the rest stays marked as ours. */
+    const onStart = S.OFFICIAL_START && $('pStart').value === S.OFFICIAL_START;
+    $('pCaveat').innerHTML = plan.official
+      ? '<strong>These are Centenary\'s confirmed programme dates.</strong>'
+      : (onStart
+          ? '<strong>The 10 September start is confirmed by Centenary Networks. The module dates below it are not.</strong> '
+          : '')+
+        '<strong>Indicative dates.</strong> Centenary Networks sets the official programme calendar — '+
+        'the registered curriculum documents deliberately leave duration blank, because the provider '+
+        'decides it. Use this to agree a realistic pace and to book the time; confirm the real dates '+
+        'with the provider before they go into a workplace skills plan or a learner agreement.';
+
+    return plan;
+  }
+
+  function download(){
+    const plan=S.planModules(MODS,$('pStart').value,+$('pHours').value);
+    if(!plan) return;
+    const ics=S.buildICS(plan,{
+      sessionsPerWeek:+$('pSessions').value,
+      sessionTime:$('pTime').value||'09:00',
+      baseUrl:location.href.replace(/[^/]*$/,'')
+    });
+    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='project-manager-nqf5-study-plan.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    const n=$('pIcsNote');
+    n.innerHTML='<strong style="color:var(--green-deep)">Downloaded.</strong> Open '+
+      '<code>project-manager-nqf5-study-plan.ics</code> to add '+plan.rows.length+
+      ' module blocks and the recurring study sessions to your calendar.';
+  }
+
+  els.forEach(el=>el&&el.addEventListener('change',render));
+  $('pIcs').addEventListener('click',download);
+  $('pPrint').addEventListener('click',()=>window.print());
+  render();
+})();
+</script>
+<script src="site.js?v=20260820"></script>
+<script src="profile.js?v=20260820"></script>
+<script src="assistant.js?v=20260820"></script>
+</body>
+</html>

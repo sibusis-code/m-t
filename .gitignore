@@ -1,0 +1,18 @@
+.vscode/
+copy-dont-touch.html
+
+# Development database, client notes and the local config: never in git.
+.claude/
+_drafts/
+lib/config.local.php
+*.sqlite
+*.sqlite-journal
+private/
+
+# What M&T supplied to build the brand from: their logo file and a screenshot of
+# their own website (1.3 MB). Kept on disk as the record of where the palette in
+# styles.css was sampled from, and kept out of git because the deploy mirrors
+# tracked files into the web root — a screenshot of the client's site has no
+# business being served from it. The logo the site actually uses is the copy at
+# mt-logo.webp, which IS tracked.
+_brand-source/

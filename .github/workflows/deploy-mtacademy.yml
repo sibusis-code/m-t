@@ -1,0 +1,366 @@
+# Deploy M&T Academy to centenarynetworks.com/mtacademy/ over SFTP.
+#
+# This is the SPS workflow with the nouns changed. It is a copy rather than
+# something shared because a GitHub workflow cannot live in another repository,
+# and because the one thing that must never be shared between two academies is
+# the credential — SPS's secrets are not readable from here, and that is the
+# point. If you change one of these files, change both: tools/sync-backend.php
+# in the SPS repository does NOT sync workflows, deliberately.
+#
+# DELIBERATELY MANUAL: GitHub -> Actions -> "Deploy M&T Academy" -> Run workflow.
+# Pushing does not deploy. This lands inside a LIVE CLIENT SITE, and going live
+# stays a decision rather than a side effect of a commit.
+#
+# THE RISK THIS FILE IS BUILT AROUND
+# centenarynetworks.com is not ours, and SPS Academy is already live one
+# directory across at public_html/spsacademy. A mirror pointed at the wrong
+# directory, with deletion enabled, would erase either the client's website or
+# another company's academy. So:
+#
+#   - server_dir must look like public_html/<something>. Deploying to the web
+#     root itself is refused by the job, not by a convention in a document.
+#   - delete_removed is off by default.
+#   - after uploading, the job fetches the CLIENT's homepage AND the SPS academy
+#     and fails if either stopped working.
+#
+# TRANSPORT: SFTP on port 22. Xneelo answers with "SSH-2.0-FTP Service" and
+# refuses FTPS on 21. The host key is pinned in .github/known_hosts with
+# StrictHostKeyChecking=yes, so a substituted server aborts the deploy instead
+# of being handed the password.
+#
+# CREDENTIALS live in repository secrets and are never in this file, never in
+# the repository, and never pasted into a chat:
+#   MT_FTP_SERVER    centenarynetworks.com
+#   MT_FTP_USERNAME  the Xneelo SFTP user
+#   MT_FTP_PASSWORD  its password
+# Set them with:  printf '%s' 'value' | gh secret set MT_FTP_USERNAME
+#
+# Ask Xneelo for an FTP user whose home is public_html/mtacademy if the panel
+# allows it. Then the credential in this repository physically cannot reach the
+# client's site or SPS's academy, which is worth more than every check below.
+name: "Deploy M&T Academy"
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — list what would change, upload nothing"
+        type: boolean
+        default: true
+      server_dir:
+        description: "Target directory, relative to the SFTP login directory"
+        type: string
+        default: "public_html/mtacademy"
+      delete_removed:
+        description: "Delete server files no longer in the repo (destructive — leave off)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-mtacademy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Upload to centenarynetworks.com/mtacademy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v5
+
+      - name: Refuse to deploy anywhere dangerous
+        env:
+          DIR: ${{ inputs.server_dir }}
+        run: |
+          # A subdirectory of public_html, and nothing else. This is the check
+          # that stands between a typo and a client's website, so it is written
+          # to have no way round it.
+          #
+          # The first character must be alphanumeric. Allowing [A-Za-z0-9._-]+
+          # for the whole segment lets "public_html/." through — and that
+          # resolves to public_html itself, the client's web root.
+          # "public_html/.." resolved to their home directory. A guard with a
+          # bypass is worse than no guard, because it is trusted.
+          if ! printf '%s' "$DIR" | grep -Eq '^public_html/[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+            echo "::error::server_dir must be public_html/<folder>, starting with a letter or digit — got '$DIR'."
+            echo "Deploying to the web root would overwrite the client's site."
+            exit 1
+          fi
+          case "$DIR" in
+            *..*) echo "::error::server_dir must not contain '..' — got '$DIR'."; exit 1 ;;
+          esac
+          # This repository must never be able to write into another academy's
+          # folder. Different company, different repository, different learners'
+          # personal information — and they are all siblings in one public_html,
+          # so the only thing between them is this list.
+          case "$DIR" in
+            public_html/spsacademy|public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy)
+              echo "::error::That is another academy's directory. This repository deploys only to public_html/mtacademy."
+              exit 1 ;;
+          esac
+          echo "Target '$DIR' is a real subdirectory of the web root. Good."
+
+      - name: Fail early if the credentials are missing
+        env:
+          FTP_SERVER: ${{ secrets.MT_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.MT_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.MT_FTP_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$FTP_SERVER" ]   || missing="$missing MT_FTP_SERVER"
+          [ -n "$FTP_USERNAME" ] || missing="$missing MT_FTP_USERNAME"
+          [ -n "$FTP_PASSWORD" ] || missing="$missing MT_FTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            exit 1
+          fi
+          test -s .github/known_hosts || {
+            echo "::error::.github/known_hosts is missing — refusing to connect without a pinned host key."
+            exit 1
+          }
+
+          # The host key is pinned against an exact hostname, so the secret has
+          # to BE that hostname. Anything else — https:// in front, sftp:// in
+          # front, a www. or ftp. prefix, an IP address, a trailing space from
+          # pasting — connects to a name the pin does not cover, and ssh reports
+          # it as "Host key verification failed" a good half-minute later. That
+          # message reads like the server changed or is being impersonated,
+          # which sends you off checking the wrong thing entirely.
+          #
+          # The secret is never printed. What is printed is the hostname the
+          # repository pins, which is in the repository already.
+          pinned=$(grep -v '^#' .github/known_hosts | awk '{print $1}' | sort -u | tr '\n' ' ')
+          if ! ssh-keygen -F "$FTP_SERVER" -f .github/known_hosts >/dev/null 2>&1; then
+            echo "::error::MT_FTP_SERVER is not a host pinned in .github/known_hosts (which pins: $pinned)."
+            echo "Set the secret to the bare hostname only — no https://, no sftp://, no www. or ftp. prefix, no trailing space."
+            exit 1
+          fi
+          echo "Secrets present, and MT_FTP_SERVER matches the pinned host key."
+
+      - name: Record what the neighbours look like BEFORE we touch anything
+        run: |
+          curl -sS --max-time 30 https://centenarynetworks.com/ -o /tmp/client-before.html || true
+          if [ -s /tmp/client-before.html ]; then
+            echo "before=$(md5sum /tmp/client-before.html | cut -d' ' -f1)" >> "$GITHUB_ENV"
+            echo "Captured the client homepage ($(wc -c < /tmp/client-before.html) bytes)."
+          else
+            echo "::warning::Could not fetch the client homepage beforehand; the after-check will be skipped."
+          fi
+          for nb in spsacademy fungiacademy mazivacademy equinixacademy; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+                   "https://centenarynetworks.com/$nb/" || echo 000)
+            echo "before_$nb=$code" >> "$GITHUB_ENV"
+            echo "Neighbour $nb answered $code before this deploy."
+          done
+
+      - name: Install lftp and sshpass
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp sshpass
+
+      - name: Deploy
+        env:
+          SSHPASS: ${{ secrets.MT_FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.MT_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.MT_FTP_USERNAME }}
+        run: |
+          set -euo pipefail
+          # A secret pasted into the web form can carry a trailing space or
+          # newline, which survives into the hostname and breaks the host key
+          # match for a reason nothing in the error message mentions.
+          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '[:space:]')"
+          FLAGS="--reverse --verbose --no-perms"
+          [ "${{ inputs.dry_run }}" = "true" ]        && FLAGS="$FLAGS --dry-run"
+          [ "${{ inputs.delete_removed }}" = "true" ] && FLAGS="$FLAGS --delete"
+
+          # The same exclusions as tools/make-deploy-zip.php, for the same
+          # reasons: _drafts/ holds client emails, tools/ is command-line only
+          # and cannot run on a host with no shell, and lib/config.local.php
+          # holds the development IP pepper. The real config lives outside the
+          # web root and is uploaded once, by hand — never from here.
+          cat > "$RUNNER_TEMP/deploy.lftp" <<EOF
+          set sftp:connect-program "sshpass -e ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$GITHUB_WORKSPACE/.github/known_hosts"
+          set net:max-retries 5
+          set net:timeout 60
+          set net:reconnect-interval-base 5
+          set net:reconnect-interval-multiplier 1.5
+          # Shared hosting throttles concurrent SFTP channels; one at a time is
+          # slower but survives a few dozen files.
+          set mirror:parallel-transfer-count 1
+          open -u "$FTP_USERNAME","" sftp://$FTP_SERVER
+          mirror $FLAGS \
+            -X '.git*' -X '.git*/' \
+            -X '.github/' -X '.vscode/' -X '.claude/' \
+            -X 'tools/' -X '_drafts/' -X 'private/' \
+            -X '*.md' -X '*.docx' -X '*.zip' \
+            -X 'config.local.php' -X 'config.sample.php' \
+            ./ "${{ inputs.server_dir }}"
+          bye
+          EOF
+          lftp -f "$RUNNER_TEMP/deploy.lftp"
+
+      - name: Check we did not disturb the client's site or the other academies
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          sleep 5
+          curl -sS --max-time 30 https://centenarynetworks.com/ -o /tmp/client-after.html || true
+          if [ -n "${before:-}" ] && [ -s /tmp/client-after.html ]; then
+            after=$(md5sum /tmp/client-after.html | cut -d' ' -f1)
+            if [ "$after" != "$before" ]; then
+              echo "::error::The client's homepage CHANGED during this deploy. Check the target directory immediately."
+              exit 1
+            fi
+            echo "Client homepage unchanged."
+          fi
+          # The other academies are other companies' learner records, sitting in
+          # sibling directories. If this deploy touched one of them, that has to
+          # stop the build.
+          for nb in spsacademy fungiacademy mazivacademy equinixacademy; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+                   "https://centenarynetworks.com/$nb/" || echo 000)
+            prev=$(printenv "before_$nb" || echo '')
+            echo "  neighbour $nb answers $code (was ${prev:-unknown})"
+            # A 404 is fine — that academy may not be deployed yet. A neighbour
+            # that WAS answering and has stopped is the thing worth failing for.
+            if [ "$prev" = "200" ] && [ "$code" != "200" ]; then
+              echo "::error::$nb stopped answering during this deploy. Check the target directory immediately."
+              exit 1
+            fi
+          done
+
+      - name: Check our own pages
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          base="https://centenarynetworks.com/${{ inputs.server_dir }}"
+          base="${base/public_html\//}"
+          echo "Checking $base"
+          fail=0
+
+          # WHY NONE OF THIS TRUSTS A STATUS CODE
+          #
+          # centenarynetworks.com answers 200 with the CLIENT'S OWN HOMEPAGE for
+          # any path it does not recognise, and that rule reaches into this
+          # folder for as long as our .htaccess is not there. Measured on the
+          # empty directory before the first deploy:
+          #
+          #   /mtacademy/login       200  text/html   <- client's homepage
+          #   /mtacademy/styles.css  200  text/html   <- client's homepage
+          #   /mtacademy/lib/db.php  200  text/html   <- client's homepage
+          #
+          # So "200" here means nothing whatsoever. A deploy that uploaded not
+          # one byte would have passed a status-code check on every page. Every
+          # check below looks at WHAT came back instead.
+
+          # 1. Is our .htaccess in charge of this directory at all? A path that
+          #    cannot exist must 404. If it comes back 200, the parent site is
+          #    still answering for us and nothing else below can be believed.
+          nonsense=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+                     "$base/zzz-this-cannot-exist-$RANDOM" || echo 000)
+          printf '  %-22s %s\n' "(nonsense URL)" "$nonsense"
+          if [ "$nonsense" = "200" ]; then
+            echo "::error::A nonsense URL under $base returned 200, which is the client's catch-all answering. Our .htaccess is not in place — the deploy did not land."
+            fail=1
+          fi
+
+          # 2. The stylesheet has to BE a stylesheet. The catch-all serves
+          #    text/html, so the content type is what separates "our CSS
+          #    uploaded" from "their homepage with a .css on the end".
+          ct=$(curl -sS --max-time 30 -o /dev/null -w '%{content_type}' "$base/styles.css" || echo none)
+          printf '  %-22s %s\n' "/styles.css" "$ct"
+          case "$ct" in
+            text/css*) ;;
+            *) echo "::error::/styles.css came back as '$ct', not text/css — that is the client's homepage, not our stylesheet."; fail=1 ;;
+          esac
+
+          # 3. Our pages have to be OUR pages. Every one of them carries the
+          #    academy name in its <title>, and the client's homepage does not.
+          for p in "/" "/courses" "/graduates" "/contact" "/privacy" "/login" "/forgot" "/reset"; do
+            body=$(curl -sS --max-time 30 "$base$p" || echo '')
+            case "$body" in
+              *"M&amp;T Academy"*|*"M&T Academy"*) printf '  %-22s ok\n' "$p" ;;
+              *) echo "::error::$p did not come back as an M&T Academy page."; fail=1 ;;
+            esac
+          done
+
+          # 4. Signed out, these must redirect and must not render. A 200 here
+          #    would mean require_user()/require_admin() is not running, which
+          #    is the whole access control on those pages.
+          for p in "/my" "/admin-users" "/admin"; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
+            printf '  %-22s %s\n' "$p" "$code"
+            case "$code" in
+              302|303) ;;
+              *) echo "::error::$p returned $code signed out — it must redirect to the sign-in page."; fail=1 ;;
+            esac
+          done
+
+          # The session endpoint every learner page depends on. A 404 means it
+          # did not upload; a 500 means it uploaded and cannot run. Either way
+          # the site looks fine and quietly forgets who everyone is.
+          probe=$(curl -sS --max-time 30 "$base/account.php" || echo '')
+          printf '  %-14s %s\n' "/account.php" "$(printf '%s' "$probe" | head -c 40)"
+          case "$probe" in
+            *'"in":false'*) ;;
+            *) echo "::error::/account.php did not answer with a session probe."; fail=1 ;;
+          esac
+
+          # The tenant check, and the one that matters most once there is more
+          # than one academy. If ~/private/mtacademy-config.php is missing or
+          # names the wrong tenant, every page still renders perfectly — it just
+          # renders another company's registrations and learners under this
+          # company's logo. Nothing errors, nothing 500s, and not one of the
+          # checks above would notice.
+          #
+          # Checked as "no OTHER academy's name appears", not "SPS's name does
+          # not appear", because there are four of these and the one you forget
+          # to name is the one that leaks.
+          home=$(curl -sS --max-time 30 "$base/contact" || echo '')
+          leak=""
+          for other in "SPS Academy" "Sustainable Power" "Fungi Academy" "Maziv Academy" "Equinix Academy"; do
+            case "$home" in *"$other"*) leak="$leak $other" ;; esac
+          done
+          if [ -n "$leak" ]; then
+            echo "::error::This site's contact page is carrying another academy's branding ($leak). The configuration file is wrong — check ~/private/mtacademy-config.php names tenant 'mt'."
+            fail=1
+          else
+            echo "  tenant                 no other academy's branding on these pages"
+          fi
+
+          # Server code must never be readable.
+          for p in "/lib/db.php" "/schema/schema.mysql.sql" "/lib/bootstrap.php" "/lib/brand.php"; do
+            code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "$base$p" || echo 000)
+            printf '  %-24s %s\n' "$p" "$code"
+            # 403 and 404 are both correct. The parent .htaccess answers 404 and
+            # the per-directory deny files answer 403 — whichever fires first,
+            # the file is not readable, which is the whole requirement.
+            #
+            # A 200 is a failure, but read it together with the nonsense-URL
+            # check at the top: if that also returned 200 then this is the
+            # client's catch-all rather than our source code being served, and
+            # the real fault is that nothing deployed.
+            case "$code" in
+              403|404) ;;
+              *) echo "::error::$p returned $code — it must not be readable over HTTP."; fail=1 ;;
+            esac
+          done
+          exit $fail
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deploy M&T Academy"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Ref | \`${{ github.ref_name }}\` |"
+            echo "| Target | \`${{ inputs.server_dir }}\` |"
+            echo "| Dry run | ${{ inputs.dry_run }} |"
+            echo "| Delete removed | ${{ inputs.delete_removed }} |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              echo "Dry run — nothing was uploaded. Read the file list above, then run again with dry_run off."
+            else
+              echo "Live at <https://centenarynetworks.com/mtacademy/>"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

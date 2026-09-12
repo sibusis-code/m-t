@@ -1,0 +1,2057 @@
+/* ===================================================================
+   M&T Academy — shared stylesheet (all pages)
+   M&T Development palette: indigo (#3e4096) on white, charcoal and cool
+   greys, deep indigo dark sections
+
+   The token names below are historical (--orange / --green) and are kept
+   so the markup stays identical across academy sites; only the VALUES are
+   brand-specific. --orange* is the primary brand ramp, --green* the
+   secondary. Re-skinning another company = change this block.
+
+   WHERE THE COLOURS CAME FROM (12 Sep 2026)
+   Sampled from M&T's own material in M-T/_brand-source, not guessed: the
+   logo square is #3e4096 at every corner, and the AI badge on their site is
+   the deeper #2f3194. The greys match their site's navigation tiles.
+
+   WHY --green IS NOT INDIGO
+   M&T's brand is one hue, and the obvious move is to use it for both ramps.
+   That breaks two things. --green* is not only decoration here: it marks a
+   PASSED quiz, a module DONE on the dashboard and PRESENT on the in-person
+   register — and the register marks LATE with --orange-deep. With both ramps
+   indigo, a facilitator scanning a register could not tell present from late.
+   So the secondary ramp is a teal-green that sits well beside indigo and
+   keeps "done" reading as done. Present vs late fills measure 2.02:1.
+   It is #1b7a63 rather than the first choice #1f8a70: white on the lighter
+   one measured 4.26:1 on the "Locally accredited" badge, just under AA.
+
+   WHY THIS WAS CHECKED ON THE RENDERED PAGES
+   A check of token pairs passed. Measuring every piece of text against what
+   is actually behind it on the page then found five failures the pair check
+   could not see, because they only exist in context: the brand indigo used
+   for eyebrows and list ticks INSIDE the dark indigo sections (1.83:1), the
+   intake eyebrow (3.0:1), the footer disclaimer (2.86:1) and the badge above.
+   Equinix's red read on its plum sections; a one-hue brand does not. The
+   fixes are in the "ON DARK" block below and at .disclaimer. Primary indigo
+   on white is 8.83:1.
+   =================================================================== */
+:root{
+  --ink:#26262e;--ink-soft:#5d5e66;--grey:#2a2a33;--bg:#ffffff;--bg-soft:#f4f4f8;
+  --orange:#3e4096;--orange-deep:#2f3194;--orange-light:#5b5fc7;--orange-tint:#eceef9;
+  --green:#1b7a63;--green-deep:#16674f;--green-tint:#e2f2ec;
+  --accent:#3e4096;--accent-green:#b4b7f3;--line:#dcdce6;--dark:#1d1e3b;--max:1180px;
+  /* The pale band the nav sits on, and the tint the landing hero falls back
+     to before its photograph loads. A pale tint of M&T's indigo — ink on it
+     measures 12.98:1. */
+  --header:#eceef9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:78px}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg,canvas{max-width:100%}
+h1,h2,h3,h4{font-weight:800;line-height:1.12;letter-spacing:-.01em;color:var(--grey)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 26px}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:700;color:var(--orange)}
+/* ON DARK. Every academy uses its primary colour for eyebrows and list ticks,
+   and on the others that primary is warm enough to read on their dark
+   sections. M&T's primary IS the dark sections' hue: indigo on deep indigo
+   measured 1.83:1. On dark, both take the light indigo instead (8.46:1). */
+.section-dark .eyebrow,.chero .eyebrow,.cta-band .eyebrow{color:var(--accent-green)}
+.section-dark .outcomes li::before{background:var(--accent-green)}
+
+/* NAV
+   M&T supply a square mark — white lettering on a solid indigo tile — so it
+   is paired with a wordmark span to form the lockup, the same shape as the
+   Equinix nav this was cloned from. The tile is opaque and self-contained, so
+   unlike Equinix's JPG it gets no white chip on dark backgrounds — see
+   .foot-brand img, which gives it a faint ring instead. */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--header);border-bottom:1px solid rgba(45,70,55,.09);transition:box-shadow .3s}
+nav.scrolled{}
+.nav-inner{max-width:var(--max);margin:0 auto;padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:relative}
+.brand{display:inline-flex;align-items:center;gap:11px}
+.brand img{height:34px;width:34px;object-fit:contain;display:block}
+/* .06em, not Equinix's .2em. That tracking was set for a seven-letter word;
+   on "M&T" it opened the letters out until the nav read "M & T". */
+.brand-word{font-size:19px;font-weight:700;letter-spacing:.06em;color:var(--grey);line-height:1}
+.nav-links{display:flex;gap:24px;align-items:center}
+/* Sentence case at 14.5px, not 13px uppercase: the nav in the screenshot
+   Kgomotso sent reads as words rather than as labels, and that is most of why
+   it looks calmer. Every link the site had is still here. */
+.nav-links a{color:var(--grey);font-size:14.5px;font-weight:600;transition:color .2s;position:relative;padding:4px 0;white-space:nowrap;flex:0 0 auto}
+.nav-links a:hover,.nav-links a.active{color:var(--orange)}
+.nav-links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:2.5px;background:var(--accent);border-radius:2px}
+/* .nav-links a sets `padding:4px 0` at higher specificity — keep `.nav-links` in this
+   selector or the pill loses its horizontal padding and the label sits flush to the edge */
+/* Deep-indigo pill (--dark), hovering to the brand indigo — the call to action
+   is the one solid shape in an otherwise light nav band. */
+.nav-links a.nav-cta{background:var(--dark);color:#fff;padding:10px 20px;border-radius:30px;font-weight:700;transition:background .2s}
+.nav-links a.nav-cta:hover{background:var(--orange);color:#fff}
+.nav-cta::after{display:none!important}
+.nav-toggle{display:none;background:none;border:0;color:var(--grey);cursor:pointer;line-height:0}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:9px;justify-content:center;padding:14px 26px;border-radius:30px;font-weight:700;font-size:15px;transition:background .2s,box-shadow .2s,border-color .2s,color .2s;cursor:pointer;border:0}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-primary:hover{background:var(--orange-deep)}
+.btn-ghost{background:#fff;color:var(--orange-deep);border:1.5px solid var(--orange)}
+.btn-ghost:hover{border-color:var(--orange-deep);background:var(--orange-tint)}
+.btn-light{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.btn-light:hover{background:#fff;color:var(--dark)}
+
+/* SECTIONS */
+section{padding:80px 0}
+.section-soft{background:var(--bg-soft)}
+.section-dark{background:var(--dark);color:#fff}
+.section-dark h2,.section-dark h3{color:#fff}
+.sec-head{max-width:720px;margin-bottom:42px}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+.sec-head .eyebrow{display:block;margin-bottom:12px}
+.sec-head h2{font-size:clamp(28px,3.6vw,42px);margin:0 0 16px}
+/* A heading written as a full sentence rather than a headline phrase. It needs
+   a wider measure and a step down the scale to avoid stacking into five dense
+   lines — but it stays larger than the section headings under it, or the page
+   opens on its quietest line. Pair .lede-h with .sec-head-wide on the parent. */
+.sec-head-wide{max-width:880px}
+.sec-head h2.lede-h{font-size:clamp(25px,3.2vw,38px);line-height:1.2;text-wrap:balance}
+.sec-head p{color:var(--ink-soft);font-size:17px}
+.sec-head p+p{margin-top:14px}
+.section-dark .sec-head p{color:#c8c2d4}
+.page-top{padding-top:132px}
+
+/* HERO — the landing page, and nothing else.
+   Restored on 9 Sep 2026. Kgomotso sent back a screenshot of the 3 Jul hero
+   (commit a4939c3) and asked for it on every academy: a photograph, one line,
+   one search field, two pills, a white curve. It is rebuilt here rather than
+   reverted, because the palette moved on and the page below it is no longer
+   the July page.
+
+   Nothing in here moves on hover. That is deliberate — see the note at the end
+   of this file; every animation came off these sites at her request. */
+.hero{position:relative;overflow:hidden;background:var(--header)}
+.hero-photo{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+/* The wash is the only reason white type is readable here. Each academy points
+   .hero-photo at its own photograph, so it has to hold up over an image nobody
+   has seen yet: heavy on the left where the words are, nearly clear on the
+   right so the picture still reads as a picture. */
+.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(24,30,26,.88) 0%,rgba(24,30,26,.63) 46%,rgba(24,30,26,.18) 100%)}
+/* The nav is fixed, so the top padding here is what stops it sitting on the
+   headline. Change one and check the other. */
+.hero-inner{position:relative;z-index:2;max-width:var(--max);margin:0 auto;padding:148px 26px 128px;color:#fff}
+.hero h1{color:#fff;font-size:clamp(34px,5.6vw,58px);margin:0 0 16px;max-width:16ch}
+.hero p.lead{color:rgba(255,255,255,.94);font-size:clamp(17px,2.1vw,23px);font-weight:400;line-height:1.35;max-width:34ch;margin:0 0 32px}
+.hero-search{display:flex;align-items:center;gap:10px;max-width:620px;background:#fff;border-radius:50px;padding:7px 7px 7px 24px;box-shadow:0 24px 50px -28px rgba(0,0,0,.65)}
+/* font:inherit would pull the white hero colour in with it, so the colour is
+   set back explicitly on the next declaration. */
+.hero-search input{flex:1;min-width:0;border:0;outline:0;background:none;font-family:inherit;font-size:17px;color:var(--ink)}
+.hero-search input::placeholder{color:#8d8880;opacity:1}
+.hero-search .go{flex:0 0 auto;width:56px;height:52px;display:grid;place-items:center;border:0;border-radius:50px;background:var(--orange-light);color:var(--dark);cursor:pointer;transition:background .2s}
+.hero-search .go:hover{background:var(--orange);color:#fff}
+.hero-search .go svg{width:23px;height:23px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+/* The soft pill is the nav band in button form — that pairing is what makes
+   the hero read as one thing. Pointing it at --header rather than a hex keeps
+   it on-brand on every academy; a fixed mint green was visibly wrong on four
+   of the five. */
+.btn-soft{background:var(--header);color:var(--grey)}
+.btn-soft:hover{background:var(--header);filter:brightness(.96)}
+.btn-white{background:#fff;color:var(--grey)}
+.btn-white:hover{background:#f0eeea}
+/* Hides the seam between the photograph and the first white section. It is
+   decoration only: aria-hidden in the markup, and no pointer target here. */
+.hero-curve{position:absolute;left:0;right:0;bottom:-1px;z-index:2;line-height:0;pointer-events:none}
+.hero-curve svg{width:100%;height:70px;display:block}
+
+
+/* THE SKILLS BUILDING BAND — first thing under the landing hero.
+   Added 10 Sep 2026. Kgomotso sent a card from a Centenary deck and liked what
+   it said: "Upskilling, reskilling, and workforce training to prepare
+   individuals for employment and entrepreneurship." The sentence below keeps
+   her three ideas and her order, and turns "individuals" into "you", because
+   every other line on these sites talks to the reader ("around your shift",
+   "yours to keep") and one paragraph in the third person reads as pasted in.
+
+   The white disc and the certificate mark are the nod to her card. The rest is
+   this site's own idiom rather than the deck's navy panel, and it is a LIGHT
+   band on purpose: the intake band directly below it is dark, and two dark
+   bands stacked lose the edge between them. */
+.pillar{background:var(--bg-soft);padding:44px 0}
+.pillar-inner{display:flex;align-items:center;gap:26px}
+.pillar-ico{flex:0 0 auto;width:64px;height:64px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--grey)}
+.pillar-ico svg{width:31px;height:31px}
+.pillar .eyebrow{display:block;margin-bottom:7px}
+.pillar p{font-size:clamp(16.5px,1.9vw,21px);line-height:1.45;color:var(--grey);max-width:62ch;margin:0}
+
+/* FEATURES / PILLARS */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;transition:box-shadow .25s}
+.feat:hover{}
+.feat .ico{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;margin-bottom:18px;background:var(--orange-tint);color:var(--orange-deep)}
+.feat .ico svg{width:25px;height:25px}
+.feat:nth-child(2) .ico{background:var(--green-tint);color:var(--green-deep)}
+.feat h3{font-size:18px;margin-bottom:10px}
+.feat p{color:var(--ink-soft);font-size:14.5px}
+
+.outcomes{display:grid;grid-template-columns:1fr 1fr;gap:18px 40px;list-style:none;margin-top:10px}
+.outcomes li{display:flex;gap:14px;align-items:flex-start;font-size:16px;color:#e6e1ec}
+.outcomes li::before{content:"";flex:0 0 24px;height:24px;margin-top:1px;border-radius:50%;background:var(--orange);-webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/15px no-repeat;mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/15px no-repeat}
+
+.accred-note{margin-top:30px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);font-size:12.5px;line-height:1.7;color:#b3adc0;max-width:900px}
+.accred-note .lbl{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:700;color:var(--accent-green);margin-bottom:6px}
+
+.energy-line{max-width:900px;margin:0 auto;text-align:center}
+.energy-line .eyebrow{display:block;margin-bottom:14px}
+.energy-line p{font-size:clamp(20px,2.6vw,28px);font-weight:700;line-height:1.4;letter-spacing:-.01em;color:var(--grey)}
+
+/* COURSE BAND + ACCREDITED FEATURE */
+.course-band-label{display:flex;align-items:center;gap:14px;margin:0 0 26px}
+.course-band-label .ln{height:1px;background:var(--line);flex:1}
+.course-band-label .tag{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.13em;color:var(--orange)}
+.accredited-feature{background:linear-gradient(120deg,#fff,#fdf4f5);border:1.5px solid var(--orange);border-radius:16px;padding:34px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;margin-bottom:50px}
+.accredited-feature .badge{display:inline-flex;align-items:center;gap:7px;background:var(--orange);color:#fff;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:6px 13px;border-radius:30px;margin-bottom:14px}
+.accredited-feature h3{font-size:24px;margin-bottom:10px}
+.accredited-feature p{color:var(--ink-soft);font-size:15px;max-width:560px;margin-bottom:18px}
+.qual-meta{display:flex;gap:28px;flex-wrap:wrap}
+.qual-meta div span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#918a9c;margin-bottom:2px}
+.qual-meta div strong{font-size:15px;color:var(--grey)}
+.accredited-feature .side{text-align:center;border-left:1px solid var(--line);padding-left:30px}
+.accredited-feature .side .nqf{font-size:48px;font-weight:800;color:var(--orange);line-height:1}
+.accredited-feature .side .nqf small{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#918a9c;margin-top:6px;font-weight:700}
+
+/* COURSE CARDS */
+.course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:box-shadow .22s;display:flex;flex-direction:column}
+.ccard:hover{}
+.ccard-img{height:180px;position:relative;overflow:hidden;flex:0 0 auto}
+.ccard-img-inner{position:absolute;inset:0;background-size:cover;background-position:center}
+.ccard:hover .ccard-img-inner{}
+.ccard-img.has-photo svg{display:none}
+.ccard-img.has-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,18,24,.05) 45%,rgba(20,18,24,.35));pointer-events:none}
+.ccard-body{padding:20px 22px;flex:1;display:flex;flex-direction:column}
+.ccard-cat{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:10px}
+.ccard-cat svg{opacity:.55}
+.ccard-mode{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin-bottom:8px}
+.ccard h4{font-size:18px;line-height:1.25;margin-bottom:10px;color:var(--orange-deep);font-weight:800}
+.ccard p{color:var(--ink-soft);font-size:14px;line-height:1.55;flex:1;margin-bottom:18px}
+.ccard-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:auto}
+.ccard-foot .price{font-size:15px;font-weight:800;color:var(--grey)}
+.ccard-foot .avail{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft)}
+.soon-note{text-align:center;color:var(--ink-soft);font-size:14.5px;margin-top:30px;font-style:italic}
+
+.corp{background:linear-gradient(120deg,var(--orange-tint),var(--green-tint));border-radius:18px;padding:40px;display:flex;justify-content:space-between;align-items:center;gap:30px;flex-wrap:wrap;margin-top:50px}
+.corp h3{font-size:24px;margin-bottom:6px;color:var(--grey)}
+.corp p{color:var(--ink-soft);max-width:480px}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:50px}
+.contact-info p{margin-bottom:18px;font-size:16px}
+.contact-info .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);font-weight:700;display:block;margin-bottom:3px}
+.contact-info a{font-weight:600;border-bottom:1px solid var(--line)}
+.contact-info a:hover{color:var(--accent);border-color:var(--accent)}
+.form{background:#fff;border:1px solid var(--line);border-radius:16px;padding:32px}
+.form .field{margin-bottom:16px}
+.form label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink-soft)}
+.form input,.form textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:15px;background:var(--bg-soft)}
+.form input:focus,.form textarea:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+.cta-band{background:linear-gradient(120deg,var(--orange-deep),var(--orange-light));color:#fff;text-align:center;padding:78px 0}
+.cta-band h2{font-size:clamp(28px,3.6vw,40px);margin-bottom:14px;color:#fff}
+.cta-band p{color:rgba(255,255,255,.92);font-size:17px;margin-bottom:30px;max-width:540px;margin-left:auto;margin-right:auto}
+.cta-band .btn-primary{background:#fff;color:var(--orange-deep)}
+.cta-band .btn-primary:hover{background:var(--dark);color:#fff}
+
+footer{background:var(--dark);color:#a9a2b4;padding:52px 0 30px;font-size:14px}
+.foot-top{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:28px;margin-bottom:24px}
+.foot-nav{display:flex;gap:22px;flex-wrap:wrap}
+.foot-nav a{font-size:13px;color:#ccc6d6;text-transform:uppercase;letter-spacing:.04em}
+.foot-nav a:hover{color:#fff}
+/* the mark is a JPG with a solid white background — sit it on a white chip
+   rather than inverting it, which would flatten the whole square to white */
+.foot-brand{display:inline-flex;align-items:center;gap:12px}
+/* No white chip, unlike the Equinix footer this came from: M&T's mark is its
+   own solid tile, so it is shown as supplied. A 1px light ring keeps the
+   tile's edge from dissolving into the deep-indigo footer behind it. */
+.foot-brand img{height:34px;width:34px;object-fit:contain;border-radius:4px;box-shadow:0 0 0 1px rgba(255,255,255,.22)}
+.foot-brand .brand-word{color:#fff;font-size:17px;font-weight:700;letter-spacing:.06em;line-height:1}
+.foot-accred{max-width:560px}
+.foot-accred strong{color:#ded8e6;display:block;margin-bottom:6px;font-size:13px}
+.foot-accred span{font-size:12.5px;line-height:1.7}
+/* #a3a5bd, 6.67:1 on the footer. It was Equinix's #6b6478, which measures
+   3.00:1 on Equinix's own footer and 2.86:1 on this darker indigo one — too
+   faint for 11.5px text on either. */
+.disclaimer{font-size:11.5px;color:#a3a5bd;max-width:820px;line-height:1.6}
+
+/* AI IN ACTION DEMO */
+.ai-action{position:relative;overflow:hidden}
+.ai-action::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 80% 0%,rgba(233,28,36,.16),transparent 60%),radial-gradient(60% 60% at 0% 100%,rgba(108,75,166,.14),transparent 60%);pointer-events:none}
+.ai-action .wrap{position:relative;z-index:1}
+.ai-demo{max-width:860px;margin:0 auto}
+.ai-demo-tabs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
+.ai-tab{background:rgba(255,255,255,.06);color:#cbc5d5;border:1px solid rgba(255,255,255,.14);padding:9px 18px;border-radius:30px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center}
+.ai-tab:hover{border-color:var(--orange);color:#fff}
+.ai-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.ai-window{background:#15162e;border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden}
+.ai-window-bar{display:flex;align-items:center;gap:8px;padding:13px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08)}
+.ai-window-bar i{width:11px;height:11px;border-radius:50%;display:block}
+.ai-window-bar i:nth-child(1){background:#ff5f57}.ai-window-bar i:nth-child(2){background:#febc2e}.ai-window-bar i:nth-child(3){background:#28c840}
+.ai-window-bar em{margin-left:8px;font-style:normal;font-size:12.5px;color:#867f93;font-weight:600;letter-spacing:.03em}
+.ai-chat{padding:24px 22px;min-height:280px;display:flex;flex-direction:column;gap:16px;font-size:14.5px}
+.ai-msg{display:flex;gap:12px;align-items:flex-start;max-width:88%}
+.ai-msg .av{flex:0 0 30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800}
+.ai-msg.user{align-self:flex-end;flex-direction:row-reverse;text-align:right}
+.ai-msg.user .av{background:var(--green);color:#fff}
+.ai-msg.bot .av{background:linear-gradient(135deg,var(--orange),var(--orange-light));color:#fff}
+.ai-msg .bubble{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:12px 15px;border-radius:12px;color:#e7e2ee;line-height:1.55}
+.ai-msg.user .bubble{background:rgba(108,75,166,.16);border-color:rgba(108,75,166,.3)}
+.ai-msg .bubble b{color:#fff}
+.ai-caret{display:inline-block;width:8px;height:16px;background:var(--accent);margin-left:2px;vertical-align:-2px}
+
+/* auto-fit, not repeat(4): the stat count changes with what we can honestly
+   claim, and a fixed four-column track leaves a dead column behind whenever one
+   is removed. */
+.ai-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px;margin-top:54px;max-width:860px;margin-left:auto;margin-right:auto;text-align:center}
+.ai-stats .num{font-size:clamp(30px,4vw,44px);font-weight:800;color:var(--orange-light);line-height:1}
+.ai-stats .lbl2{font-size:13px;color:#b3adc0;margin-top:8px;font-weight:600}
+
+/* ===== COURSE PAGE ===== */
+.chero{background:linear-gradient(160deg,#26262e 0%,#23254f 55%,#262857 100%);color:#fff;padding:118px 0 56px;position:relative;overflow:hidden}
+.chero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 88% 0%,rgba(233,28,36,.16),transparent 60%),radial-gradient(50% 60% at 0% 100%,rgba(108,75,166,.10),transparent 60%);pointer-events:none}
+.chero .wrap{position:relative;z-index:1}
+.crumb{font-size:12.5px;color:#b9b4c4;margin-bottom:20px;letter-spacing:.02em}
+.crumb a:hover{color:#fff}
+/* #9fa1bb: at least 5.44:1 across every stop of the indigo course hero. Equinix's
+   #6f6a7c measured 2.64:1 there — found only once the audit learned to measure
+   gradients instead of skipping them. */
+.crumb span{color:#9fa1bb;margin:0 8px}
+.chero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.chero .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chero .tags span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:5px 11px;border-radius:30px;color:#e9e6ef}
+.chero .tags span.accred{background:var(--green);border-color:var(--green);color:#fff}
+.chero h1{color:#fff;font-size:clamp(28px,4.2vw,46px);margin-bottom:16px}
+.chero p.lead{color:#d4d0dc;font-size:17px;max-width:560px;margin-bottom:26px}
+.chero .actions{display:flex;gap:13px;flex-wrap:wrap;margin-bottom:26px}
+.chero .ataglance{display:flex;gap:26px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.14);padding-top:20px}
+.chero .ataglance div span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#9c97a8;margin-bottom:3px}
+.chero .ataglance div strong{font-size:15px;color:#fff;font-weight:700}
+.videobox{display:block;width:100%;border:0;padding:0;cursor:pointer;position:relative;border-radius:14px;overflow:hidden;background:#0e0d12 center/cover no-repeat;aspect-ratio:16/9}
+.videobox::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.45))}
+.videobox .play{position:absolute;inset:0;margin:auto;width:74px;height:74px;border-radius:50%;background:var(--orange);display:grid;place-items:center;z-index:2;transition:background .2s}
+.videobox:hover .play{background:var(--orange-deep)}
+.videobox .play svg{width:30px;height:30px;margin-left:4px;fill:#fff}
+.videobox .vlabel{position:absolute;left:14px;bottom:13px;z-index:2;color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.03em}
+.videobox .vbadge{position:absolute;right:12px;top:12px;z-index:2;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 9px;border-radius:30px;backdrop-filter:blur(4px)}
+.learn{display:grid;grid-template-columns:1fr 1fr;gap:14px 40px;list-style:none}
+.learn li{display:flex;gap:13px;align-items:flex-start;font-size:15.5px;color:var(--ink)}
+.learn li svg{flex:0 0 22px;height:22px;margin-top:1px;color:var(--green-deep)}
+.modules{display:flex;flex-direction:column;gap:14px}
+.module{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+.module-head{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:#fff;border:0;padding:20px 22px;cursor:pointer;font-family:inherit}
+.module-head:hover{background:var(--bg-soft)}
+.module-num{flex:0 0 38px;height:38px;border-radius:9px;background:var(--orange-tint);color:var(--orange-deep);display:grid;place-items:center;font-weight:800;font-size:15px}
+.module-head .mt{flex:1}
+.module-head .mt h4{font-size:17px;margin-bottom:3px}
+.module-head .mt .meta{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.module-head .chev{color:var(--ink-soft);flex:0 0 auto}
+.module.open .chev{transform:rotate(180deg)}
+.module-body{display:none;border-top:1px solid var(--line);padding:6px 0}
+.module.open .module-body{display:block}
+.lesson{display:flex;align-items:center;gap:14px;padding:13px 22px;cursor:pointer;border-bottom:1px solid var(--line)}
+.lesson:last-child{border-bottom:0}
+.lesson:hover{background:var(--orange-tint)}
+.lesson .lp{flex:0 0 30px;height:30px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;color:var(--orange-deep)}
+.lesson:hover .lp{border-color:var(--orange);background:var(--orange);color:#fff}
+.lesson .lp svg{width:13px;height:13px;fill:currentColor;margin-left:1px}
+.lesson .lname{flex:1;font-size:15px;font-weight:600;color:var(--grey)}
+.lesson .lmeta{display:flex;align-items:center;gap:12px}
+.lesson .ltag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);background:var(--bg-soft);padding:3px 8px;border-radius:20px}
+.lesson .ldur{font-size:12.5px;color:var(--ink-soft);font-weight:600;min-width:42px;text-align:right}
+/* A module row that leads to its study guide. It is an <a>, so it needs the
+   hover back that .lesson gives its clickable variant, plus an arrow so it
+   reads as a link next to the rows that are only listings. */
+.lesson-link{cursor:pointer}
+.lesson-link .lname{color:var(--orange-deep)}
+.lesson-link:hover{background:var(--orange-tint)}
+.lesson-link .lname::after{content:" →";font-weight:800;opacity:.65}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.vcard{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff;transition:box-shadow .2s}
+.vcard:hover{}
+.vcard .videobox{border-radius:0;aspect-ratio:16/9}
+.vcard .videobox .play{width:56px;height:56px}.vcard .videobox .play svg{width:22px;height:22px}
+.vcard .vc-body{padding:16px 18px}
+.vcard .vc-body .k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin-bottom:6px}
+.vcard .vc-body h4{font-size:16px;margin-bottom:4px}
+.vcard .vc-body p{font-size:13.5px;color:var(--ink-soft)}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.dcard{display:flex;gap:15px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;padding:20px;background:#fff;transition:box-shadow .2s,border-color .2s}
+.dcard:hover{border-color:var(--orange)}
+.dcard .fic{flex:0 0 44px;height:54px;border-radius:7px;background:var(--orange-tint);color:var(--orange-deep);display:grid;place-items:center;position:relative}
+.dcard .fic svg{width:24px;height:24px}
+.dcard .fic .ext{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--orange-deep);margin:0 6px;border-radius:3px;padding:1px 0}
+.dcard .dmeta{flex:1}
+.dcard .dmeta h4{font-size:15.5px;margin-bottom:3px}
+.dcard .dmeta p{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.dcard .dl{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--orange-deep)}
+.dcard .dl svg{width:15px;height:15px}
+.dcard:hover .dl{color:var(--orange)}
+.instructor{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;border:1px solid var(--line);border-radius:18px;padding:34px;background:#fff}
+.instructor img{width:128px;height:128px;border-radius:14px;object-fit:cover}
+.instructor .ieyebrow{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:8px}
+.instructor h3{font-size:22px;margin-bottom:4px}
+.instructor .role{font-size:14px;color:var(--green-deep);font-weight:700;margin-bottom:12px}
+.instructor p{color:var(--ink-soft);font-size:15px;max-width:640px}
+.enrol-band{background:linear-gradient(120deg,var(--orange-deep),var(--orange-light));color:#fff;text-align:center;padding:70px 0}
+.enrol-band h2{color:#fff;font-size:clamp(26px,3.4vw,38px);margin-bottom:12px}
+.enrol-band p{color:rgba(255,255,255,.92);font-size:16px;max-width:520px;margin:0 auto 26px}
+.enrol-band .btn-primary{background:#fff;color:var(--orange-deep)}
+.enrol-band .btn-primary:hover{background:var(--dark);color:#fff}
+.vmodal{position:fixed;inset:0;z-index:200;background:rgba(10,9,13,.86);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px}
+.vmodal.open{display:flex}
+.vmodal .vinner{width:min(960px,100%);background:#000;border-radius:14px;overflow:hidden;position:relative}
+.vmodal video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+.vmodal .soon{aspect-ratio:16/9;display:grid;place-items:center;text-align:center;color:#fff;background:#15162e;padding:30px}
+.vmodal .soon .ic{width:64px;height:64px;border-radius:50%;background:rgba(233,28,36,.2);display:grid;place-items:center;margin:0 auto 16px}
+.vmodal .soon h3{color:#fff;font-size:20px;margin-bottom:8px}
+.vmodal .soon p{color:#bdb8c4;font-size:14px;max-width:380px}
+.vmodal .vclose{position:absolute;top:-14px;right:-6px;transform:translateY(-100%);background:#fff;color:#222;border:0;border-radius:30px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center}
+@media(max-width:1000px){.vmodal .vclose{top:8px;right:8px;transform:none;z-index:3}}
+
+/* GM MESSAGE */
+.gm{display:grid;grid-template-columns:300px 1fr;gap:46px;align-items:center;max-width:1020px;margin:0 auto}
+.gm-photo{border-radius:18px;overflow:hidden;background:var(--dark)}
+/* height:auto is load-bearing: the <img> carries its intrinsic width and height
+   so the space is reserved before it loads, and without this the attribute
+   height survives width:100% and stretches the portrait. */
+.gm-photo img{width:100%;height:auto;display:block}
+.gm .eyebrow{display:block;margin-bottom:16px}
+.gm blockquote{margin:0;color:var(--ink-soft);font-size:16.5px;line-height:1.7}
+.gm blockquote p{margin-bottom:16px}
+.gm blockquote p:last-of-type{margin-bottom:0}
+.gm blockquote p.big{font-size:clamp(20px,2.5vw,27px);font-weight:700;line-height:1.4;letter-spacing:-.01em;color:var(--grey)}
+.gm .sig{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+.gm .sig strong{display:block;font-size:16px;color:var(--grey)}
+.gm .sig span{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--orange-deep)}
+/* The leadership block with no photograph and no named person — see the note
+   above it in index.html for why M&T's has neither yet. One column, narrower,
+   with an indigo rule down the side so it still reads as a statement rather
+   than as a stray paragraph. */
+.gm.gm-solo{grid-template-columns:1fr;max-width:760px;padding-left:28px;border-left:4px solid var(--orange)}
+
+/* ACADEMY POSTERS */
+.posters{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+.poster{margin:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.poster img{width:100%;display:block}
+.poster figcaption{padding:18px 20px 20px;font-size:14.5px;line-height:1.65;color:var(--ink-soft)}
+.poster figcaption strong{display:block;font-size:15.5px;color:var(--grey);margin-bottom:5px}
+.instructor img.logo{object-fit:contain;padding:20px;background:var(--bg-soft);border:1px solid var(--line)}
+
+/* CATALOGUE ANNOUNCEMENT
+   A single headline number, so a hero figure rather than a chart. The figure
+   and the stat numbers are large text on the tint, so they are held to the 3:1
+   large-text threshold; heading and body clear 4.5:1. */
+.announce{background:linear-gradient(120deg,var(--orange-tint),var(--green-tint))}
+.announce-grid{display:grid;grid-template-columns:290px 1fr;gap:50px;align-items:center}
+.announce-lead .eyebrow{display:block;margin-bottom:12px}
+.bignum{font-size:clamp(76px,13vw,138px);font-weight:800;line-height:.86;letter-spacing:-.045em;color:var(--orange-deep)}
+.announce-lead h3{font-size:clamp(19px,2.3vw,25px);color:var(--grey);margin-top:10px;line-height:1.25;letter-spacing:-.01em}
+.announce-body p{color:var(--ink-soft);font-size:16px;line-height:1.7;margin-bottom:14px}
+.announce-body p strong{color:var(--grey)}
+.announce-body .btn{margin-top:12px}
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:42px;padding-top:32px;border-top:1px solid rgba(35,24,44,.14)}
+.statrow .s-num{font-size:clamp(27px,3.8vw,38px);font-weight:800;color:var(--green-deep);letter-spacing:-.02em;line-height:1}
+.statrow .s-lbl{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
+.tag-new{display:inline-block;margin-bottom:10px;padding:5px 12px;border-radius:20px;background:var(--orange-deep);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+.corp .tag-new+h3{margin-bottom:8px}
+/* ---- Intake band -----------------------------------------------------------
+   A dated intake is the only thing on this page with a deadline attached, so it
+   sits directly under the hero and is the one dark band above the fold — the
+   announce band below it is a light tint, so the two never compete.
+
+   The date is set as a display figure rather than written into a sentence. The
+   whole job of this band is that somebody scrolling past registers the day.
+
+   White on --dark (#222021 here) is ~15:1, and the muted body text is held at
+   .8 alpha, which is still ~11:1 — well clear on all three brands. The eyebrow
+   uses --orange-light rather than --orange because the deeper brand oranges
+   drop under 4.5:1 against this ground at 10.5px. */
+.intake{background:var(--dark);color:#fff;padding:44px 0}
+.intake-grid{display:grid;grid-template-columns:176px 1fr;gap:38px;align-items:center}
+.intake-when{text-align:center;border-right:1px solid rgba(255,255,255,.16);padding-right:34px}
+.intake-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent-green);margin-bottom:12px}
+.intake-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--orange-light);box-shadow:0 0 0 3px rgba(255,255,255,.14)}
+.intake-day{font-size:clamp(56px,8vw,82px);font-weight:800;line-height:.84;letter-spacing:-.045em;color:#fff}
+.intake-mon{font-size:14px;font-weight:700;color:rgba(255,255,255,.74);margin-top:9px}
+.intake-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;padding:5px 12px;border-radius:30px;margin-bottom:14px}
+.intake-body h2{font-size:clamp(22px,2.9vw,31px);color:#fff;line-height:1.16;margin-bottom:11px;letter-spacing:-.015em}
+.intake-body p{color:rgba(255,255,255,.8);font-size:15.5px;line-height:1.65;max-width:60ch;margin-bottom:17px}
+.intake-facts{display:flex;flex-wrap:wrap;gap:8px 10px;list-style:none;margin:0 0 22px;padding:0}
+.intake-facts li{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.86);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:5px 13px}
+.intake .btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.42)}
+.intake .btn-ghost:hover{background:rgba(255,255,255,.11);border-color:#fff}
+@media(max-width:760px){
+  .intake{padding:34px 0}
+  .intake-grid{grid-template-columns:1fr;gap:22px}
+  .intake-when{text-align:left;border-right:0;padding-right:0;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.16)}
+  .intake-day{font-size:60px}
+}
+
+/* The start date where it also has to appear: on the qualification's own page,
+   just under the hero actions. Same information, quieter treatment — someone
+   reading this page has already chosen the course. */
+.c-starts{display:flex;align-items:center;gap:11px;margin-top:18px;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:14.5px;max-width:520px}
+/* display:flex beats the UA rule for [hidden], so an empty box would otherwise
+   sit in the hero of every course that has no date. Same trap as .btn. */
+.c-starts[hidden]{display:none}
+.c-starts svg{width:18px;height:18px;flex:0 0 18px;color:var(--orange-light)}
+.c-starts strong{font-weight:700}
+.corp .tag-new+h3{margin-bottom:8px}
+
+/* ACCREDITATION BADGE + FRAMEWORK POPOVER
+   The badge is a real <button> rather than a hover-only tooltip: hover alone
+   is unreachable on touch and by keyboard. It opens on click/Enter and also on
+   hover for pointer users. */
+.acc-badge{position:relative;display:inline-flex;align-items:center;gap:6px;border:0;padding:5px 11px;border-radius:20px;
+  font-family:inherit;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;cursor:help}
+.acc-badge svg{width:12px;height:12px;flex:0 0 auto}
+.acc-badge.local{background:var(--green-tint);color:var(--green-deep)}
+.acc-badge.intl{background:var(--orange-tint);color:var(--orange-deep)}
+.acc-badge:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.acc-pop{position:absolute;bottom:calc(100% + 10px);left:0;width:min(320px,78vw);z-index:60;
+  background:var(--dark);color:#ded7e8;border-radius:12px;padding:15px 17px;text-align:left;
+  font-size:12.5px;font-weight:400;line-height:1.6;letter-spacing:0;text-transform:none;
+  opacity:0;visibility:hidden;transform:translateY(4px);
+  transition:opacity .16s,visibility .16s;pointer-events:none}
+.acc-pop::after{content:"";position:absolute;top:100%;left:22px;border:7px solid transparent;border-top-color:var(--dark)}
+.acc-pop strong{display:block;color:#fff;font-size:13px;margin-bottom:6px}
+.acc-pop a{color:var(--accent-green);font-weight:700;text-decoration:underline}
+.acc-badge:hover .acc-pop,.acc-badge:focus-visible .acc-pop,.acc-badge[aria-expanded="true"] .acc-pop{
+  opacity:1;visibility:visible;transform:none;pointer-events:auto}
+/* .ccard-body is a flex column, so the badge stretched the full card width
+   until it was told to hug its own content. */
+.ccard-body .acc-badge{margin-bottom:9px;align-self:flex-start;width:-moz-fit-content;width:fit-content}
+/* ---- Progress tracking ----
+   Self-reported study progress. Green throughout, because on this site green is
+   the accreditation/credit colour and progress belongs in that family — but the
+   copy around it always says what it is and is not. */
+.topic-tick{display:flex;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid var(--line);
+  background:var(--bg-soft);cursor:pointer;font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+.topic-tick:hover{color:var(--green-deep)}
+.topic-tick input{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex:0 0 auto;margin:0}
+.topic-tick input:checked+span{color:var(--green-deep)}
+
+.prog{border:1px solid var(--line);border-radius:16px;background:#fff;padding:24px 26px;margin-bottom:26px}
+.prog-top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:14px}
+.prog-lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink-soft);font-weight:700;margin-bottom:5px}
+.prog-top strong{font-size:19px;color:var(--grey)}
+.prog-pct{font-size:28px;font-weight:800;color:var(--green-deep);line-height:1;letter-spacing:-.02em}
+.prog-bar{height:9px;border-radius:20px;background:var(--bg-soft);border:1px solid var(--line);overflow:hidden}
+.prog-bar i{display:block;height:100%;background:var(--green);border-radius:20px;transition:width .3s}
+.prog-bar.sm{height:7px;min-width:90px}
+.prog-act{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.prog-note{margin-top:14px;font-size:13px;color:var(--ink-soft);line-height:1.6}
+
+.pill{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:4px 10px;border-radius:20px;background:var(--bg-soft);color:var(--ink-soft);white-space:nowrap}
+/* --green-deep on --green-tint measures 7:1+ in this palette, so the done
+   pill stays on-brand rather than needing a hand-picked ink, as it does on a
+   palette where the two do not clear 4.5:1. */
+.pill.done{background:var(--green-tint);color:var(--green-deep)}
+.pill.going{background:var(--orange-tint);color:var(--orange-deep)}
+
+/* The countersignature only exists on paper — on screen it would read as a form
+   nobody can fill in. */
+.signblock{display:none}
+@media print{
+  .signblock{display:block;margin-top:26px;padding-top:20px;border-top:2px solid #333;page-break-inside:avoid}
+  .signblock h3{font-size:15px;margin-bottom:8px}
+  .signblock p{font-size:12px;color:#333;margin-bottom:18px;max-width:none}
+  .sigrow{display:grid;grid-template-columns:2fr 1fr;gap:30px;margin-bottom:26px}
+  .sigrow span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:26px}
+  .sigrow i{display:block;border-bottom:1px solid #333}
+  #pgForm,.sg-actions,.topic-tick,.prog-act{display:none!important}
+  .prog-bar i{background:#666}
+  .ptable{font-size:11px}
+  .scrollx{overflow:visible;border:0}
+}
+
+/* ---- Study plan: stat row + schedule table ----
+   The table has seven columns of real data, so on a phone it scrolls inside its
+   own container rather than squeezing — the page itself must never scroll
+   sideways. */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stats-row .stat{background:#fff;padding:20px 22px}
+.stats-row .stat .n{font-size:clamp(21px,2.6vw,28px);font-weight:800;color:var(--orange-deep);
+  line-height:1.15;letter-spacing:-.02em}
+.stats-row .stat .l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4}
+
+.scrollx{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.ptable{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.ptable thead th{text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);font-weight:700;padding:14px 16px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);white-space:nowrap}
+.ptable td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.ptable tbody tr:last-child td{border-bottom:0}
+.ptable tbody tr:hover{background:var(--orange-tint)}
+.ptable .num{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.ptable thead th.num{text-align:left}
+.ptable a{color:var(--grey)}
+.ptable a strong{color:var(--orange-deep)}
+.ptable a:hover{text-decoration:underline}
+
+/* ---- Knowledge module pages ----
+   The topic weighting is the most useful number on the page — it tells a learner
+   where the marks are — so it gets its own slot at the end of the head row
+   rather than being buried in the meta line. */
+.topic-w{flex:0 0 auto;font-size:15px;font-weight:800;color:var(--orange-deep);
+  background:var(--orange-tint);border-radius:20px;padding:5px 12px;letter-spacing:-.01em}
+.topic-key{padding:16px 22px 18px;border-top:1px solid var(--line);background:var(--bg-soft);
+  font-size:14.5px;line-height:1.7;color:var(--ink-soft)}
+.topic-key .lbl{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;
+  font-weight:700;color:var(--grey);margin-bottom:7px}
+/* the sub-topic rows are reference text, not clickable lessons */
+#m-topics .lesson:hover{background:transparent}
+#m-topics .lesson .lname{line-height:1.55;padding:2px 0}
+
+.vid-soon{border:1px dashed var(--line);border-radius:14px;padding:30px 26px;background:var(--bg-soft);
+  font-size:14.5px;line-height:1.7;color:var(--ink-soft);max-width:760px}
+.vid-soon strong{display:block;color:var(--grey);font-size:16px;margin-bottom:6px}
+
+.modnav{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center}
+.modnav a{display:block;padding:18px 20px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;transition:border-color .18s}
+.modnav a:hover{border-color:var(--orange)}
+.modnav span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--orange-deep);margin-bottom:5px}
+.modnav strong{display:block;font-size:14.5px;color:var(--grey);line-height:1.4;font-weight:700}
+.modnav-r{text-align:right}
+.modnav-c{font-size:13px;font-weight:700;color:var(--ink-soft);white-space:nowrap;
+  padding:18px 16px!important;border-style:dashed!important}
+@media (max-width:820px){
+  .modnav{grid-template-columns:1fr;gap:12px}
+  .modnav-r{text-align:left}
+  .modnav-c{text-align:center}
+}
+
+/* ---- Locked courses ----
+   Only the Project Management route is open while its material is prepared.
+   Locked cards stay on the page — the breadth of the catalogue is the point of
+   it — but must read as "not yet" rather than as broken. So: the banner goes
+   grey, the title drops from the orange link colour to body ink, and every
+   hover affordance is switched off, because a card that lifts under the cursor
+   is promising a click it will not honour. */
+.ccard.locked{opacity:.78}
+.ccard.locked:hover{transform:none}
+.ccard.locked:hover .ccard-img-inner{transform:none}
+.ccard.locked .ccard-img-inner{filter:grayscale(.85)}
+.ccard.locked h4{color:var(--grey)}
+.ccard.locked .ccard-foot .avail{color:var(--ink-soft)}
+.lock-badge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  width:-moz-fit-content;width:fit-content;margin-bottom:9px;padding:5px 11px;border-radius:20px;
+  background:var(--bg-soft);border:1px solid var(--line);color:var(--grey);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.lock-badge svg{width:12px;height:12px;flex:0 0 auto}
+
+/* RECOGNITION OF PRIOR LEARNING */
+.dgrid.two-up{grid-template-columns:repeat(2,1fr)}   /* four cards read better 2×2 than 3+1 */
+/* RPL note on an accredited course page — sits in the dark hero */
+.c-rplnote{margin-top:22px;padding:16px 20px;border-left:3px solid var(--accent-green);
+  background:rgba(255,255,255,.06);border-radius:0 10px 10px 0;font-size:14px;line-height:1.7;
+  color:#cfc8d8;max-width:620px}
+.c-rplnote strong{color:#fff}
+.c-rplnote a{color:var(--accent-green);font-weight:700;text-decoration:underline}
+/* Same note, different news. The green rule reads as an opportunity; a course
+   that isn't running is neutral information, so it takes a plain light rule. */
+.c-rplnote.is-lock{border-left-color:rgba(255,255,255,.45)}
+.c-rplnote.is-lock a{color:#fff}
+/* An <a> with its href removed is inert already; this stops it looking clickable. */
+.btn.is-locked{opacity:.5;pointer-events:none}
+.rpl-steps{counter-reset:rpl;list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.rpl-steps li{counter-increment:rpl;position:relative;padding:18px 22px 18px 66px;background:#fff;
+  border:1px solid var(--line);border-radius:13px}
+.rpl-steps li::before{content:counter(rpl);position:absolute;left:20px;top:18px;width:30px;height:30px;
+  border-radius:50%;background:var(--green-tint);color:var(--green-deep);font-weight:800;font-size:13.5px;
+  display:grid;place-items:center}
+.rpl-steps b{display:block;font-size:16px;color:var(--grey);margin-bottom:4px}
+.rpl-steps span{font-size:14.5px;color:var(--ink-soft);line-height:1.65}
+.rpl-quote{border-left:3px solid var(--green);padding:4px 0 4px 20px;margin:22px 0;max-width:760px;
+  font-size:16px;line-height:1.7;color:var(--ink-soft)}
+.rpl-quote cite{display:block;margin-top:9px;font-size:13px;font-style:normal;font-weight:700;color:var(--grey)}
+
+/* The RPL prompt that appears inside a Skills Gap result */
+/* .sg-card is defined further down and its `border` shorthand would otherwise
+   win on source order, so this needs both class names to raise specificity. */
+.sg-card.sg-rpl{border-left:4px solid var(--green)}
+.sg-rpl .rpl-flag{display:inline-flex;align-items:center;gap:7px;background:var(--green-tint);
+  color:var(--green-deep);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;
+  padding:5px 12px;border-radius:20px;margin-bottom:13px}
+.sg-rpl .rpl-flag svg{width:13px;height:13px}
+.sg-rpl ul{margin:6px 0 0;padding-left:20px}
+.sg-rpl li{font-size:14.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:6px}
+.sg-rpl li b{color:var(--grey)}
+.sg-rpl h4{font-size:15px;color:var(--grey);margin:22px 0 6px}
+
+/* PROVIDER / COST LINE — international cards only.
+   Cost is the first thing anyone wants to know about an outside course, so it
+   gets a pill of its own rather than being buried in the description. */
+.ccard-prov{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.ccard-prov .pv{font-size:12.5px;font-weight:800;color:var(--ink)}
+.ccard-prov .fr{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  background:var(--green-tint);color:var(--green-deep);border-radius:20px;padding:3px 9px}
+.ccard-prov .fr.part{background:var(--orange-tint);color:var(--orange-deep)}
+.ccard-prov .du{font-size:12.5px;color:var(--ink-soft)}
+
+/* Standing note above a band of cards */
+.band-note{max-width:820px;margin:-4px 0 26px;font-size:15px;line-height:1.75;color:var(--ink-soft)}
+.band-note p+p{margin-top:11px}
+.band-note strong{color:var(--ink)}
+.band-note a{color:var(--orange-deep);font-weight:700;text-decoration:underline}
+
+/* COURSE INDEX (search + filters) */
+.cx{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:34px;
+  }
+.cx-search{position:relative;margin-bottom:16px}
+.cx-search input{width:100%;padding:13px 15px 13px 44px;border:1px solid var(--line);border-radius:10px;
+  font-family:inherit;font-size:15px;color:var(--grey);background:var(--bg-soft)}
+.cx-search input:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.cx-search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink-soft)}
+.cx-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.cx-row:last-of-type{margin-bottom:0}
+.cx-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin-right:4px}
+.cx-chip{background:var(--bg-soft);border:1px solid var(--line);border-radius:20px;padding:7px 14px;
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--grey);cursor:pointer;transition:all .16s}
+.cx-chip:hover{border-color:var(--orange);color:var(--orange-deep)}
+.cx-chip.on{background:var(--orange-deep);border-color:var(--orange-deep);color:#fff}
+.cx-count{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-soft)}
+.cx-count strong{color:var(--grey)}
+.cx-reset{background:none;border:0;padding:0;margin-left:8px;font-family:inherit;font-size:13px;font-weight:700;
+  color:var(--orange-deep);cursor:pointer;text-decoration:underline}
+.cx-empty{text-align:center;padding:46px 20px;color:var(--ink-soft)}
+.cx-empty strong{display:block;color:var(--grey);font-size:18px;margin-bottom:8px}
+
+/* NQF FRAMEWORK EXPLAINER */
+.nqf-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:18px 0 4px}
+.nqf-step{background:var(--bg-soft);border:1px solid var(--line);border-radius:11px;padding:13px 14px}
+.nqf-step b{display:block;font-size:12.5px;color:var(--grey);margin-bottom:4px}
+.nqf-step span{display:block;font-size:11.5px;color:var(--ink-soft);line-height:1.5}
+.nqf-arrow{align-self:center;color:var(--orange-deep);font-size:17px;font-weight:800;line-height:1}
+.section-dark .nqf-step{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16)}
+.section-dark .nqf-step b{color:#fff}
+.section-dark .nqf-step span{color:#c8c2d4}
+
+/* PROFILE
+   This nav bar is white with dark links, so the avatar takes its outline from
+   the rule colour rather than from a translucent white. */
+.nav-links a.nav-profile{display:inline-flex;align-items:center;gap:8px}
+.nav-profile .np-av{width:27px;height:27px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:10.5px;font-weight:800;letter-spacing:.02em;flex:0 0 auto;color:var(--ink-soft)}
+.nav-profile .np-av svg{width:15px;height:15px;display:block}
+.nav-profile:hover .np-av,.nav-profile.active .np-av{border-color:var(--orange);color:var(--orange)}
+.nav-profile .np-av.filled{background:var(--orange);color:#fff;border-color:var(--orange)}
+.nav-profile .np-av.filled svg{display:none}
+.pf-saved{align-self:center;font-size:13.5px;font-weight:700;color:var(--green-deep)}
+.pf-saved.bad{color:#b23c17}
+.btn-danger{background:#fff;color:#b23c17;border:1px solid #e8c4b8}
+.btn-danger:hover{background:#b23c17;color:#fff;border-color:#b23c17}
+.pf-courselist{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.pf-course{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid var(--line);border-radius:12px}
+.pf-course a{font-weight:700;color:var(--grey);font-size:15.5px;flex:1;line-height:1.35}
+.pf-course a:hover{color:var(--orange-deep)}
+.pf-drop{background:none;border:0;padding:4px 2px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;text-decoration:underline;flex:0 0 auto}
+.pf-drop:hover{color:#b23c17}
+.prefill-note{background:var(--orange-tint);border:1px solid var(--orange);border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.55;color:var(--grey);margin-bottom:18px}
+.prefill-note a{font-weight:700;color:var(--orange-deep);text-decoration:underline}
+#c-save.on{background:var(--green);border-color:var(--green);color:#fff}
+
+/* SKILLS GAP ANALYSIS */
+.sg-assure{margin-top:30px;padding:18px 22px;border-left:3px solid var(--accent-green);background:rgba(255,255,255,.05);border-radius:0 10px 10px 0;font-size:14px;line-height:1.7;color:#c9c5c0;max-width:820px}
+.sg-assure .lbl{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:700;color:var(--accent-green);margin-bottom:6px}
+.sg-wrap{max-width:820px;margin:0 auto}
+.sg-card{border:1px solid var(--line);border-radius:18px;padding:34px;background:#fff}
+.sg-card+.sg-card{margin-top:26px}
+.sg-stepnum{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--orange-deep);margin-bottom:10px}
+.sg-card h3{font-size:clamp(21px,2.6vw,27px);margin-bottom:10px;color:var(--grey)}
+.sg-intro{color:var(--ink-soft);font-size:15.5px;line-height:1.65;margin-bottom:24px;max-width:620px}
+.sg-hint{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-soft)}
+/* The .field/.two rules above are scoped to .form, so the tool needs its own. */
+.sg-card .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.sg-card .field{margin-bottom:18px;min-width:0}
+.sg-card label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:var(--ink-soft)}
+.sg-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:15px;color:var(--grey);background:var(--bg-soft)}
+.sg-card input:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.sg-card input::placeholder{color:#a29ba9}
+.sg-card select{width:100%;padding:12px 38px 12px 14px;border:1px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:15px;color:var(--grey);background-color:var(--bg-soft);cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c5c5c' stroke-width='2.4' stroke-linecap='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+.sg-card select:focus{outline:2px solid var(--orange);border-color:var(--orange);background-color:#fff}
+.sg-nav{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.btn-ghost-dark{background:transparent;color:var(--grey);border:1px solid var(--line)}
+.btn-ghost-dark:hover{border-color:var(--orange);color:var(--orange-deep)}
+.sg-card .btn:disabled{opacity:.4;cursor:not-allowed}
+.sg-card .btn:disabled:hover{background:var(--orange)}
+
+.sg-skill{padding:18px 0;border-top:1px solid var(--line)}
+.sg-skill:first-child{border-top:0;padding-top:0}
+.sg-skill-h strong{display:block;font-size:16px;color:var(--grey);margin-bottom:3px}
+.sg-skill-h span{display:block;font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:12px}
+.sg-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sg-lv{background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:9px 4px;cursor:pointer;font-family:inherit;text-align:center;transition:all .16s;line-height:1.25}
+.sg-lv b{display:block;font-size:15px;color:var(--grey);font-weight:800}
+.sg-lv span{display:block;font-size:10.5px;color:var(--ink-soft);margin-top:2px}
+.sg-lv:hover{border-color:var(--orange)}
+.sg-lv.on{background:var(--orange-deep);border-color:var(--orange-deep)}
+.sg-lv.on b,.sg-lv.on span{color:#fff}
+.sg-scalekey{display:none;margin-top:7px;font-size:11.5px;color:var(--ink-soft)}
+
+/* Gap chart: one measure (your level) against a target marker.
+   Single series, so one hue and no colour legend — the key names the two marks.
+   The bar fill is the deep step of the brand ramp: it clears 3:1 on both the
+   white and the soft surface, which the mid step does not. */
+.gapchart{margin:26px 0 8px}
+.gapkey{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-size:12.5px;color:var(--ink-soft)}
+.gapkey i{display:inline-block;vertical-align:middle;margin-right:7px}
+.gapkey .k-bar{width:15px;height:9px;border-radius:2px;background:#2f3194}
+.gapkey .k-mark{width:3px;height:14px;border-radius:2px;background:var(--dark)}
+.gaprow{display:grid;grid-template-columns:190px 1fr 86px;gap:16px;align-items:center;padding:7px 0}
+.gaplabel{font-size:13.5px;color:var(--grey);font-weight:600;line-height:1.35}
+.gaptrack{position:relative;height:14px;background:#f3f0f6;border:1px solid #e3dcec;border-radius:4px}
+.gapbar{position:absolute;left:0;top:0;bottom:0;background:#2f3194;border-radius:3px;min-width:3px}
+.gapmark{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--dark);border-radius:2px;transform:translateX(-50%)}
+.gaprow:hover .gaptrack{border-color:#b8abc9}
+.gapstat{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;text-align:right}
+.gapstat.ok{color:#16674f}
+.gapstat.mid{color:var(--ink-soft)}
+.gapstat.hi{color:#b23c17}
+.gapaxis{display:flex;justify-content:space-between;margin-left:206px;margin-right:102px;margin-top:8px;font-size:11px;color:var(--ink-soft)}
+.sg-lede{font-size:16.5px;line-height:1.65;color:var(--ink-soft);margin-bottom:6px}
+.sg-lede b{color:var(--grey)}
+
+.sg-tablewrap{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.sg-toggle{background:none;border:0;padding:0;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--orange-deep);cursor:pointer;text-decoration:underline}
+.sg-tablebox{overflow-x:auto;margin-top:16px}
+.sg-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+.sg-table caption{text-align:left;font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
+.sg-table th,.sg-table td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+.sg-table thead th{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+.sg-table tbody th{font-weight:600;color:var(--grey)}
+.sg-table td{color:var(--ink-soft)}
+
+.sg-recs{display:flex;flex-direction:column;gap:12px}
+.sg-rec{display:grid;grid-template-columns:38px 1fr 20px;gap:16px;align-items:center;padding:18px 20px;border:1px solid var(--line);border-radius:14px;text-decoration:none;transition:all .18s;background:#fff}
+.sg-rec:hover{border-color:var(--orange)}
+.sg-rec.accred{background:var(--orange-tint);border-color:var(--orange)}
+.sg-rank{width:38px;height:38px;border-radius:50%;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px}
+.sg-rec.accred .sg-rank{background:var(--orange-deep)}
+.sg-reccat{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--orange-deep);margin-bottom:5px}
+.sg-rec h4{font-size:16.5px;color:var(--grey);margin-bottom:5px;line-height:1.35}
+.sg-rec p{font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+.sg-recgo{font-size:19px;color:var(--orange-deep)}
+/* A locked recommendation is still worth reading, so it keeps its rank and its
+   reasoning and only loses the affordance — no hover lift, no arrow. */
+.sg-rec.locked{cursor:default;opacity:.82;grid-template-columns:38px 1fr}
+.sg-rec.locked:hover{border-color:var(--line);transform:none}
+/* Sits inside .sg-reccat rather than in the arrow column: that column is 20px
+   wide and is hidden altogether under 620px, which would drop the one word
+   that matters on a phone. */
+.sg-reclock{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:20px;
+  background:var(--bg-soft);border:1px solid var(--line);color:var(--ink-soft);
+  font-size:10px;font-weight:700;letter-spacing:.07em}
+.sg-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.sg-priv{margin-top:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.sg-caveat{max-width:820px;margin:34px auto 0;padding:18px 22px;background:#fff;border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.7;color:var(--ink-soft)}
+.sg-caveat strong{color:var(--grey)}
+
+@media print{
+  nav,footer,.cta-band,.section-dark,.section-soft,.aiw-btn,.aiw-panel,.sg-actions,.sg-toggle{display:none!important}
+  .sg-card{border-color:#ccc;page-break-inside:avoid}
+  body{background:#fff}
+}
+
+/* REVEAL — paused 2026-08-04
+   Kgomotso finds the motion on the home page uncomfortable, so nothing
+   moves on its own for now: content is simply there when you scroll to it.
+   To bring it back, swap the live rule for the two commented lines below
+   (and see the PAUSED flag in neural.js + the .dot rule above). */
+.reveal{opacity:1;transform:none}
+/* .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease}
+   .reveal.in{opacity:1;transform:none} */
+
+/* ===================== RESPONSIVE ===================== */
+@media(max-width:980px){
+  .hero-inner{padding:126px 26px 104px}
+  .hero p.lead{max-width:none}
+  .hero-curve svg{height:48px}
+  .features{grid-template-columns:1fr 1fr}
+  .course-grid{grid-template-columns:1fr 1fr}
+  .contact-grid{grid-template-columns:1fr;gap:34px}
+  .accredited-feature{grid-template-columns:1fr;gap:22px}
+  .accredited-feature .side{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:18px;text-align:left;display:flex;align-items:center;gap:14px}
+  .accredited-feature .side .nqf{font-size:38px}
+  .accredited-feature .side .nqf small{margin-top:0}
+  .chero-grid{grid-template-columns:1fr;gap:34px}
+  .vgrid,.dgrid{grid-template-columns:1fr 1fr}
+  .nqf-flow{grid-template-columns:1fr;gap:8px}
+  .nqf-arrow{transform:rotate(90deg);justify-self:center}
+  .cx{padding:18px 16px}
+  .acc-pop{left:auto;right:0;width:min(300px,86vw)}
+  .acc-pop::after{left:auto;right:22px}
+  .announce-grid{grid-template-columns:1fr;gap:22px}
+  .statrow{grid-template-columns:1fr 1fr;gap:22px;margin-top:32px;padding-top:26px}
+  .gm{grid-template-columns:1fr;gap:28px}
+  .gm-photo{max-width:300px}
+  .posters{grid-template-columns:1fr;max-width:520px;margin:0 auto}
+  .gaprow{grid-template-columns:1fr;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .gapstat{text-align:left}
+  .gapaxis{margin-left:0;margin-right:0}
+  .sg-card{padding:24px 20px}
+  .sg-card .two{grid-template-columns:1fr;gap:0}
+  .sg-scale{grid-template-columns:repeat(5,1fr);gap:5px}
+  .sg-lv{padding:8px 2px}
+  .sg-lv span{display:none}
+  .sg-scalekey{display:block}
+  .sg-rec{grid-template-columns:32px 1fr;gap:12px}
+  .sg-recgo{display:none}
+  .sg-actions .btn{width:100%;text-align:center}
+}
+@media(max-width:900px){
+  .nav-inner{position:relative}
+  .nav-toggle{display:block;line-height:0}
+  .nav-links{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:6px 0;display:none}
+  .nav-links.open{display:flex}
+  .nav-links a{padding:14px 26px;font-size:14px}
+  .nav-links a.active::after{display:none}
+  .nav-cta{margin:8px 26px 6px;text-align:center}
+}
+@media(max-width:680px){.ai-stats{grid-template-columns:1fr 1fr;gap:30px 20px}.ai-msg{max-width:96%}}
+@media(max-width:640px){
+  section{padding:60px 0}
+  .page-top{padding-top:104px}
+  .wrap{padding:0 18px}
+  .nav-inner{padding:11px 18px}
+  .hero-inner{padding:104px 18px 84px}
+  .hero h1{font-size:clamp(28px,8vw,40px);max-width:none}
+  /* The pill has to stay round and tappable while the field beside it shrinks,
+     so the button keeps its width and the padding comes off the left instead. */
+  .hero-search{padding:6px 6px 6px 18px}
+  .hero-search input{font-size:16px}
+  .hero-search .go{width:50px;height:46px}
+  .hero-cta .btn{flex:1;text-align:center}
+  .hero-curve svg{height:36px}
+  /* .dgrid.two-up is two classes, so it outranks a bare .dgrid here and stayed
+     two-up on phones. Match its specificity or the cards never collapse. */
+  .features,.course-grid,.outcomes,.form .two,.learn,.vgrid,.dgrid,.dgrid.two-up{grid-template-columns:1fr}
+  .btn-row{gap:10px}.btn-row .btn{flex:1;text-align:center}
+  .corp{padding:28px;flex-direction:column;align-items:flex-start;text-align:left}
+  .corp .btn{width:100%;text-align:center}
+  .ai-chat{padding:18px 15px;min-height:0}.ai-msg{max-width:100%}
+  .ai-tab{font-size:12.5px;padding:8px 13px}
+  .cta-band,.enrol-band{padding:58px 0}
+  .foot-top{flex-direction:column}
+  .instructor{grid-template-columns:1fr;text-align:center;padding:26px}.instructor img{margin:0 auto}
+  .chero{padding:104px 0 44px}.chero .actions .btn{flex:1}.lesson .ltag{display:none}
+}
+@media(max-width:400px){.ai-stats{grid-template-columns:1fr;gap:24px}.brand img{height:36px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+
+/* >>> SHARED ACADEMY STYLES — BEGIN ------------------------------------------
+   Everything below this line is the same on all four academy sites and is
+   written here by tools/sync-backend.php. SPS is the source; edits made in
+   any other repository are overwritten by the next sync without warning.
+
+   It stays inside styles.css rather than becoming academy.css because two
+   STATIC pages — module.html and pm-schedule.html — load pm-progress.js and
+   therefore need .pm-bar, and those pages are not part of this application.
+   A second stylesheet would have to be added to them by hand in four repos,
+   which is the maintenance problem this whole exercise exists to remove.
+
+   It uses only the palette VARIABLES, never literal colours, which is what
+   lets one block of CSS look right in SPS orange and Fungi teal.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Server-rendered form state, and the privacy notice.
+   Added 17 Aug 2026 with the move to Xneelo, when the registration form stopped
+   posting to a third party and started being validated by us.
+
+   Appended rather than merged into the form block above so the diff is legible.
+   --err is defined here, additively, rather than in :root — the token block has
+   been fragile before and this needs no access to the rest of it.
+   --------------------------------------------------------------------------- */
+:root{--err:#b3261e}
+
+.form-err{background:#fdecea;border:1px solid #f3c3bd;color:var(--err);border-radius:9px;
+  padding:12px 14px;font-size:14px;font-weight:600;margin:0 0 18px}
+.field-err{color:var(--err);font-size:13px;font-weight:600;margin:6px 0 0}
+.form .field.has-err input,.form .field.has-err textarea{border-color:var(--err);background:#fffafa}
+
+/* The consent tick. The box is pulled to the top of the sentence rather than
+   centred on it, because the sentence runs to three lines and a centred box
+   floats away from the words it belongs to.
+
+   Written as `.form .check` and not `.check`: the existing `.form label` rule is
+   a class plus an element, which outranks a bare class. A plain `.check` loses,
+   the label stays display:block, and the sentence wraps back underneath the
+   checkbox instead of aligning with its own first line. */
+.field-consent{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.form .check{display:flex;gap:11px;align-items:flex-start;cursor:pointer;
+  font-weight:400;margin-bottom:0}
+.form .check input{width:18px;height:18px;flex:0 0 18px;margin-top:1px;
+  accent-color:var(--orange);padding:0}
+.form .check span{font-size:14px;line-height:1.55;color:var(--ink-soft);font-weight:400}
+.form .check a{color:var(--orange-deep);text-decoration:underline}
+
+.legal{max-width:760px}
+.legal h3{font-size:20px;margin:36px 0 12px}
+.legal p,.legal li{color:var(--ink-soft);line-height:1.72}
+.legal p{margin:0 0 14px}
+.legal ul{margin:0 0 18px;padding-left:22px}
+.legal li{margin-bottom:8px}
+.legal a{color:var(--orange-deep)}
+.legal-meta{font-size:13px;color:var(--ink-soft);padding-bottom:18px;border-bottom:1px solid var(--line)}
+.legal-draft{background:var(--orange-tint);border:1px solid var(--orange-light);border-radius:11px;
+  padding:16px 18px;font-size:14px;line-height:1.65;margin:22px 0 8px}
+.legal-tbc{background:var(--bg-soft);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;
+  padding:12px 16px;font-size:14px;margin:0 0 14px}
+
+@media(max-width:640px){.legal h3{font-size:18px}}
+
+/* ---------------------------------------------------------------------------
+   Sign-in and the registrations list. Added 17 Aug 2026.
+
+   Staff-facing rather than public, so the styling stays out of the way: the
+   same palette and type as the rest of the site, no decoration, and a table
+   that is readable at a glance because it is read many times a day.
+   --------------------------------------------------------------------------- */
+
+.auth-card{max-width:430px;margin:0 auto;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:34px}
+.auth-card h2{font-size:26px;margin:4px 0 10px}
+.auth-lede{font-size:14px;line-height:1.6;color:var(--ink-soft);margin:0 0 22px}
+.auth-lede a{color:var(--orange-deep)}
+/* The form supplies the card everywhere else on the site; here the wrapper does. */
+.auth-card .form{background:transparent;border:0;border-radius:0;padding:0}
+.auth-foot{font-size:13px;line-height:1.6;color:var(--ink-soft);margin:20px 0 0;
+  padding-top:18px;border-top:1px solid var(--line)}
+.auth-foot a{color:var(--orange-deep)}
+
+/* A submit button that has to look like the nav links beside it, because
+   signing out must be a POST and a POST needs a button. */
+.linkish{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.linkish:hover{color:var(--orange)}
+
+.adm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  flex-wrap:wrap;margin-bottom:24px}
+.adm-head h2{font-size:30px;margin:4px 0 0}
+.adm-notice{background:var(--green-tint);border:1px solid var(--green);color:var(--green-deep);
+  border-radius:9px;padding:11px 14px;font-size:14px;font-weight:600;margin:0 0 20px}
+
+.adm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.adm-tabs a{font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--line);color:var(--ink-soft);background:#fff}
+.adm-tabs a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.adm-tabs a span{opacity:.65;margin-left:5px;font-weight:600}
+
+.adm-search{display:flex;gap:10px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
+.adm-search input[type=search]{flex:1;min-width:240px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:9px;font-family:inherit;font-size:15px;background:var(--bg-soft)}
+.adm-search input[type=search]:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.adm-clear{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.adm-empty{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;
+  padding:30px;text-align:center;color:var(--ink-soft);font-size:15px}
+
+/* A table with eleven columns of real data will always be wider than a phone.
+   It scrolls inside its own box so the page itself never scrolls sideways. */
+.adm-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+/* min-width grew with the enrolment column. The table lives inside .adm-scroll,
+   so this is what it scrolls to rather than what it squeezes into. */
+.adm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:1140px}
+.adm-table th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);padding:13px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.adm-table td{padding:14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+.adm-table tr:last-child td{border-bottom:0}
+.adm-table a{color:var(--orange-deep)}
+.adm-id{color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.adm-when{white-space:nowrap;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.adm-sub{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+.adm-none{color:var(--ink-soft);font-style:italic}
+.adm-msg{display:block;font-size:13px;color:var(--ink-soft);margin-top:7px;padding-left:10px;
+  border-left:2px solid var(--line);max-width:340px}
+.adm-status select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;
+  font-family:inherit;font-size:13px;background:#fff}
+
+.adm-pages{display:flex;justify-content:space-between;align-items:center;gap:16px;
+  margin-top:20px;font-size:14px;color:var(--ink-soft);flex-wrap:wrap}
+.adm-pages a{font-weight:700;color:var(--orange-deep)}
+.adm-foot{margin-top:26px;font-size:13px;line-height:1.65;color:var(--ink-soft);
+  background:var(--bg-soft);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;
+  padding:14px 16px}
+
+@media(max-width:640px){
+  .adm-head{align-items:flex-start}
+  .adm-head h2{font-size:24px}
+  .auth-card{padding:26px}
+}
+
+/* The one-time installer at /setup. Staff-facing and short-lived — it stops
+   existing once the setup token is emptied — so it borrows the sign-in card
+   rather than earning a look of its own. */
+.setup-list{margin:0 0 18px;padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink-soft)}
+.setup-state{font-size:13px;color:var(--ink-soft);background:var(--bg-soft);
+  border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:0 0 20px}
+.setup-secret{background:var(--ink);color:#fff;border-radius:12px;padding:18px;margin:0 0 18px}
+.setup-secret strong{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  opacity:.75;margin-bottom:9px}
+.setup-secret code{display:block;font-size:21px;letter-spacing:.04em;word-break:break-all;
+  margin-bottom:11px}
+.setup-secret span{display:block;font-size:13px;line-height:1.6;opacity:.8}
+.setup-secret a{color:#fff;text-decoration:underline}
+
+/* The module-by-module detail on a progress report is a wall of text that is
+   only wanted occasionally, so it collapses. */
+.adm-detail{margin-top:8px}
+.adm-detail summary{font-size:12.5px;font-weight:700;color:var(--orange-deep);cursor:pointer}
+.adm-detail pre{white-space:pre-wrap;font-size:12.5px;line-height:1.55;color:var(--ink-soft);
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;padding:11px;
+  margin-top:8px;max-width:420px;max-height:260px;overflow:auto}
+
+/* ===================================================================
+   LEARNER ACCOUNTS (Aug 2026)
+   The dashboard at /my, the enrolment control on the registrations
+   list, and the two bars pm-progress.js puts at the top of a page.
+   =================================================================== */
+
+/* A way in, injected by profile.js rather than added to seventeen navs. It is a
+   plain link and not a second CTA — there is already one, and two buttons
+   competing in a nav makes neither read as the main thing. */
+/* No colour of its own, on purpose. It used to be var(--ink-soft), which is
+   right on SPS's white nav and illegible on a coloured one — Fungi, Maziv and
+   Equinix all have a solid brand bar across the top, and this was body-grey
+   sitting on it. Shared CSS cannot assume the nav is white. It now takes
+   whatever colour the site already gives its nav links, and just sits back. */
+.nav-links a.nav-signin{opacity:.75}
+.nav-links a.nav-signin:hover{opacity:1}
+.nav-profile.signed-in .np-av{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ---- the learner's own page ---- */
+.my-h{font-size:20px;margin:0 0 16px}
+.my-empty{border:1px dashed var(--line);border-radius:14px;padding:26px;background:var(--bg-soft)}
+.my-empty strong{display:block;font-size:17px;color:var(--grey);margin-bottom:8px}
+.my-empty p{font-size:14.5px;color:var(--ink-soft);line-height:1.7}
+.my-empty a,.my-note a,.my-untracked a,.my-privacy a{color:var(--orange-deep);font-weight:700}
+
+.my-course{border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:22px;
+  background:#fff}
+.my-course-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
+  margin-bottom:18px}
+.my-course h4{font-size:19px;color:var(--grey)}
+.my-meta{font-size:13px;color:var(--ink-soft);margin-top:5px}
+.my-loading{font-size:14px;color:var(--ink-soft);padding:14px 0}
+/* The progress panel reuses .prog wholesale — it is the same component as the
+   module page, and a dashboard that draws its own version of it would drift. */
+.my-progress .prog{margin-bottom:18px}
+.my-actions{display:flex;gap:12px;flex-wrap:wrap}
+.my-untracked{font-size:14px;color:var(--ink-soft);line-height:1.7;background:var(--bg-soft);
+  border-left:3px solid var(--line);border-radius:0 8px 8px 0;padding:14px 16px}
+
+/* Module by module, on the dashboard. Replaced a flat list of every topic
+   quiz (11 Sep 2026) — fifty-one undifferentiated rows told a learner nothing
+   about which module they were actually in the middle of. */
+.my-mods{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.my-mods .lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+  font-weight:700;color:var(--ink-soft);margin-bottom:10px}
+.my-mod{display:flex;align-items:center;gap:14px;padding:11px 12px;border-radius:11px;
+  color:var(--ink);border:1px solid transparent}
+.my-mod:hover{background:var(--bg-soft);border-color:var(--line)}
+.my-mod-code{flex:none;width:58px;font-size:12px;font-weight:700;color:var(--ink-soft);
+  letter-spacing:.02em}
+.my-mod-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.my-mod-body strong{font-size:14.5px;font-weight:700;line-height:1.4}
+.my-mod-sub{font-size:12.5px;color:var(--ink-soft)}
+.my-mod-bar{display:block;height:4px;border-radius:3px;background:var(--line);
+  overflow:hidden;margin-top:4px}
+.my-mod-bar i{display:block;height:100%;background:var(--ink-soft);border-radius:3px}
+.my-mod-pct{flex:none;font-size:13px;font-weight:700;color:var(--ink-soft);
+  min-width:38px;text-align:right}
+/* Done, started, untouched — a learner should be able to find the one they are
+   in the middle of without reading any numbers. */
+.my-mod-all .my-mod-bar i{background:var(--green)}
+.my-mod-all .my-mod-pct{color:var(--green-deep)}
+.my-mod-part .my-mod-bar i{background:var(--orange-deep)}
+.my-mod-part .my-mod-pct{color:var(--orange-deep)}
+.my-mod-none .my-mod-pct{color:var(--ink-soft);font-weight:600}
+.my-mod-note{margin:12px 2px 0;font-size:12.5px;line-height:1.65;color:var(--ink-soft)}
+@media (max-width:560px){
+  .my-mod{gap:10px;padding:10px 8px}
+  .my-mod-code{width:48px;font-size:11.5px}
+}
+
+/* "Carry on with" — the single most useful thing on the page, so it is the one
+   element here that gets to look like a button-sized target. */
+.my-next{display:block;border:1.5px solid var(--orange);border-radius:14px;padding:16px 20px;
+  background:var(--orange-tint);margin-bottom:18px;transition:background .2s}
+.my-next:hover{background:#fbe3d1}
+.my-next-lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.09em;
+  font-weight:700;color:var(--orange-deep);margin-bottom:4px}
+.my-next strong{display:block;font-size:16px;color:var(--grey);line-height:1.35}
+.my-next-sub{display:block;font-size:13px;color:var(--ink-soft);margin-top:5px}
+.my-done{background:var(--green-tint);border-left:3px solid var(--green);border-radius:0 8px 8px 0;
+  padding:14px 16px;font-size:14px;line-height:1.7;color:var(--grey);margin-bottom:18px}
+
+/* align-items:start, or the shorter card stretches to match the taller one and
+   ends in a panel of white space with nothing in it. */
+.my-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px;align-items:start}
+.my-card{border:1px solid var(--line);border-radius:16px;padding:24px 26px;background:#fff}
+.my-dl{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:14.5px;margin-bottom:14px}
+.my-dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  color:var(--ink-soft);align-self:center}
+.my-dl dd{color:var(--grey);font-weight:600;word-break:break-word}
+.my-note{font-size:13px;color:var(--ink-soft);line-height:1.65}
+.field-hint{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin:6px 0 0}
+
+.my-privacy{margin-top:40px;padding:18px 22px;border-left:3px solid var(--green);
+  background:var(--green-tint);border-radius:0 10px 10px 0;font-size:14px;line-height:1.7;
+  color:var(--grey);max-width:900px}
+.my-privacy .lbl{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:11px;
+  font-weight:700;color:var(--green-deep);margin-bottom:6px}
+
+/* Which of the two stores a module page is writing to. Small, and always
+   present: "where is this saved" should never need to be worked out. */
+.prog-where{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.prog-where a{color:var(--orange-deep);font-weight:700;text-decoration:underline}
+
+/* ---- the bars pm-progress.js inserts at the top of the document ---- */
+.pm-bar{position:relative;z-index:99;margin-top:70px;padding:16px 26px;display:flex;
+  align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  font-size:14px;line-height:1.6}
+.pm-bar strong{display:block;color:var(--grey)}
+.pm-bar span{display:block;color:var(--ink-soft);font-size:13.5px;margin-top:3px}
+.pm-bar a{color:var(--orange-deep);font-weight:700;text-decoration:underline}
+.pm-bar-act{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.pm-bar .btn{padding:10px 20px;font-size:14px}
+.pm-import{background:var(--orange-tint);border-bottom:1px solid var(--orange)}
+.pm-done{background:var(--green-tint);border-bottom:1px solid var(--green)}
+.pm-warn{background:#fdecea;border-bottom:1px solid #f3c3bd;color:var(--err);font-weight:600}
+/* Every page that can show a bar has a fixed nav; the bar sits under it and
+   the page below has already allowed for the nav, so nothing else shifts. */
+@media print{.pm-bar{display:none}}
+
+/* ---- enrolment, on the registrations list ---- */
+.adm-creds{border:2px solid var(--green);background:var(--green-tint);border-radius:14px;
+  padding:22px 24px;margin-bottom:22px}
+.adm-creds h3{font-size:17px;color:var(--green-deep);margin-bottom:8px}
+.adm-creds p{font-size:14px;color:var(--grey);line-height:1.65}
+.adm-creds dl{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;margin:16px 0;
+  align-items:center}
+.adm-creds dt{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  color:var(--ink-soft)}
+.adm-creds dd{font-size:15px;color:var(--grey);font-weight:600;word-break:break-all}
+/* justify-self, because a <dd> is a grid item and would otherwise stretch the
+   box the width of the panel for a nineteen-character password. */
+.adm-pass{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px!important;
+  letter-spacing:.06em;background:#fff;border:1px solid var(--green);border-radius:8px;
+  padding:8px 12px;display:inline-block;justify-self:start}
+.adm-creds-note{font-size:13px!important;color:var(--ink-soft)!important;margin-top:4px}
+
+.adm-enrolled{display:block;font-size:12.5px;font-weight:700;color:var(--green-deep);
+  background:var(--green-tint);border-radius:6px;padding:4px 8px;margin-bottom:6px}
+.adm-enrol{margin-top:4px}
+.adm-enrol summary{font-size:12.5px;font-weight:700;color:var(--orange-deep);cursor:pointer}
+.adm-enrol form{margin-top:10px;display:flex;flex-direction:column;gap:8px;max-width:320px}
+.adm-enrol-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  color:var(--ink-soft)}
+.adm-enrol select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;
+  font-family:inherit;font-size:13px;background:#fff;max-width:100%}
+.adm-enrol .btn{padding:9px 16px;font-size:13.5px}
+.adm-delivery{border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;margin:2px 0}
+.adm-delivery legend{font-size:11px;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:700;color:var(--ink-soft);padding:0 2px}
+.adm-delivery label{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;
+  color:var(--grey);margin-top:5px;cursor:pointer}
+.adm-delivery input[type="radio"]{margin-top:2px;flex:none}
+.adm-delivery .adm-sub{margin-top:8px}
+
+@media(max-width:820px){
+  .my-grid{grid-template-columns:1fr}
+  .pm-bar{flex-direction:column;align-items:flex-start}
+}
+
+/* ===================================================================
+   PASSWORDS: the reset flow, and the Accounts page behind it
+   =================================================================== */
+
+/* The "check your junk mail" panel on /forgot. Deliberately not a red error —
+   nothing has gone wrong, there is simply a DNS record still to be added, and
+   the visitor needs to know what to do about it rather than be alarmed. */
+.auth-note{margin-top:20px;background:var(--bg-soft);border-left:3px solid var(--orange);
+  border-radius:0 9px 9px 0;padding:14px 16px;font-size:13.5px;line-height:1.7;
+  color:var(--ink-soft)}
+.auth-note strong{display:block;color:var(--grey);margin-bottom:4px}
+.auth-note a{color:var(--orange-deep);font-weight:700}
+.field-hint a{color:var(--orange-deep);font-weight:700}
+
+.adm-users{min-width:1040px}
+.adm-role{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:800;color:#fff;background:var(--grey);border-radius:5px;padding:2px 7px;
+  margin-left:7px;vertical-align:2px}
+/* A switched-off account still has to be readable — it is the row somebody is
+   looking for when they come to switch it back on. Dimmed, not hidden. */
+.adm-off{background:var(--bg-soft)}
+.adm-off td{opacity:.72}
+.adm-status-off{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+  font-weight:800;color:var(--err);background:#fdecea;border:1px solid #f3c3bd;
+  border-radius:5px;padding:2px 8px;margin-bottom:8px}
+.adm-act{margin-bottom:8px}
+.adm-act .btn{padding:8px 14px;font-size:13px}
+.adm-toggle{font-size:12.5px;font-weight:700;color:var(--ink-soft);text-decoration:underline}
+.adm-toggle:hover{color:var(--err)}
+
+/* How far a learner has got, on the Accounts page. Counts, not a percentage —
+   see learner_progress_counts_bulk(). Small and quiet: the column's first job
+   is still "what are they enrolled on". */
+.adm-prog{display:block;font-size:12px;line-height:1.5;color:var(--ink-soft);
+  margin:-2px 0 8px;padding-left:8px;border-left:2px solid var(--green)}
+.adm-prog.none{color:var(--ink-soft);border-left-color:var(--line);font-style:italic}
+
+
+/* ---- the stacked menu on a phone ----
+   The admin and learner navs put a sign-out FORM in the menu, and the mobile
+   rules style `.nav-links a` — which a <form><button> is not. Without this the
+   control sits flush against the left edge in a different size and weight to
+   everything above it, looking like a rendering fault rather than a menu item. */
+@media(max-width:900px){
+  .nav-links form{display:block;border-top:1px solid var(--line)}
+  .nav-links form .linkish{display:block;width:100%;text-align:left;padding:14px 26px;
+    font-size:14px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+    color:var(--grey)}
+  .nav-links form .linkish:hover{color:var(--orange)}
+}
+
+
+/* ---- "Add someone" on the Accounts page ----
+   A <details> rather than a permanent form: this page is read many times a
+   day to look somebody up and used to add an account rarely, so the rare
+   thing stays folded away above the common one. */
+.adm-add{border:1px solid var(--line);border-radius:12px;background:#fff;
+  padding:0 18px;margin:0 0 18px}
+.adm-add[open]{padding-bottom:18px}
+.adm-add summary{cursor:pointer;padding:14px 0;font-weight:700;font-size:14px;
+  color:var(--grey);list-style:none}
+.adm-add summary::-webkit-details-marker{display:none}
+.adm-add summary::before{content:"+ ";color:var(--orange);font-weight:800}
+.adm-add[open] summary::before{content:"– "}
+.adm-add summary:hover{color:var(--orange)}
+.adm-add-lede{font-size:13.5px;line-height:1.7;color:var(--ink-soft);margin:0 0 16px;max-width:70ch}
+/* The page-wide .form card would put a second box inside this one. */
+.adm-add-form{background:transparent;border:0;border-radius:0;padding:0}
+.adm-add-form select{width:100%;padding:12px 14px;border:1px solid var(--line);
+  border-radius:9px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+.adm-add-form select:focus{outline:0;border-color:var(--orange)}
+
+
+/* ---- the Material page ---- */
+.mat-intro{max-width:78ch;margin:0 0 20px}
+.mat-intro p{font-size:14px;line-height:1.75;color:var(--ink-soft);margin:0 0 12px}
+/* The one paragraph on this page that somebody must not skim: it is what
+   stands between a marking memo and the open internet. */
+.mat-warn{background:var(--orange-tint);border-left:3px solid var(--orange);
+  border-radius:0 9px 9px 0;padding:14px 16px}
+.mat-count{font-size:14px;color:var(--ink-soft);margin:0 0 14px}
+.mat-mod{border:1px solid var(--line);border-radius:12px;background:#fff;
+  margin:0 0 10px;padding:0 16px}
+.mat-mod[open]{padding-bottom:16px}
+.mat-mod summary{cursor:pointer;padding:14px 0;font-size:14px;font-weight:700;
+  color:var(--grey);list-style:none;display:flex;align-items:center;gap:10px}
+.mat-mod summary::-webkit-details-marker{display:none}
+.mat-mod summary:hover{color:var(--orange)}
+.mat-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:6px;
+  padding:3px 7px;color:var(--ink-soft);flex:0 0 auto}
+.mat-have{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink-soft);
+  flex:0 0 auto}
+.mat-have.on{color:var(--green-deep)}
+.mat-fields{display:grid;gap:14px}
+/* The site's .field rules are scoped to .form, and this form is not one — it
+   is a grid of eleven module rows, not a card. Without these the label and
+   the input share a line and the input is squeezed to nothing. */
+.mat-fields .field{margin:0}
+.mat-fields label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;
+  color:var(--ink-soft)}
+.mat-fields input{width:100%;padding:11px 13px;border:1px solid var(--line);
+  border-radius:9px;font-family:inherit;font-size:14px;background:var(--bg-soft)}
+.mat-fields input:focus{outline:2px solid var(--orange);border-color:var(--orange);
+  background:#fff}
+.mat-fields .field.has-err input,.mat-fields input.has-err{border-color:var(--err);
+  background:#fffafa}
+@media(min-width:760px){.mat-fields{grid-template-columns:repeat(3,1fr)}}
+.mat-on{font-size:11px;font-weight:700;color:var(--green-deep);text-transform:uppercase;
+  letter-spacing:.04em;margin-left:6px}
+.mat-file-row{display:flex;align-items:center;gap:12px;margin-top:8px}
+.mat-file-row input[type="file"]{flex:1;padding:7px;font-size:12.5px;background:transparent}
+.mat-remove{display:flex!important;align-items:center;gap:5px;font-size:12.5px!important;
+  font-weight:500!important;color:var(--ink-soft);white-space:nowrap;cursor:pointer;
+  margin-bottom:0!important}
+.mat-remove input{width:auto!important;padding:0!important}
+.mat-save{margin-top:18px}
+
+/* ---- quiz authoring, admin-quizzes.php ---- */
+.qz-form{padding:4px 0 10px}
+.qz-meta{display:flex;flex-wrap:wrap;align-items:flex-end;gap:20px;margin-bottom:18px;
+  padding-bottom:16px;border-bottom:1px solid var(--line)}
+.qz-meta .field{margin:0;max-width:260px}
+.qz-questions{display:flex;flex-direction:column;gap:16px}
+.qz-question{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg-soft)}
+.qz-question textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+  font-family:inherit;font-size:14px;background:#fff;resize:vertical}
+.qz-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.qz-choice{display:flex;align-items:center;gap:8px}
+.qz-choice input[type="radio"]{flex:none}
+.qz-choice input[type="text"]{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
+  font-family:inherit;font-size:13.5px;background:#fff}
+.qz-remove{flex:none;border:0;background:none;color:var(--ink-soft);font-size:18px;line-height:1;
+  cursor:pointer;padding:4px 6px}
+.qz-remove:hover{color:var(--err)}
+.qz-qactions{display:flex;gap:10px;margin-top:12px}
+.qz-qactions .btn{padding:7px 13px;font-size:12.5px}
+.qz-form .mat-save{display:flex;align-items:center;gap:14px}
+.qz-form .mat-save .qz-addq{margin-right:auto}
+
+/* ---- taking a quiz, quiz.php ---- */
+.qz-disclaimer{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:6px}
+.qz-take .qz-question,.qz-review .qz-question{border:1px solid var(--line);border-radius:12px;
+  padding:18px 20px;margin-top:16px;background:#fff}
+.qz-prompt{font-size:15.5px;font-weight:700;margin:0 0 12px;color:var(--ink)}
+.qz-choice-pick{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+  font-size:14px;cursor:pointer}
+.qz-choice-pick:hover{background:var(--bg-soft)}
+.qz-choice-pick input{flex:none}
+.qz-choice-static{padding:9px 10px;border-radius:8px;font-size:14px;color:var(--ink-soft)}
+.qz-choice-static.qz-right{background:var(--green-tint);color:var(--green-deep);font-weight:600}
+.qz-choice-static.qz-wrong{background:#fff0ef;color:var(--err);font-weight:600}
+.qz-result{text-align:center;padding:28px 20px;border-radius:14px;background:var(--bg-soft);
+  border:1px solid var(--line);margin-top:18px}
+.qz-result-pass{background:var(--green-tint);border-color:var(--green)}
+.qz-result-fail{background:#fff5f4;border-color:var(--err)}
+.qz-score{font-size:44px;font-weight:800;line-height:1}
+.qz-review{margin-top:8px}
+
+/* ---- the "Check yourself" card on module.html, quiz-widget.js ---- */
+.qz-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding:20px 24px;border-radius:14px;background:var(--bg-soft);border:1px solid var(--line)}
+.qz-card-score{font-size:15px;color:var(--ink-soft)}
+
+
+/* ---------------------------------------------------------------------------
+   The graduates page.
+   Added 19 Aug 2026, rebuilt round cohorts 20 Aug 2026. Everything here is
+   built by graduates.js from its own COHORTS and PEOPLE lists; with both empty
+   the page renders a .corp panel instead and none of this is used.
+
+   A cohort is a group who came through together. One with a photograph and
+   figures gets the wide .cohort panel; one without gets a plain heading over
+   its faces. That is the difference between "here is a class photo" and "here
+   is what happened to them", and the page is worth having only for the second.
+
+   Deliberately NOT reusing .poster: a poster is a wide photograph with a
+   caption under it, and these are portrait-first with the text doing the work.
+   --------------------------------------------------------------------------- */
+.cohort{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;
+  margin-bottom:34px}
+.cohort-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch}
+/* aspect-ratio, not height:100% alone: the source is a portrait photograph and
+   without it the picture drives the row to its own 4:5 height, leaving half a
+   screen of white space beside the text */
+.cohort-top img{width:100%;height:100%;aspect-ratio:16/11;object-fit:cover;
+  object-position:50% 50%}
+.cohort-body{padding:32px 34px;display:flex;flex-direction:column;justify-content:center}
+.cohort-body h3{font-size:24px;margin:8px 0 10px}
+.cohort-body>p{color:var(--ink-soft);font-size:15.5px;margin-bottom:22px}
+.cohort-stats{display:flex;gap:30px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+.cohort-stats div strong{display:block;font-size:26px;color:var(--orange-deep);line-height:1.1}
+.cohort-stats div span{font-size:12.5px;color:var(--ink-soft);letter-spacing:.02em}
+.grad-sub{margin:44px 0 22px}
+.grad-sub h3{font-size:25px}
+
+.facegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:20px}
+.face{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+  transition:box-shadow .2s,transform .2s}
+.face:hover{box-shadow:0 10px 26px rgba(0,0,0,.09);transform:translateY(-2px)}
+/* The initials sit UNDERNEATH the photograph rather than instead of it, so an
+   image that 404s reveals them when graduates.js removes the <img>. A missing
+   file is then a card that looks deliberate, not a broken-image icon on a
+   client's website. */
+.face-shot{position:relative;display:block;aspect-ratio:4/5;background:var(--orange-deep)}
+.face-ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:34px;font-weight:800;letter-spacing:.02em}
+.face-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.face figcaption{padding:13px 15px 15px}
+.face figcaption strong{display:block;font-size:15px;color:var(--grey);letter-spacing:-.01em}
+.face figcaption span{display:block;font-size:12.5px;color:var(--orange-deep);font-weight:600;
+  margin-top:3px}
+.face figcaption em{display:block;font-style:normal;font-size:12px;color:var(--ink-soft);margin-top:3px}
+
+/* Shown only while graduates.js has REVIEW on. It is loud on purpose: this
+   page is reachable by anyone with the address, so it has to say for itself
+   that it is a draft. */
+.grad-review{border:1px solid var(--orange);background:var(--orange-tint);border-radius:14px;
+  padding:20px 24px;margin-bottom:34px}
+.grad-review strong{display:block;font-size:15px;color:var(--orange-deep);margin-bottom:8px}
+.grad-review p{margin:0 0 8px;font-size:14.5px;line-height:1.6;color:var(--ink-soft)}
+.grad-review p:last-child{margin-bottom:0}
+
+/* ---- Meet the trainers --------------------------------------------------
+   A trainer card carries a paragraph of professional history, so it is a wide
+   two-column card rather than one of the small .face tiles the graduates page
+   uses. Same portrait treatment, same initials fallback. */
+.trainergrid{display:grid;gap:22px}
+.trainer{display:grid;grid-template-columns:180px 1fr;gap:0;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;background:#fff}
+.tr-shot{position:relative;display:block;background:var(--orange-deep);min-height:100%}
+.tr-ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font:700 42px/1 Inter,sans-serif;color:#fff;letter-spacing:-.02em}
+.tr-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tr-body{padding:24px 26px 26px}
+.tr-body h3{font-size:21px;letter-spacing:-.015em;color:var(--grey);margin:0 0 4px}
+.tr-role{margin:0 0 2px;font-size:13.5px;font-weight:700;color:var(--orange-deep);
+  text-transform:uppercase;letter-spacing:.05em}
+.tr-org{margin:0 0 2px;font-size:14.5px;color:var(--ink)}
+.tr-creds{margin:0 0 14px;font-size:13px;color:var(--ink-soft)}
+.tr-bio{margin:0;font-size:15px;line-height:1.7;color:var(--ink-soft)}
+.tr-pending{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink-soft);font-style:italic}
+.tr-courses{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+.tr-courses>span{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-soft);font-weight:700}
+.tr-course{font-size:13px;font-weight:700;color:var(--orange-deep);border:1px solid var(--line);
+  border-radius:30px;padding:5px 12px;text-decoration:none}
+.tr-course:hover{border-color:var(--orange);background:var(--orange-tint)}
+.tr-link{display:inline-block;margin-top:14px;font-size:13.5px;font-weight:700;
+  color:var(--orange-deep);text-decoration:underline}
+
+@media(max-width:760px){
+  .trainer{grid-template-columns:1fr}
+  .tr-shot{aspect-ratio:16/9;min-height:0}
+  .tr-ini{font-size:34px}
+  .tr-body{padding:20px 20px 22px}
+}
+
+@media(max-width:760px){
+  .cohort-top{grid-template-columns:1fr}
+  .cohort-top img{aspect-ratio:16/10}
+  .cohort-body{padding:26px 22px}
+  .facegrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+  .grad-sub h3{font-size:22px}
+}
+
+/* ---------------------------------------------------------------------------
+   The four schools — the front door to the catalogue.
+   Added 25 Aug 2026, replacing the three focus lines and the subject chips.
+   Deliberately not .ccard and deliberately larger: a course card advertises one
+   course, and each of these stands for a whole school, so it must not have a
+   reader hunting for the price and start date that are not on it.
+   --------------------------------------------------------------------------- */
+.schools{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin:0 0 34px}
+.school{display:flex;flex-direction:column;padding:26px 28px 22px;border:1px solid var(--line);
+  border-radius:16px;background:#fff;text-decoration:none;
+  transition:border-color .2s,transform .2s,box-shadow .2s}
+.school:hover{border-color:var(--accent);transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(43,43,43,.07)}
+.school:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.school-ico{display:flex;align-items:center;justify-content:center;width:46px;height:46px;
+  border-radius:12px;background:var(--orange-tint);color:var(--orange-deep);margin-bottom:16px}
+.school-ico svg{width:24px;height:24px}
+.school strong{display:block;font-size:clamp(19px,2.1vw,22px);line-height:1.2;color:var(--grey);
+  font-weight:800;letter-spacing:-.01em;margin-bottom:9px}
+.school-line{display:block;font-size:14.5px;line-height:1.62;color:var(--ink-soft);flex:1;
+  margin-bottom:18px}
+.school-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  border-top:1px solid var(--line);padding-top:14px;margin-top:auto}
+.school-n{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink-soft)}
+.school-go{font-size:13.5px;font-weight:800;color:var(--orange-deep)}
+.school:hover .school-go{text-decoration:underline}
+
+/* On the chooser the credential chips and the count are hidden, so the search
+   box is all that is left in the panel — without this it keeps the bottom
+   margin it needs when there is a row of chips under it. */
+.cx.cx-lean .cx-search{margin-bottom:0}
+
+/* The header that replaces the chooser once a school is open. */
+.school-head{max-width:760px;margin:0 0 30px}
+.school-head .pg-back{margin-bottom:20px}
+.school-head .eyebrow{display:block;margin-bottom:12px}
+.school-head h2{font-size:clamp(26px,3.2vw,38px);margin:0 0 14px}
+.school-head p{color:var(--ink-soft);font-size:16.5px;line-height:1.65}
+
+/* Accreditation explainer. Reference rather than navigation, so it is folded
+   away — open it and it reads exactly as it did when it sat above the cards. */
+.badge-note{border:1px solid var(--line);border-radius:14px;background:var(--bg-soft);
+  margin:0 0 34px;overflow:hidden}
+.badge-note>summary{list-style:none;cursor:pointer;padding:16px 20px;font-size:14.5px;
+  font-weight:800;color:var(--grey);display:flex;align-items:center;gap:10px}
+.badge-note>summary::-webkit-details-marker{display:none}
+.badge-note>summary::before{content:"";width:8px;height:8px;flex:0 0 auto;
+  border-right:2px solid var(--orange-deep);border-bottom:2px solid var(--orange-deep);
+  transform:rotate(-45deg);transition:transform .2s;margin-left:2px}
+.badge-note[open]>summary::before{transform:rotate(45deg)}
+.badge-note>summary:hover{color:var(--orange-deep)}
+.badge-note-body{padding:0 20px 20px}
+.badge-note-body p{font-size:15px;color:var(--ink-soft);line-height:1.7}
+
+@media(max-width:820px){
+  .schools{grid-template-columns:1fr;gap:14px}
+  .school{padding:22px 22px 18px}
+}
+
+
+/* ---------------------------------------------------------------------------
+   Skills Development scorecard (/scorecard).
+   Added 25 Aug 2026. Built from the Final BEE Verification Report.
+   The report's own table is a five-column grid of small type that only reads on
+   a printed page. Here each indicator is its own expandable row instead: the
+   report's four figures stay on the summary line, and the plain-language
+   explanation is behind the disclosure rather than crowding it out.
+   --------------------------------------------------------------------------- */
+
+/* Where this element sits on the certificate. */
+.sc-overall{border:1px solid var(--line);border-radius:16px;background:var(--bg-soft);
+  padding:26px 28px;margin:0 0 26px}
+.sc-oh h3{font-size:clamp(21px,2.6vw,27px);margin:10px 0 10px}
+.sc-oh p{font-size:14px;color:var(--ink-soft);line-height:1.65}
+.sc-elems{list-style:none;margin:22px 0 0;display:grid;gap:9px}
+.sc-elem{display:grid;grid-template-columns:minmax(140px,1.1fr) 3fr auto;gap:14px;align-items:center}
+.sc-elem-n{font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+.sc-elem-n em{font-style:normal;font-size:10.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--orange-deep)}
+.sc-elem-bar{background:#fff;border:1px solid var(--line);border-radius:6px;height:12px;overflow:hidden}
+.sc-elem-bar i{display:block;height:100%;background:var(--line)}
+.sc-elem-s{font-size:14px;font-weight:800;color:var(--ink-soft);min-width:46px;text-align:right;
+  font-variant-numeric:tabular-nums}
+.sc-elem.is-here .sc-elem-n{color:var(--grey)}
+.sc-elem.is-here .sc-elem-bar{border-color:var(--orange)}
+.sc-elem.is-here .sc-elem-bar i{background:var(--orange)}
+.sc-elem.is-here .sc-elem-s{color:var(--orange-deep)}
+.sc-overall-foot{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:14px;color:var(--ink-soft);line-height:1.65}
+/* The 0.01 the report loses to rounding. Set quieter than the sentence it
+   follows — it is a footnote, not a correction. */
+.sc-rounding{display:block;margin-top:9px;font-size:12.5px;line-height:1.6;opacity:.85}
+
+/* The headline: what was scored, and what is missing. */
+.sc-top{display:grid;grid-template-columns:minmax(240px,1fr) 1.6fr;gap:24px;margin:0 0 30px}
+.sc-big,.sc-gap{border:1px solid var(--line);border-radius:16px;padding:26px 28px;background:#fff}
+.sc-big{display:flex;flex-direction:column;justify-content:center;
+  background:linear-gradient(150deg,var(--orange-tint),#fff 70%)}
+.sc-num{display:block;font-size:clamp(48px,7vw,72px);font-weight:800;line-height:1;
+  letter-spacing:-.03em;color:var(--orange-deep);font-variant-numeric:tabular-nums}
+.sc-of{display:block;font-size:14.5px;font-weight:800;color:var(--grey);margin-top:8px}
+.sc-sub{display:block;font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:12px}
+.sc-gap strong{display:block;font-size:16px;color:var(--grey);margin-bottom:8px}
+.sc-gap p{font-size:14px;color:var(--ink-soft);line-height:1.65;margin-bottom:12px}
+.sc-gap ul{list-style:none;display:grid;gap:10px}
+.sc-gap li{font-size:13.5px;color:var(--ink-soft);line-height:1.55;padding-left:56px;position:relative}
+.sc-gap li em{font-style:normal;color:var(--grey);font-weight:700}
+.sc-gap-n{position:absolute;left:0;top:0;width:46px;text-align:center;font-size:13px;font-weight:800;
+  color:var(--orange-deep);background:var(--orange-tint);border-radius:6px;padding:2px 0;
+  font-variant-numeric:tabular-nums}
+
+/* One indicator per row. */
+.sc-group{margin-bottom:26px}
+.sc-sub-h{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.13em;
+  color:var(--orange);margin:0 0 12px}
+.sc-tag{font-size:10px;letter-spacing:.08em;background:var(--orange-tint);color:var(--orange-deep);
+  border-radius:20px;padding:3px 9px;margin-left:6px}
+.sc-row{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:9px;
+  overflow:hidden}
+.sc-row[open]{border-color:var(--orange)}
+.sc-row>summary{list-style:none;cursor:pointer;padding:16px 18px 14px;display:grid;
+  grid-template-columns:1fr auto;gap:10px 20px;align-items:start}
+.sc-row>summary::-webkit-details-marker{display:none}
+.sc-row>summary:hover .sc-ind{color:var(--orange-deep)}
+.sc-ind{font-size:14px;line-height:1.5;color:var(--grey);font-weight:600}
+.sc-figs{display:flex;gap:18px;align-items:flex-start}
+.sc-f{display:flex;flex-direction:column;align-items:flex-end;min-width:52px}
+.sc-f b{font-size:14.5px;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.sc-f i{font-style:normal;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--ink-soft);margin-top:3px}
+.sc-f-score b{color:var(--grey)}
+.sc-row.is-short .sc-f-score b{color:var(--orange-deep)}
+.sc-bar{grid-column:1/-1;height:4px;border-radius:3px;background:var(--bg-soft);
+  border:1px solid var(--line);overflow:hidden}
+.sc-bar i{display:block;height:100%;background:var(--green)}
+.sc-row.is-short .sc-bar i{background:var(--orange)}
+.sc-body{padding:2px 18px 18px;border-top:1px solid var(--line);margin-top:2px}
+.sc-body p{font-size:14px;line-height:1.68;color:var(--ink-soft);margin-top:14px}
+.sc-body strong{color:var(--grey)}
+.sc-links{display:flex;flex-wrap:wrap;gap:8px}
+.sc-links a{display:inline-block;font-size:12.5px;font-weight:700;color:var(--orange-deep);
+  border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:var(--bg-soft)}
+.sc-links a:hover{border-color:var(--orange);background:var(--orange-tint)}
+.sc-foot{font-size:13.5px;color:var(--ink-soft);line-height:1.7;padding-top:16px;
+  border-top:1px solid var(--line)}
+.sc-foot code{font-size:12.5px;background:var(--bg-soft);border:1px solid var(--line);
+  border-radius:5px;padding:2px 7px;white-space:nowrap}
+
+/* The link to the scorecard, on the courses page under the four schools. */
+.sc-strip{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+  border:1px solid var(--line);border-radius:14px;background:#fff;padding:18px 22px;
+  margin:0 0 34px;text-decoration:none;transition:border-color .2s,transform .2s}
+.sc-strip:hover{border-color:var(--accent);transform:translateY(-2px)}
+.sc-strip-n{font-size:27px;font-weight:800;letter-spacing:-.02em;color:var(--orange-deep);
+  background:var(--orange-tint);border-radius:11px;padding:10px 15px;font-variant-numeric:tabular-nums}
+.sc-strip-t{font-size:13.5px;line-height:1.6;color:var(--ink-soft)}
+.sc-strip-t strong{display:block;font-size:15.5px;color:var(--grey);margin-bottom:4px}
+.sc-strip-go{font-size:20px;font-weight:800;color:var(--orange-deep)}
+@media(max-width:620px){
+  .sc-strip{grid-template-columns:auto 1fr;gap:14px;padding:16px 18px}
+  .sc-strip-go{display:none}
+}
+
+/* Reading it without getting it wrong. */
+.sc-note{border:1px solid var(--line);border-radius:16px;background:var(--bg-soft);
+  padding:26px 28px;margin:34px 0 0}
+.sc-note h3{font-size:19px;margin-bottom:16px}
+.sc-note dt{font-size:14.5px;font-weight:800;color:var(--grey);margin-top:16px}
+.sc-note dt:first-of-type{margin-top:0}
+.sc-note dd{font-size:14px;color:var(--ink-soft);line-height:1.68;margin-top:5px}
+
+@media(max-width:900px){
+  .sc-top{grid-template-columns:1fr}
+  .sc-row>summary{grid-template-columns:1fr}
+  .sc-figs{justify-content:flex-start;gap:22px}
+  .sc-f{align-items:flex-start}
+  .sc-elem{grid-template-columns:1fr auto;gap:6px 12px}
+  .sc-elem-bar{grid-column:1/-1;order:3}
+}
+@media(max-width:620px){
+  .sc-overall,.sc-big,.sc-gap,.sc-note{padding:20px 18px}
+}
+/* ---- Written section content on a module page (lessons.js) ----------------
+   Attaches to the existing .lesson rows rather than introducing a new
+   component: an area that has something to read becomes an expander, and one
+   that does not is left exactly as the curriculum rendered it. That
+   difference has to be visible at a glance, which is what the caret is for. */
+/* One block of material per topic. The per-area expanders this replaced are
+   gone: the Learner Guides are written topic by topic, so the areas listed on
+   the card are the syllabus, not sections. See the note in lessons.js. */
+.read-open{display:flex;align-items:center;gap:10px;width:100%;margin:0;padding:13px 22px;
+  background:var(--bg-soft);border:0;border-top:1px solid var(--line);
+  font:600 14px/1.2 inherit;color:var(--ink);text-align:left;cursor:pointer}
+.read-open:hover{background:var(--orange-tint)}
+.read-open:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+.read-caret{flex:0 0 auto;width:8px;height:8px;margin-left:2px;
+  border-right:2px solid var(--orange-deep);border-bottom:2px solid var(--orange-deep);
+  transform:rotate(-45deg)}
+.read-open.open .read-caret{transform:rotate(45deg)}
+.read-label{flex:1 1 auto}
+.read-meta{flex:0 0 auto;font-weight:500;font-size:12.5px;color:var(--ink-soft)}
+
+.read-body{padding:6px 22px 22px;border-top:1px solid var(--line);background:var(--bg-soft)}
+.read-part{margin:22px 0 8px;font-size:15px;font-weight:700;color:var(--ink)}
+.read-part:first-child{margin-top:6px}
+.read-text p{margin:0 0 13px;line-height:1.75;max-width:68ch}
+.read-text p:last-child{margin-bottom:0}
+.read-text ul{margin:0 0 13px;padding-left:22px;max-width:68ch}
+.read-text li{margin-bottom:7px;line-height:1.7}
+
+/* Where to go when this topic is done. Deliberately quiet — it is the end of a
+   card, not a call to action, and there is one on every topic. */
+.topic-next{border-top:1px solid var(--line)}
+.topic-next a{display:flex;flex-direction:column;gap:2px;padding:13px 22px;text-decoration:none}
+.topic-next a:hover{background:var(--bg-soft)}
+.topic-next span{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--orange-deep)}
+.topic-next strong{font-size:14px;font-weight:600;color:var(--ink)}
+
+/* Anchored topic cards sit under the fixed nav without this. */
+#m-topics .module{scroll-margin-top:96px}
+
+/* The self-check for one topic, on its card under the reading. */
+.qz-topic{display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  padding:13px 22px;border-top:1px solid var(--line)}
+.qz-topic-score{flex:1 1 auto;font-size:13.5px;color:var(--ink-soft)}
+.qz-topic-score strong{color:var(--ink)}
+.qz-topic .btn{flex:0 0 auto;padding:8px 16px;font-size:13px}
+
+/* ---- Taking it in place, on the card (11 Sep 2026) ----------------------
+   The questions, the marked result and the way back to the reading all render
+   inside .qz-topic, so the loop read → answer → re-read → answer never moves
+   the learner to another page. Everything here is scoped under .qz-topic
+   because the plain .qz-* names above belong to the admin editor and the
+   standalone quiz.php page, and both must keep their own look. */
+.qz-topic-open{display:block;padding:18px 22px 20px;background:var(--bg-soft)}
+.qz-topic-passed{background:var(--green-tint)}
+.qz-topic .qz-bar{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft)}
+.qz-topic .qz-bar strong{color:var(--ink)}
+
+.qz-topic .qz-q{border:1px solid var(--line);border-radius:11px;margin:0 0 12px;
+  padding:14px 16px;background:#fff}
+.qz-topic .qz-q legend{display:flex;gap:10px;align-items:flex-start;padding:0;
+  font-size:15px;font-weight:700;line-height:1.5;color:var(--ink)}
+.qz-topic .qz-n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--header);
+  color:var(--ink);font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:2px}
+.qz-topic .qz-choice{display:flex;align-items:flex-start;gap:10px;margin-top:9px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14.5px;line-height:1.55}
+.qz-topic .qz-choice:hover{background:var(--bg-soft)}
+.qz-topic .qz-choice input{flex:none;margin-top:3px}
+
+.qz-topic .qz-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.qz-topic .qz-err{margin:12px 0 0;padding:10px 13px;border-radius:8px;
+  background:#fff0ef;color:var(--err);font-size:13.5px}
+
+/* The marked paper. Overrides the centred .qz-result used on quiz.php — here
+   it sits inside a card and reads left to right. */
+.qz-topic .qz-result{display:flex;align-items:center;gap:18px;text-align:left;
+  padding:16px 18px;border-radius:12px;margin:0 0 14px}
+.qz-topic .qz-result-pct{flex:none;font-size:34px;font-weight:800;line-height:1}
+.qz-topic .qz-result-say{display:flex;flex-direction:column;gap:3px;font-size:14px;
+  line-height:1.6;color:var(--ink-soft)}
+.qz-topic .qz-result-say strong{color:var(--ink);font-size:15px}
+
+.qz-topic .qz-review{margin:0 0 4px}
+.qz-topic .qz-review .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+.qz-topic .qz-review-q{border-left:3px solid var(--err);padding:2px 0 2px 13px;margin-bottom:12px}
+.qz-topic .qz-review-prompt{margin:0 0 5px;font-size:14.5px;font-weight:700;color:var(--ink)}
+.qz-topic .qz-review-mine{margin:0;font-size:13.5px;color:var(--err)}
+.qz-topic .qz-review-right{margin:2px 0 0;font-size:13.5px;color:var(--green-deep);font-weight:600}
+
+@media (max-width:560px){
+  .qz-topic-open{padding:16px 16px 18px}
+  .qz-topic .qz-result{flex-direction:column;align-items:flex-start;gap:8px}
+}
+
+/* ---- Quizzes are authored per topic, grouped under their module ---------- */
+.qz-modhead{margin:26px 0 8px;font-size:13px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-soft)}
+.qz-modhead:first-child{margin-top:0}
+.qz-paste{margin:0 0 14px;border:1px dashed var(--line);border-radius:10px;padding:12px 16px;
+  background:var(--bg-soft)}
+.qz-paste>summary{cursor:pointer;font-weight:700;font-size:14px}
+.qz-paste textarea{width:100%;font:13px/1.55 "SFMono-Regular",Consolas,monospace;padding:10px 12px;
+  border:1px solid var(--line);border-radius:8px;resize:vertical;margin:8px 0 0}
+.qz-paste-msg{font-size:13px;color:var(--ink-soft);align-self:center}
+
+/* ---- Writing that content (admin-lessons.php) ---------------------------- */
+.sec-area{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#fff}
+.sec-area h5{margin:0 0 4px;font-size:15px}
+.sec-area .sec-idx{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;
+  border-radius:6px;background:var(--orange-tint);color:var(--orange-deep);font-weight:700;
+  font-size:12px;margin-right:8px}
+.sec-area textarea{width:100%;min-height:150px;font:14px/1.6 inherit;padding:10px 12px;
+  border:1px solid var(--line);border-radius:8px;resize:vertical}
+.sec-area .sec-hint{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
+.sec-topic{margin:22px 0 10px;font-size:14px;font-weight:700}
+.sec-topic .sec-topic-code{color:var(--ink-soft);font-weight:500;margin-left:8px}
+.sec-covers{margin:0 0 12px;padding-left:20px;color:var(--ink-soft);font-size:13px}
+.sec-covers li{margin-bottom:3px}
+.sec-area .sec-hint:first-child{margin-top:0}
+
+/* Loading a prepared course bundle. Folded away by default: it is the thing
+   done once when a course arrives, not the thing done while editing, and an
+   open file-picker sitting above the editor invites a mis-click that would
+   reload a whole course over somebody's edits. */
+.sec-bundle{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.sec-bundle>summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:14px}
+.sec-bundle-body{padding:0 16px 16px;max-width:70ch}
+.sec-bundle-body p{font-size:13.5px;line-height:1.65;margin:0 0 10px}
+.sec-bundle-form{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--line)}
+.sec-bundle-form input[type=file]{font:13px/1.5 inherit;max-width:100%}
+
+/* ---- No motion, anywhere ---------------------------------------------------
+   Kgomotso, 3 Sep 2026: no animation on the sites. This follows the hero dots
+   coming out on 2 Sep for the same reason — she finds the movement
+   uncomfortable, and a learner reading a module for forty notional hours should
+   not have anything moving at the edge of their vision.
+
+   Written as one override at the end of the shared block rather than by hunting
+   the twenty-odd transition declarations above. Two reasons: a declaration
+   removed by hand comes back the next time somebody copies a rule from another
+   component, and !important here beats every later rule in the per-site half of
+   this file without needing to be last in the file.
+
+   TRANSFORMS ARE NOT TOUCHED, deliberately. transform is load-bearing here —
+   it rotates the section caret and the link arrows and centres a few things.
+   Killing transform would break layout; killing the TRANSITION of transform
+   just means the caret flips instantly, which is the point.
+
+   The reduced-motion block further up is now redundant for this file and kept
+   anyway: it costs nothing and it is what a browser looks for. */
+*,*::before,*::after{
+  transition:none!important;
+  animation:none!important;
+}
+html{scroll-behavior:auto!important}
+
+/* The trainer page groups its table by course. .adm-block is the wrapper for
+   one of those groups; everything inside it is existing admin styling. */
+.adm-block{margin:0 0 34px}
+.adm-block h3{font-size:17px;margin:0 0 2px;color:var(--grey)}
+.adm-block .adm-sub{margin:0 0 14px}
+
+/* The three-role controls on the Accounts page (10 Sep 2026). */
+.adm-rolepick{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft)}
+.adm-rolepick select{font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.adm-rolehelp{margin:5px 0 9px;font-size:12px;line-height:1.55;color:var(--ink-soft);max-width:52ch}
+.adm-role-tr{background:var(--green-tint);color:var(--green-deep)}
+.adm-courses{display:block;margin:0 0 6px}
+.adm-coursehead{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 5px}
+.adm-coursebox{display:block;font-size:12.5px;color:var(--ink);margin:0 0 3px}
+.adm-coursebox input{margin-right:6px}
+
+
+/* ---- In-person classes and the register (11 Sep 2026) -------------------- */
+/* Uses the house .form / .field / .two pattern, so it matches the other admin
+   forms; only the three-across time row needs a grid of its own. */
+.cls-form{padding:26px}
+.cls-form select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:15px;background:var(--bg-soft);color:var(--ink)}
+.cls-form select:focus{outline:2px solid var(--orange);border-color:var(--orange);background:#fff}
+.cls-form select:disabled{opacity:.6}
+.cls-times{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cls-actions{display:flex;gap:10px;margin-top:18px}
+@media (max-width:640px){ .cls-times{grid-template-columns:1fr} }
+.cls-sub{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.cls-none{color:var(--ink-soft);font-style:italic}
+.cls-act{white-space:nowrap}
+.cls-act .btn{padding:6px 12px;font-size:12.5px;margin-right:6px}
+.cls-state{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:20px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cls-state-held{background:var(--green-tint);color:var(--green-deep)}
+.cls-state-cancelled{background:#fff0ef;color:var(--err)}
+
+/* The register. One row per learner, one column per mark — a facilitator
+   reads down a column to see who is missing, which is how a room is counted. */
+.reg-tally{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.reg-chip{padding:5px 12px;border-radius:20px;font-size:12.5px;color:var(--ink-soft);
+  background:var(--bg-soft);border:1px solid var(--line)}
+.reg-chip strong{color:var(--ink);font-size:13.5px}
+.reg-present{background:var(--green-tint);border-color:var(--green)}
+.reg-present strong{color:var(--green-deep)}
+.reg-absent{background:#fff0ef;border-color:var(--err)}
+.reg-absent strong{color:var(--err)}
+.reg-table th.reg-h{text-align:center;font-size:11.5px;white-space:nowrap}
+.reg-table td.reg-pick{text-align:center;width:64px}
+.reg-row-unmarked{background:repeating-linear-gradient(45deg,transparent,transparent 6px,
+  rgba(0,0,0,.018) 6px,rgba(0,0,0,.018) 12px)}
+.reg-radio{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  width:100%;padding:6px 0}
+.reg-radio input{position:absolute;opacity:0;width:0;height:0}
+.reg-dot{display:block;width:19px;height:19px;border-radius:50%;
+  border:2px solid var(--line);background:#fff;transition:none}
+.reg-radio:hover .reg-dot{border-color:var(--ink-soft)}
+.reg-radio input:focus-visible + .reg-dot{outline:2px solid var(--ink);outline-offset:2px}
+.reg-radio input:checked + .reg-dot-present{background:var(--green);border-color:var(--green)}
+.reg-radio input:checked + .reg-dot-absent{background:var(--err);border-color:var(--err)}
+.reg-radio input:checked + .reg-dot-late{background:var(--orange-deep);border-color:var(--orange-deep)}
+.reg-radio input:checked + .reg-dot-excused{background:var(--ink-soft);border-color:var(--ink-soft)}
+.reg-radio input:disabled + .reg-dot{opacity:.5}
+.reg-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.reg-note{width:100%;min-width:110px;font:inherit;font-size:12.5px;padding:6px 9px;
+  border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.reg-note[readonly]{background:var(--bg-soft);color:var(--ink-soft)}
+.reg-by{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.reg-save{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:20px}
+@media (max-width:760px){
+  .reg-table td.reg-pick{width:48px}
+  .reg-note{min-width:80px}
+  .reg-by{display:none}
+}
+/* <<< SHARED ACADEMY STYLES — END ------------------------------------------- */
+
+/* ---- Technical & artisan programmes (Fisha Renaissance menu) -------------
+   A long reference list, not a set of course cards: fifty-seven rows across
+   seven streams, read by somebody looking for one of them. So it is laid out
+   as a document with a jump list, and the duration is pulled out to the right
+   because that and the name are what people scan for. There is deliberately no
+   price column — see the note at the top of programmes.js. */
+.pg-caveat{font-size:15px;color:var(--ink-soft);margin-top:12px;line-height:1.65}
+
+.pg-intro{margin-bottom:26px}
+.pg-lead{font-size:17px;line-height:1.7;color:var(--ink-soft);max-width:70ch}
+.pg-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:22px}
+.pg-stats div{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.pg-stats strong{display:block;font-size:23px;color:var(--orange-deep);letter-spacing:-.02em;line-height:1.15}
+.pg-stats span{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--ink-soft);margin-top:5px;font-weight:700}
+
+.pg-jump{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px;margin:0 0 40px}
+.pg-jump a{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;font-size:13.5px;font-weight:700;color:var(--grey);text-decoration:none;background:#fff}
+.pg-jump a:hover{border-color:var(--orange);background:var(--orange-tint)}
+.pg-jump b{flex:0 0 auto;width:24px;height:24px;border-radius:6px;background:var(--orange);color:#fff;
+  display:grid;place-items:center;font-size:12.5px}
+.pg-jump i{margin-left:auto;font-style:normal;font-size:12px;font-weight:700;color:var(--ink-soft)}
+
+.pg-stream{margin:0 0 44px;scroll-margin-top:96px}
+.pg-head{display:flex;gap:15px;align-items:flex-start;padding-bottom:14px;margin-bottom:6px;
+  border-bottom:2px solid var(--grey)}
+.pg-letter{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--grey);color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:16px}
+.pg-head h3{font-size:21px;letter-spacing:-.015em;margin:0 0 4px;color:var(--grey)}
+.pg-head p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;margin:0;max-width:74ch}
+
+.pg-item{display:grid;grid-template-columns:1fr 190px;gap:0 26px;padding:17px 0;
+  border-bottom:1px solid var(--line)}
+.pg-item h4{font-size:16px;letter-spacing:-.01em;margin:0 0 5px;color:var(--grey);line-height:1.3}
+.pg-item p{font-size:14.5px;line-height:1.65;color:var(--ink-soft);margin:0;max-width:72ch}
+.pg-dur span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-soft);font-weight:700;margin-bottom:3px}
+.pg-dur strong{font-size:14px;color:var(--orange-deep);line-height:1.4;font-weight:700}
+.pg-dur abbr{text-decoration:none;cursor:help;color:var(--ink-soft)}
+.pg-tbc{font-weight:600;color:var(--ink-soft);font-size:13.5px}
+
+.pg-notes{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:12px;
+  background:var(--bg-soft);padding:22px 26px;margin-top:8px}
+.pg-notes strong{display:block;font-size:15px;color:var(--grey);margin-bottom:12px}
+.pg-notes ul{margin:0;padding-left:19px}
+.pg-notes li{font-size:14.5px;line-height:1.65;color:var(--ink-soft);margin-bottom:9px}
+.pg-notes li:last-child{margin-bottom:0}
+.pg-notes abbr{text-decoration:none;cursor:help}
+
+@media(max-width:720px){
+  .pg-item{grid-template-columns:1fr;gap:10px}
+  .pg-dur{display:flex;align-items:baseline;gap:8px}
+  .pg-dur span{margin-bottom:0}
+  .pg-head{gap:12px}
+}
+
+/* ---- Programmes page: back link + responsive corrections ---------------
+   The back link exists because this page is reached from a card on /courses
+   and has no nav item of its own, so the nav cannot show you where you are.
+   Two of them: one above the heading, and one at the foot, because 57 rows is
+   a long way to scroll back up before you can go anywhere. */
+.pg-back{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;
+  color:var(--orange-deep);text-decoration:none;margin-bottom:20px;
+  border:1px solid var(--line);border-radius:30px;padding:9px 16px 9px 13px;background:#fff}
+.pg-back:hover{border-color:var(--orange);background:var(--orange-tint)}
+.pg-back svg{width:15px;height:15px;flex:0 0 auto}
+.pg-back-foot{margin:30px 0 0}
+
+/* The jump list was a flex row with the count pushed out by margin-left:auto,
+   which is fine until a stream name wraps to three lines on a phone and the
+   count ends up marooned beside the last word. Grid keeps the badge, the name
+   and the count in their own columns however the name wraps. */
+.pg-jump a{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.pg-jump i{margin-left:0}
+
+/* Long programme names — "Higher Occupational Certificate: Solar Photovoltaic
+   Standalone Service Technician — NQF 5" — must never push the page sideways. */
+.pg-item h4,.pg-head h3,.pg-jump a{overflow-wrap:anywhere}
+
+@media(max-width:560px){
+  /* Two stat tiles across reads better than one tall column of four. */
+  .pg-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .pg-stats div{padding:13px 14px}
+  .pg-stats strong{font-size:19px}
+  .pg-stats span{font-size:11px}
+  .pg-jump{grid-template-columns:1fr;gap:7px;margin-bottom:30px}
+  .pg-jump a{padding:10px 12px;font-size:13px}
+  .pg-head{gap:11px}
+  .pg-letter{width:29px;height:29px;font-size:14px}
+  .pg-head h3{font-size:18px}
+  .pg-notes{padding:18px 18px;border-radius:10px}
+  .pg-notes ul{padding-left:17px}
+  .pg-lead{font-size:16px}
+  .pg-back{width:100%;justify-content:center}
+}

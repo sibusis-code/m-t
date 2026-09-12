@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" width="600" height="760" role="img" aria-label="Placeholder for the General Manager's photograph">
+  <rect width="600" height="760" fill="#1d1e3b"/>
+  <g fill="none" stroke="#3e4096" stroke-width="6" opacity=".5">
+    <circle cx="300" cy="300" r="96"/>
+    <path d="M150 560c0-83 67-150 150-150s150 67 150 150" stroke-linecap="round"/>
+  </g>
+  <rect x="70" y="620" width="460" height="2" fill="#3e4096" opacity=".6"/>
+  <text x="300" y="676" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="30" font-weight="700" fill="#ffffff">Photograph to follow</text>
+  <text x="300" y="712" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="20" fill="#ffffff" opacity=".65">Replace images/gm-photo.svg</text>
+</svg>

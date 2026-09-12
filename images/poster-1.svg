@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder for academy photograph 1">
+  <rect width="800" height="600" fill="#eceef9"/>
+  <rect x="1" y="1" width="798" height="598" fill="none" stroke="#e4e0ea" stroke-width="2"/>
+  <g fill="none" stroke="#3e4096" stroke-width="5" opacity=".55">
+    <rect x="230" y="200" width="340" height="220" rx="18"/>
+    <circle cx="400" cy="300" r="62"/>
+    <path d="M330 200l30-42h80l30 42" stroke-linejoin="round"/>
+  </g>
+  <text x="400" y="484" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="30" font-weight="700" fill="#1d1e3b">Academy photograph 1</text>
+  <text x="400" y="522" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="20" fill="#1d1e3b" opacity=".6">Replace images/poster-1.svg</text>
+</svg>

@@ -1,0 +1,187 @@
+# Apache configuration for SPS Academy.
+#
+# WRITTEN TO WORK IN EITHER PLACE, because it has to be both:
+#   public_html/sps/            a folder on centenarynetworks.com  (now)
+#   the document root itself    sps.centenarynetworks.com          (later)
+#
+# That means nothing in here may assume it is at the root of the site. Every
+# rewrite substitution is RELATIVE — no leading slash — so Apache resolves it
+# against whichever directory this file is sitting in. A single "/" in the wrong
+# place here sends /sps/courses to the Centenary homepage.
+#
+# It also means being a guest. centenarynetworks.com is a live site we do not
+# own the whole of, so this file must not set anything host-wide. See the note
+# on HSTS below — that one would have reached across the entire domain.
+#
+# Confirmed on 17 Aug 2026 by probing the live site: the root site rewrites
+# unknown paths to its homepage, but its rule exempts real directories
+# (/assets/ returns 403, not the homepage). So a genuine sps/ directory is
+# served by these rules and the parent's catch-all does not interfere.
+# mod_rewrite rules are not inherited into subdirectories by default, which is
+# what we are relying on.
+
+Options -Indexes
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Server-side code and data are not documents.
+  #
+  # Expressed as a RewriteRule, not RedirectMatch. RedirectMatch matches the
+  # full URL path from the root, so "^/(lib|schema|tools)" silently stops
+  # matching the moment the site moves into a folder — the pattern would be
+  # tested against /sps/lib/db.php and never fire. A RewriteRule in a
+  # per-directory file matches the path RELATIVE to this directory, so it keeps
+  # working in both layouts. A deny rule that quietly stops denying is the worst
+  # kind of thing to get wrong.
+  RewriteRule ^(lib|schema|tools|_drafts|private)(/|$) - [R=404,L]
+
+  # .user.ini tunes PHP-FPM upload limits for the material-upload feature —
+  # nothing secret in it, but no reason to make PHP-FPM tuning fetchable
+  # either. The rule above matches directory names, not filenames, so it does
+  # not already cover this; same [R=404,L] style rather than a 403, so a
+  # denied file reads the same as one that never existed.
+  RewriteRule ^\.user\.ini$ - [R=404,L]
+
+  # WHICH TRAINER PHOTOGRAPHS MAY BE SERVED. A whitelist, not a blocklist.
+  #
+  # images/ is mirrored to the server wholesale and the deploy does not delete
+  # (delete_removed is off, by design), so taking a photograph OUT of the
+  # repository does not take it off the servers it already reached. On
+  # 10 Sep 2026 a trainer came off the site pending her contract, and her
+  # picture was already live.
+  #
+  # images/trainers/README.md says the answer is a rule naming the one file.
+  # This is that idea inverted, for two reasons. A rule that names the blocked
+  # person writes her name into a file that lives in a PUBLIC repository and
+  # sits on four public servers, which is most of what we are trying to undo.
+  # And a blocklist is a rule somebody has to remember to DELETE, while a
+  # whitelist is one somebody has to remember to ADD to — and forgetting that
+  # fails safe: a photograph falls back to initials, rather than a face nobody
+  # meant to publish staying up.
+  #
+  # To publish a trainer photograph, add its name here in the same edit that
+  # sets consent:true in trainers.js. Below are the cleared four: three
+  # confirmed 25 Aug 2026, and Sibusiso Seopela added 10 Sep 2026 — he asked
+  # for his own card, so the clearance and the photograph both came from him.
+  #
+  # Relative, like every rule in this file — no leading slash — so it holds in
+  # the folder layout and at a document root both.
+  RewriteCond %{REQUEST_URI} !/(fiston-nselike|sibusiso-seopela|tarryn-norris|taryn-mccormick)\.jpg$
+  RewriteRule ^images/trainers/ - [R=404,L]
+
+  # Force HTTPS. Registration posts personal information; it does not travel in
+  # the clear. X-Forwarded-Proto is checked too because shared hosting often
+  # terminates TLS at a proxy, where %{HTTPS} reads "off" on an https request.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # /scorecard is HR-only and MUST reach scorecard.php. These two rules are not
+  # tidiness — they are the gate.
+  #
+  # The page shipped public on 25 Aug 2026 as scorecard.html plus a public
+  # scorecard.js, was deployed, and was then moved behind require_admin() the
+  # same day on Kgomotso's instruction. The deploy mirror runs with
+  # delete_removed OFF, so both of those files are very likely still sitting on
+  # the server even though they are gone from the repository. Without the first
+  # rule the extensionless rewrite below finds the orphaned scorecard.html —
+  # because it is a real file — and serves the ungated page to anybody who asks.
+  # The second rule makes the two orphans unreachable by their own names, which
+  # matters most for scorecard.js: it held every figure on the page.
+  #
+  # Delete these only once you have confirmed the server has no scorecard.html
+  # and no scorecard.js. Confirm it; do not assume a later deploy removed them,
+  # because a mirror that is not deleting will not.
+  RewriteRule ^scorecard/?$ scorecard.php [L]
+  RewriteRule ^scorecard\.(html|js)$ - [R=404,L]
+
+  # /courses -> courses.html, and /contact -> contact.php. This is what GitHub
+  # Pages did for free and Apache does not; without it every internal link on
+  # all seventeen pages 404s. Real files and directories are left alone.
+  #
+  # No leading slash on the substitution — that is what makes this work in a
+  # subfolder as well as at a document root.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+?)/?$ $1.html [L]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^(.+?)/?$ $1.php [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  # NO Strict-Transport-Security here, deliberately.
+  #
+  # HSTS is not scoped to a path — it applies to the whole hostname. Setting it
+  # from this folder would force HTTPS on all of centenarynetworks.com,
+  # including the existing site and anything else ever put on it, for a year,
+  # and it cannot be recalled from a browser that has already seen it. That is
+  # not ours to decide from inside /sps/. It goes back when the academy has a
+  # hostname of its own.
+</IfModule>
+
+# HOW LONG BROWSERS MAY HOLD ON TO OUR CSS AND JAVASCRIPT.
+#
+# This is here because of a real incident, on the day learner accounts shipped.
+#
+# The parent site sets, through mod_expires, "Cache-Control: max-age=2592000"
+# on css and js. Those directives ARE inherited into a subdirectory — unlike
+# mod_rewrite rules, which are not — so they applied to us. That is thirty days.
+# The deploy uploaded a new styles.css, profile.js and pm-progress.js, the
+# server served them correctly to anyone who asked, and every browser that had
+# visited before simply did not ask. The dashboard rendered unstyled, the "Sign
+# in" link never appeared, and progress kept going to localStorage. Nothing was
+# broken on the server and nothing looked wrong in the deploy log.
+#
+# Five minutes, with revalidation, is the right trade for a site with no build
+# step and therefore no content-hashed filenames. There is nothing to version,
+# so the only thing between a deploy and the people it is for is this number. A
+# conditional request that comes back 304 costs a few hundred bytes; a release
+# nobody can see costs a day of confusion.
+#
+# Both modules are set to the same value on purpose. mod_expires and mod_headers
+# both write Cache-Control, and which one wins depends on module order, so they
+# are made to agree rather than raced.
+#
+# Scoped to css and js. Images and PDFs keep the parent's long cache, which is
+# right for files that are replaced rather than edited.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                  "access plus 5 minutes"
+  ExpiresByType application/javascript    "access plus 5 minutes"
+  ExpiresByType text/javascript           "access plus 5 minutes"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "max-age=300, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# NO php_flag / php_value DIRECTIVES HERE, deliberately.
+#
+# There used to be a php_flag block guarded by <IfModule mod_php.c>. Those
+# directives only exist when PHP runs as an Apache module; where PHP runs as
+# FastCGI or FPM — which is the normal modern arrangement, and Xneelo's — they
+# are unknown, and depending on the configuration Apache either errors or the
+# handler refuses the request. The symptom is every .php file returning 500 or
+# 503 while .html and .css serve perfectly, which reads like "PHP is broken"
+# rather than "one line of configuration is unwelcome".
+#
+# display_errors is set from PHP instead, in lib/bootstrap.php, where no server
+# configuration can disagree with it. expose_php cannot be set at run time and
+# is not worth a directive — it only hides a version header.
+
+# No ErrorDocument. It takes a path from the document root, which would have to
+# be hardcoded as /sps/404.html and would then be wrong at the subdomain. The
+# server's default 404 is plain but correct in both places.

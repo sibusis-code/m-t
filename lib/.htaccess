@@ -1,0 +1,10 @@
+# Nothing in this directory is a page. Belt to the RedirectMatch braces in the
+# site's root .htaccess — if that file is ever edited carelessly, this one still
+# stands between the web and the configuration loader.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>
