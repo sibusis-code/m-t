@@ -33,7 +33,8 @@
 #   MT_FTP_SERVER    centenarynetworks.com
 #   MT_FTP_USERNAME  the Xneelo SFTP user
 #   MT_FTP_PASSWORD  its password
-# Set them with:  printf '%s' 'value' | gh secret set MT_FTP_USERNAME
+# Set them with:  gh secret set MT_FTP_USERNAME -R sibusis-code/m-t   (it prompts for the value)
+# Repository: https://github.com/sibusis-code/m-t — secrets set there 13 Sep 2026.
 #
 # Ask Xneelo for an FTP user whose home is public_html/mtacademy if the panel
 # allows it. Then the credential in this repository physically cannot reach the
