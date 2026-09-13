@@ -109,6 +109,11 @@ function install_seed_tenants(?string $contact = null): int
            it is compared against the 'tenant' line in a config file and has no
            business carrying a character that needs escaping. */
         ['mt',      'M&T Development',                   'M&T Academy'],
+        /* Cricket South Africa, the seventh, stood up 13 Sep 2026. Seeded
+           everywhere for the same reason as the rest. Not to be confused with
+           the Cricket World Cup volunteer portal Centenary also built for them,
+           which is a separate application with its own database. */
+        ['cricketsa', 'Cricket South Africa',            'Cricket SA Academy'],
     ];
 
     $added = 0;

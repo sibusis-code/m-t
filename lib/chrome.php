@@ -83,10 +83,32 @@ function asset(string $path): string
     return $path . '?v=' . brand('asset_version');
 }
 
+/**
+ * The name set beside an icon-only logo — "CRICKET SA", "M&T", "EQUINIX".
+ *
+ * OPTIONAL, AND ASKED FOR THROUGH brand_has() FIRST (13 Sep 2026). Some academies'
+ * logos carry the company name in the artwork and need nothing beside them; others
+ * are a bare mark. The static .html pages always paired a bare mark with a
+ * .brand-word span, but these PHP pages never did, so contact, sign-in and every
+ * admin page showed an unlabelled mark — on Cricket SA's, just a green and gold
+ * ball, with nothing on the page saying whose academy it was.
+ *
+ * brand() fails the whole page on a missing key, by design. Calling it for a key
+ * the logo-with-lettering academies do not define would have taken down every PHP
+ * page on SPS, Fungi, Maziv and Tracker on their next deploy. So it is only called
+ * once brand_has() says the site set one; everyone else renders exactly as before.
+ */
+function chrome_wordmark(): string
+{
+    return brand_has('wordmark')
+        ? '<span class="brand-word">' . e(brand('wordmark')) . '</span>'
+        : '';
+}
+
 function chrome_logo(string $class = 'brand'): string
 {
     return '<a href="./" class="' . e($class) . '"><img src="' . e(brand('logo'))
-         . '" alt="' . e(brand('logo_alt')) . '"></a>';
+         . '" alt="' . e(brand('logo_alt')) . '">' . chrome_wordmark() . '</a>';
 }
 
 /**
@@ -293,7 +315,7 @@ function chrome_footer(string $variant, array $o = []): void
     if ($variant === 'site') {
         echo '    <div class="foot-top">' . "\n";
         echo '      <div class="foot-brand"><img src="' . e(brand('logo')) . '" alt="'
-           . e(brand('logo_alt')) . '"></div>' . "\n";
+           . e(brand('logo_alt')) . '">' . chrome_wordmark() . '</div>' . "\n";
         echo '      <div class="foot-nav">' . "\n";
         foreach ([
             './'           => 'Home',

@@ -39,6 +39,12 @@ return [
   'logo'          => 'mt-logo.webp',
   'logo_alt'      => 'M&T Development',
 
+  /* Set beside the logo on the PHP pages, matching the static pages' lockup. The
+     tile's own "DEVELOPMENT" lettering is unreadable at 34px, so without this the
+     sign-in, contact and admin pages showed an unlabelled square. Plain "M&T":
+     chrome_wordmark() escapes it, so do not write &amp; here. */
+  'wordmark'      => 'M&T',
+
   /* Centenary runs the academy for every company, so registrations and reset
      notifications go to Centenary, not to the client. */
   'academy_email'   => 'kgomotso@centenarynetworks.com',
