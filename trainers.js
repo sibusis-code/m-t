@@ -46,6 +46,11 @@
      photo     A file in images/trainers/. Optional — without it the card shows
                their initials, which looks deliberate rather than broken, and a
                photo that 404s falls back to the same initials.
+     focus     Where to keep the photo when it is cropped, as CSS object-position
+               ("50% 4%" = centred across, near the top). Optional, default centre.
+               Needed for a tall portrait: on phones the card crops every photo to
+               a 16:9 strip, and a centre crop of a head-and-shoulders shot keeps
+               the chest and loses the face.
      pending   true while we are still waiting for their profile. The card says
                so plainly instead of carrying invented copy.
      consent   MUST be true to be published. See below.
@@ -296,6 +301,7 @@
            'across the academies: what the tools actually do, how to use them in the ' +
            'working day, and how to build with them.',
       photo: 'images/trainers/sibusiso-seopela.jpg',
+      focus: '50% 4%',       // 391x580 portrait, face in the top third
       linkedin: '',
       consent: true          // 10 Sep 2026 — he asked for the card himself
     }
@@ -345,6 +351,7 @@
     var ini = '<span class="tr-ini" aria-hidden="true">' + esc(initials(t.name)) + '</span>';
     if (!t.photo) return ini;
     return ini + '<img class="tr-img" loading="lazy" alt="' + esc(t.name) + '"' +
+           (t.focus ? ' style="object-position:' + esc(t.focus) + '"' : '') +
            ' src="' + esc(t.photo) + '" onerror="this.remove()">';
   }
 
