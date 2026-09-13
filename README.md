@@ -91,10 +91,10 @@ Must be supplied before the site is announced:
 
 ## Standing it up
 
-Nothing below has been done. Each step needs a credential or a decision.
+Step 1 is done; each step after it needs a credential or a decision.
 
-1. **GitHub repository** — create `kgomotso-Bolide/mt.academy` and push this repo's
-   `xneelo-backend` branch. (Not `main` — see the cutover note in `DEPLOY-XNEELO.md`.)
+1. **GitHub repository** — done 13 Sep 2026: <https://github.com/sibusis-code/m-t>, branch
+   `xneelo-backend` (its default; there is no `main` — see the cutover note in `DEPLOY-XNEELO.md`).
 2. **Repository secrets** — `MT_FTP_SERVER`, `MT_FTP_USERNAME`, `MT_FTP_PASSWORD`.
 3. **Server folder** — `public_html/mtacademy` on Xneelo.
 4. **Configuration** — `~/private/mtacademy-config.php`, with `'tenant' => 'mt'`. That one
