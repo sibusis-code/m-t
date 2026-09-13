@@ -938,7 +938,12 @@ footer{background:var(--dark);color:#a9a2b4;padding:52px 0 30px;font-size:14px}
   .wrap{padding:0 18px}
   .nav-inner{padding:11px 18px}
   .hero-inner{padding:104px 18px 84px}
-  .hero h1{font-size:clamp(28px,8vw,40px);max-width:none;white-space:normal}
+  /* Phones: still one line (13 Sep 2026). The size comes from the screen width —
+     the space inside the 18px gutters, less 16px for a desktop scrollbar, divided
+     by this headline's width in ems. 17.3 is its width in Verdana, the widest of the
+     fonts measured, so it fits whichever system font the phone uses. The first
+     declaration is for browsers without min(). Change the text, re-measure. */
+  .hero h1{font-size:5vw;font-size:min(40px,calc((100vw - 52px) / 17.3));max-width:none;white-space:nowrap}
   /* The pill has to stay round and tappable while the field beside it shrinks,
      so the button keeps its width and the padding comes off the left instead. */
   .hero-search{padding:6px 6px 6px 18px}
