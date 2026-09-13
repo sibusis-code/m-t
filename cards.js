@@ -14,7 +14,7 @@
     ["AI Strategy for Business Leaders","ai-strategy","1542744173-8e7e53415bb0"],
     ["AI in Medicine: Foundations","ai-medicine-foundations","1576091160550-2173dba999ef"],
     ["AI Ethics in Business","ai-ethics-business","1488229297570-58520851e868"],
-    ["AI in Action: Organizational Strategy","ai-in-action","1504384308090-c894fdcc538d"],
+    ["AI in Action: Organizational Strategy","ai-in-action","images/course-ai-in-action.jpg"],
     ["Cybersecurity","cybersecurity","1550751827-4bd374c3f58b"],
     ["AI in Medicine: Natural Language","ai-medicine-nlp","1518186285589-2f7649de83e0"],
     ["Computer Science for Lawyers","cs-for-lawyers","1589829545856-d10d557cf95f"],
@@ -24,7 +24,8 @@
     ["Leadership in Emerging Technology","leadership-emerging-tech","1521737604893-d14cc237f11d"],
     ["AI in Medicine: Biomedical Signal","ai-medicine-signal","1559757148-5c350d0d3c56"]
   ];
-  var img=function(id){return "https://images.unsplash.com/photo-"+id+"?auto=format&fit=crop&w=720&q=70";};
+  // An id with a slash is a photo of our own under images/; anything else is an Unsplash id.
+  var img=function(id){return id.indexOf("/")>-1?id:"https://images.unsplash.com/photo-"+id+"?auto=format&fit=crop&w=720&q=70";};
   var ARROW=' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;color:var(--accent)"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   document.querySelectorAll('.ccard').forEach(function(card){
     if(card.dataset.href) return;   // external course — courses-index.js links it out
