@@ -26,9 +26,10 @@
 
   var OPEN_TITLES = [
     'Occupational Certificate: Project Manager',
+    'Occupational Certificate: Procurement Officer',
     'Google Project Management Certificate'
   ];
-  var OPEN_SLUGS = ['project-management'];
+  var OPEN_SLUGS = ['project-management', 'procurement-officer'];
 
   var LOCK_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +

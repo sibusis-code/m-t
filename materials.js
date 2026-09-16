@@ -38,10 +38,12 @@
   var code   = (params.get('m') || '').toUpperCase();
   if (!code) return;
 
-  /* One course carries a tracked curriculum today. Kept as a constant rather
-     than guessed from the page so that adding a second one is a visible change
-     here and in learner_catalogue(), not an inference that quietly breaks. */
-  var COURSE = 'project-management';
+  /* Two courses carry a tracked curriculum since 16 Sep 2026, so the slug comes
+     from course-context.js — which honours ?c= only for a curriculum that has
+     actually loaded, and otherwise answers 'project-management' exactly as this
+     constant used to. Material is stored per course, so sending the wrong slug
+     would hand a learner another qualification's documents. */
+  var COURSE = window.ACADEMY_COURSE || 'project-management';
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {

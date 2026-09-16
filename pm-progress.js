@@ -60,8 +60,20 @@
      { "KM-01": { topics: { "KM-01-KT01": "2026-08-12T09:00:00.000Z" },
                   done: "2026-08-20T…" } } */
 (function () {
-  var FIELD  = 'pmProgress';
-  var COURSE = 'project-management';   // the slug this file's curriculum belongs to
+  /* The course this page is about. One qualification was tracked until
+     16 Sep 2026; Procurement Officer is the second, and course-context.js picks
+     between them (falling back to the Project Manager, which is what this
+     constant used to be). Writes always go to THIS course.
+
+     The browser copy keeps its old key for the Project Manager, because that is
+     where existing signed-out progress already sits and renaming it would look
+     to a learner like their ticks had been thrown away. */
+  var COURSE = window.ACADEMY_COURSE || 'project-management';
+  var FIELD  = fieldFor(COURSE);
+
+  function fieldFor(slug) {
+    return slug === 'project-management' ? 'pmProgress' : 'progress-' + slug;
+  }
 
   /* Each academy exposes its profile under its own global — SPSProfile,
      FungiProfile, EquinixProfile — because the sites were branded separately.
@@ -114,10 +126,49 @@
   /* ---- which store is in play -------------------------------------------- */
 
   var mode = 'local';    // 'local' until the account probe says otherwise
-  var mem  = {};         // the account's copy, once hydrated
+  var mem  = {};         // the account's copy of THIS course, once hydrated
+  var allCourses = {};   // every course the account has progress for, by slug
   var acct = null;       // window.SPSAccount, if this page loaded profile.js
 
   function store() { return mode === 'account' ? mem : localStore(); }
+
+  /* Another course's tree, read-only. The dashboard lists every enrolment a
+     learner has, so it needs the Procurement Officer's ticks on the same page
+     as the Project Manager's — but writes still belong to the page's own
+     course, which is why this returns a copy nothing here can save through. */
+  function treeFor(slug) {
+    if (slug === COURSE) return store();
+    if (mode === 'account') return allCourses[slug] || {};
+    var p = profile();
+    return (p && p.get()[fieldFor(slug)]) || {};
+  }
+
+  function statsFrom(tree, mod) {
+    var saved = tree[mod.id] || { topics: {} };
+    var total = mod.topics.length;
+    var done  = mod.topics.filter(function (t) { return saved.topics && saved.topics[t.code]; }).length;
+    return {
+      id: mod.id, done: done, total: total,
+      pct: total ? Math.round(done / total * 100) : 0,
+      complete: !!saved.done, completedAt: saved.done || null
+    };
+  }
+
+  function overallFrom(tree, modules) {
+    var t = 0, d = 0, mods = 0, credits = 0;
+    modules.forEach(function (m) {
+      var s = statsFrom(tree, m);
+      t += s.total; d += s.done;
+      if (s.complete) { mods++; credits += (+m.credits || 0); }
+    });
+    return {
+      topicsDone: d, topicsTotal: t,
+      pct: t ? Math.round(d / t * 100) : 0,
+      modulesComplete: mods, modulesTotal: modules.length,
+      creditsClaimed: credits,
+      creditsTotal: modules.reduce(function (a, m) { return a + (+m.credits || 0); }, 0)
+    };
+  }
 
   /* Always deferred, never synchronous. This file is loaded before the inline
      script that renders each page, so firing during our own execution would
@@ -149,7 +200,8 @@
   function resync() {
     if (!acct) return;
     acct.refresh().then(function (s) {
-      mem = (s && s.progress && s.progress[COURSE]) || {};
+      allCourses = (s && s.progress) || {};
+      mem = allCourses[COURSE] || {};
       announce();
     });
   }
@@ -198,7 +250,8 @@
 
       if (mode === 'account') {
         mem = all;                                       // optimistic: the tick
-        write({ a: 'topic', module: moduleId,            // appears immediately
+        allCourses[COURSE] = mem;                        // appears immediately
+        write({ a: 'topic', module: moduleId,
                 item: topicCode, on: on ? '1' : '0' });
       } else {
         commitLocal(all);
@@ -218,6 +271,7 @@
 
       if (mode === 'account') {
         mem = all;
+        allCourses[COURSE] = mem;
         write({ a: 'module', module: moduleId, on: on ? '1' : '0' });
       } else {
         commitLocal(all);
@@ -228,32 +282,19 @@
     /* Per-module counts. `total` comes from the curriculum, not from what the
        learner has touched, so an untouched module still reports out of its real
        number of topics. */
-    moduleStats: function (mod) {
-      var saved = store()[mod.id] || { topics: {} };
-      var total = mod.topics.length;
-      var done = mod.topics.filter(function (t) { return saved.topics && saved.topics[t.code]; }).length;
-      return {
-        id: mod.id, done: done, total: total,
-        pct: total ? Math.round(done / total * 100) : 0,
-        complete: !!saved.done, completedAt: saved.done || null
-      };
-    },
+    /** The slug this page writes to. */
+    course: function () { return COURSE; },
 
-    overall: function (modules) {
-      var t = 0, d = 0, mods = 0, credits = 0;
-      modules.forEach(function (m) {
-        var s = API.moduleStats(m);
-        t += s.total; d += s.done;
-        if (s.complete) { mods++; credits += (+m.credits || 0); }
-      });
-      return {
-        topicsDone: d, topicsTotal: t,
-        pct: t ? Math.round(d / t * 100) : 0,
-        modulesComplete: mods, modulesTotal: modules.length,
-        creditsClaimed: credits,
-        creditsTotal: modules.reduce(function (a, m) { return a + (+m.credits || 0); }, 0)
-      };
-    },
+    moduleStats: function (mod) { return statsFrom(store(), mod); },
+
+    overall: function (modules) { return overallFrom(store(), modules); },
+
+    /* The same two, for a course this page is not writing to — the dashboard,
+       which paints a panel per enrolment. Read-only by construction: they are
+       handed a tree rather than reaching for the live store. */
+    moduleStatsFor: function (slug, mod) { return statsFrom(treeFor(slug), mod); },
+
+    overallFor: function (slug, modules) { return overallFrom(treeFor(slug), modules); },
 
     /* A flat, dated record — the thing that actually gets sent or printed. It is
        deliberately plain text: it has to survive an email client, a printout and
@@ -277,6 +318,7 @@
     clear: function () {
       if (mode === 'account') {
         mem = {};
+        allCourses[COURSE] = mem;     // keep the by-course copy in step
         write({ a: 'clear' });
         announce();
         return;
@@ -346,6 +388,7 @@
             return;
           }
           mem = res.progress || mem;
+          allCourses[COURSE] = mem;   // keep the by-course copy in step
           el.className = 'pm-bar pm-done';
           el.innerHTML = '<div><strong>Brought across — ' + res.added + ' item' +
             (res.added === 1 ? '' : 's') + ' added to your account.</strong>' +
@@ -379,7 +422,8 @@
     if (!enrolled) { announce(); return; }
 
     mode = 'account';
-    mem  = (session.progress && session.progress[COURSE]) || {};
+    allCourses = session.progress || {};
+    mem  = allCourses[COURSE] || {};
     announce();
 
     if (isEmptyTree(mem)) offerImport();

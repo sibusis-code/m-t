@@ -148,7 +148,8 @@
 <!-- both must load before the render below: locks.js says whether this course is
      open, pm-modules.js says which modules have a study guide to link to -->
 <script src="locks.js?v=20260820"></script>
-<script src="pm-modules.js?v=20260820"></script>
+<script src="pm-modules.js?v=20260916"></script>
+<script src="po-modules.js?v=20260916"></script>
 <!-- Loaded here, BEFORE the catalogue script below, because that script calls
      render() synchronously and the facilitator panel asks this file who may be
      named. Loaded later, the check would silently find nothing and the panel
@@ -343,6 +344,38 @@
     ]}
   ];
 
+  /* Procurement Officer, SAQA 111445, curriculum 332302-001-01-00. Taken from
+     SECTION 1 (2.1 Curriculum Structure) of the provider's curriculum document
+     on 16 Sep 2026 — these are the registered module titles and credit values.
+     The eight knowledge modules are the ones studied on the site, and their
+     topics live in po-modules.js. */
+  const QCTO_PROCUREMENT_OFFICER=[
+    {c:"Knowledge Modules",cr:79,note:"The theory, assessed per module.",mods:[
+      ["KM-01","Introduction to supply chain management",10],
+      ["KM-02","Demand execution management operations",10],
+      ["KM-03","Sourcing in procurement and supply",12],
+      ["KM-04","Inventory management",10],
+      ["KM-05","Negotiating and contracting in procurement and supply",13],
+      ["KM-06","Procurement operations",10],
+      ["KM-07","Returns management",7],
+      ["KM-08","Performance management and improvement of operations",7]
+    ]},
+    {c:"Practical Modules",cr:63,note:"Applied procurement work, done under supervision.",mods:[
+      ["PM-01","Develop procurement and supply operational schedules",6],
+      ["PM-02","Coordinate and implement procurement and supply operational schedules",6],
+      ["PM-03","Develop a sourcing plan and assess suitability of potential suppliers",15],
+      ["PM-04","Prepare for negotiations with suppliers",13],
+      ["PM-05","Manage contract implementation and service level agreements",10],
+      ["PM-06","Monitor implementation of demand execution and customer relationship activities",8],
+      ["PM-07","Monitor operational procurement related activities",5]
+    ]},
+    {c:"Workplace Modules",cr:38,note:"Logged in a real procurement function, evidenced in your portfolio.",mods:[
+      ["WM-01","Processes for the development and coordination of procurement and supply operational procedures",14],
+      ["WM-02","Procurement relationships and contract management processes",10],
+      ["WM-03","Processes for monitoring and evaluating procurement and supply operational schedules",14]
+    ]}
+  ];
+
   const MOD_AISD=[
     {t:"How Software Actually Gets Built",lessons:["What a codebase is, and how to read one","Version control and why every change is a branch","Code review, and what \"done\" means","Environments: local, staging, production"]},
     {t:"Programming Foundations",lessons:["Values, variables and types","Decisions, loops and functions","Lists, dictionaries and how data is shaped","Reading other people's code before writing your own"]},
@@ -382,6 +415,7 @@
   ];
   const COURSES={
     "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",regOpen:true,pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
+    "procurement-officer":{title:"Occupational Certificate: Procurement Officer",cat:"Procurement",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"111445",credits:"180",code:"332302-001-01-00",qcto:QCTO_PROCUREMENT_OFFICER,img:"1521737604893-d14cc237f11d",regOpen:true,learn:["Develop and coordinate the implementation of operational schedules for procurement and supply","Manage procurement and supply relationships, negotiations and contracts","Monitor and measure procurement and supply performance","Work to the legislative, regulatory and organisational rules that govern sourcing"],lead:"The accredited procurement qualification, registered on the NQF at Level 5 — 180 credits, SAQA ID 111445. It runs in three parts: eight knowledge modules covering supply chain, sourcing, inventory, negotiation, contracts and performance; seven practical modules; and three workplace modules logged in a real procurement function. Not to be confused with the Procurement Skills course, which is a short course and is not accredited."},
     "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
     "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,facilitator:FAC_WARIA,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
@@ -565,7 +599,12 @@
     if(locked) stripHeroPlay();   // nothing to play on a course that isn't running
 
     // learn
-    const learn=LEARN[c.cat]||LEARN["Business"];
+    /* A course may state its own outcomes. Added 16 Sep 2026 for the Procurement
+       Officer: the list above is keyed by CATEGORY, and the procurement one was
+       written for the skills course, which is a different offering from the
+       registered qualification. These four are the qualifying learner's
+       outcomes as SAQA 111445 states them. */
+    const learn=c.learn||LEARN[c.cat]||LEARN["Business"];
     document.getElementById('c-learn').innerHTML=learn.map(x=>'<li>'+CHECK+' '+ESC(x)+'</li>').join('');
 
     // modules + flatten lessons for gallery
@@ -646,7 +685,12 @@
      treatment — linking them to a page that doesn't exist would be worse than
      leaving them flat. */
   function qctoHtml(c){
-    const built = window.PM_MODULE_BY_ID || {};
+    /* Which modules have a study guide built is per qualification: both have a
+       KM-01, and linking one course's row to the other's page is the mistake
+       this lookup exists to avoid. */
+    const cur = (window.ACADEMY_CURRICULA || {})[getSlug()] || {};
+    const built = cur.byId || {};
+    const q = getSlug() === 'project-management' ? '' : '&c=' + encodeURIComponent(getSlug());
     return c.qcto.map((g,gi)=>
       '<div class="module'+(gi===0?' open':'')+'">'+
         '<button class="module-head"><span class="module-num">'+(gi+1)+'</span>'+
@@ -657,7 +701,7 @@
             '<span class="lmeta"><span class="ltag">'+c.code+'-'+m[0]+'</span>'+
             '<span class="ldur">'+m[2]+' cr</span></span>';
           return built[m[0]]
-            ? '<a class="lesson lesson-link" href="module?m='+m[0]+'">'+inner+'</a>'
+            ? '<a class="lesson lesson-link" href="module?m='+m[0]+q+'">'+inner+'</a>'
             : '<div class="lesson" style="cursor:default">'+inner+'</div>';
         }).join('') +'</div></div>').join('');
   }

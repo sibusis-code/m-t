@@ -33,7 +33,8 @@
   var moduleCode = params.get('m');
   if (!moduleCode) return;
 
-  var COURSE = 'project-management';
+  /* From course-context.js since 16 Sep 2026 — see the note there. */
+  var COURSE = window.ACADEMY_COURSE || 'project-management';
 
   fetch('lessons.php?course=' + encodeURIComponent(COURSE) +
         '&module=' + encodeURIComponent(moduleCode), { credentials: 'same-origin' })

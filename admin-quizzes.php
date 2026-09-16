@@ -341,9 +341,15 @@ function qs(array $over = []): string
 
 <?php if ($view !== 'results'): ?>
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script>
 (function () {
-  var MODS = window.PM_MODULES || [];
+  /* The curriculum for the course this page is showing. Two qualifications
+     are carried since 16 Sep 2026 and both have a KM-01, so the module list
+     has to follow the course selector — not a global named after one of
+     them. Falls back to the Project Manager, which is what it always was. */
+  var CUR  = (window.ACADEMY_CURRICULA || {})[<?= json_encode($course, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>] || null;
+  var MODS = (CUR && CUR.modules) || window.PM_MODULES || [];
   /* JSON_HEX_TAG is not decoration. Without it, a question containing a
      closing script tag — a perfectly reasonable thing to write in a course
      about anything technical — ends this block early. The browser then hits a

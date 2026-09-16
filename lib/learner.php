@@ -88,6 +88,16 @@ function learner_catalogue(): array
             'note'    => 'NQF 5 · 240 credits · SAQA 101869',
             'tracked' => true,
         ],
+        /* The second accredited qualification, added 16 Sep 2026 when the
+           provider's pack arrived. Its module structure is po-modules.js.
+           NOT the same thing as 'procurement' below, which is the short course
+           and carries no credits — they are told apart by slug everywhere, and
+           the titles are deliberately written so nobody has to guess. */
+        'procurement-officer' => [
+            'title'   => 'Occupational Certificate: Procurement Officer',
+            'note'    => 'NQF 5 · 180 credits · SAQA 111445',
+            'tracked' => true,
+        ],
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
             'note'    => 'A professional programme, not an accredited qualification',

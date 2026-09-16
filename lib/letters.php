@@ -217,8 +217,11 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
     $name    = trim((string) ($user['first_name'] ?? '')) ?: 'there';
     $academy = letter_brand('academy', tenant_name());
     $signIn  = letter_site_url('login');
-    $modules = curriculum_modules();
-    $tracked = $slug === 'project-management' && $modules !== [];
+    $modules = curriculum_modules($slug);
+    /* Tracked means "this site carries the module structure", which is exactly
+       what a non-empty parse says. Naming one slug here meant the second
+       qualification's welcome letter silently dropped its module list. */
+    $tracked = $modules !== [];
 
     $subject = 'You are enrolled — ' . $title;
 
@@ -347,11 +350,12 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
  * @param array  $rows topic code => ['pct'=>int,'score'=>int,'out_of'=>int,'attempts'=>int]
  * @return array{subject:string, html:string, text:string}
  */
-function letter_module_results(array $user, string $moduleId, array $rows, string $courseTitle): array
+function letter_module_results(array $user, string $moduleId, array $rows, string $courseTitle,
+                               string $courseSlug = 'project-management'): array
 {
     $name    = trim((string) ($user['first_name'] ?? '')) ?: 'there';
     $academy = letter_brand('academy', tenant_name());
-    $modTitle = curriculum_module_title($moduleId);
+    $modTitle = curriculum_module_title($moduleId, $courseSlug);
     $accent  = letter_colour('email_accent', '#4d4c4d');
 
     $score = 0; $outOf = 0;
@@ -389,7 +393,7 @@ function letter_module_results(array $user, string $moduleId, array $rows, strin
         $h .= '<tr>'
             . '<td style="padding:9px 10px 9px 0;border-bottom:1px solid #f0ede8;vertical-align:top;">'
             . '<span style="color:#6b6862;font-size:12px;">' . e((string) $code) . '</span><br>'
-            . e(curriculum_topic_title((string) $code))
+            . e(curriculum_topic_title((string) $code, $courseSlug))
             . ((int) $r['attempts'] > 1
                 ? '<br><span style="color:#8b8781;font-size:12px;">'
                   . (int) $r['attempts'] . ' attempts</span>'
@@ -435,7 +439,7 @@ function letter_module_results(array $user, string $moduleId, array $rows, strin
         $t .= sprintf("  %-7s %2d/%-2d  %3d%%%s\n    %s\n",
             (string) $code, (int) $r['score'], (int) $r['out_of'], (int) $r['pct'],
             (int) $r['attempts'] > 1 ? '  (' . (int) $r['attempts'] . ' attempts)' : '',
-            curriculum_topic_title((string) $code));
+            curriculum_topic_title((string) $code, $courseSlug));
     }
     $t .= "\n" . ($pct >= 80
         ? 'That is a strong result. Keep the same approach going into the next module.'
@@ -580,7 +584,7 @@ function letter_module_completed(array $user, string $courseSlug, string $topicC
     try {
         if (!function_exists('curriculum_modules') || !function_exists('quiz_for_module')) return false;
 
-        $moduleId = curriculum_module_of($topicCode);
+        $moduleId = curriculum_module_of($topicCode, $courseSlug);
         if ($moduleId === '') return false;
 
         $userId = (int) ($user['id'] ?? 0);
@@ -590,7 +594,7 @@ function letter_module_completed(array $user, string $courseSlug, string $topicC
         if ($userId <= 0 || letter_already_sent($userId, LETTER_MODULE, $ref)) return false;
 
         $rows = [];
-        foreach (curriculum_module_topics($moduleId) as $code) {
+        foreach (curriculum_module_topics($moduleId, $courseSlug) as $code) {
             $quiz = quiz_for_module($courseSlug, $code);
             if ($quiz === null || !(int) $quiz['published']) continue;   // not open to learners yet
 
@@ -607,7 +611,7 @@ function letter_module_completed(array $user, string $courseSlug, string $topicC
         if ($rows === []) return false;
 
         return letter_send_once($user, LETTER_MODULE, $ref,
-                                letter_module_results($user, $moduleId, $rows, $courseTitle));
+                                letter_module_results($user, $moduleId, $rows, $courseTitle, $courseSlug));
     } catch (Throwable $e) {
         /* Deliberately swallowed. The score page must render. */
         app_log('MODULE LETTER FAILED (' . $topicCode . '): ' . $e->getMessage());

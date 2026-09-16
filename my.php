@@ -155,11 +155,23 @@ function when_local(?string $utc): string
             <div class="my-progress" data-progress-for="<?= e($slug) ?>">
               <p class="my-loading">Fetching where you are up to…</p>
             </div>
-            <div class="my-actions">
-              <a class="btn btn-primary" href="pm-schedule">My study plan</a>
-              <a class="btn btn-ghost" href="pm-progress">Progress report for my manager</a>
-              <a class="btn btn-ghost" href="pm-pathway">How this fits with Google</a>
-            </div>
+            <?php /* The study planner, the progress report and the Google pathway are all
+                     written around the Project Manager's curriculum — its modules, its
+                     dates, its overlap with the Google certificate. Showing them on the
+                     Procurement Officer would hand a learner a plan for the wrong
+                     qualification, so the course page is offered instead until each of
+                     them is generalised. */ ?>
+            <?php if ($slug === 'project-management'): ?>
+              <div class="my-actions">
+                <a class="btn btn-primary" href="pm-schedule">My study plan</a>
+                <a class="btn btn-ghost" href="pm-progress">Progress report for my manager</a>
+                <a class="btn btn-ghost" href="pm-pathway">How this fits with Google</a>
+              </div>
+            <?php else: ?>
+              <div class="my-actions">
+                <a class="btn btn-ghost" href="<?= e('course?c=' . rawurlencode($slug)) ?>">What this qualification covers</a>
+              </div>
+            <?php endif; ?>
 
             <?php
               /* Rendered here, not fetched client-side like the progress
@@ -186,7 +198,7 @@ function when_local(?string $utc): string
               $quizSummary = db_optional(fn() => quiz_results_summary_for_user((int) $me['id'], $slug), []);
               $quizSummary = array_filter($quizSummary, fn(array $q) => $q['published'] && $q['questions'] > 0);
               $tree    = db_optional(fn() => learner_progress_tree((int) $me['id'], $slug), []);
-              $modules = curriculum_modules();
+              $modules = curriculum_modules($slug);
             ?>
             <?php if ($quizSummary && $modules): ?>
               <div class="my-mods">
@@ -209,7 +221,10 @@ function when_local(?string $utc): string
                     $pct   = $total ? (int) round($ticked / $total * 100) : 0;
                     $state = $ticked === 0 ? 'none' : ($ticked >= $total ? 'all' : 'part');
                   ?>
-                  <a class="my-mod my-mod-<?= e($state) ?>" href="<?= e('module?m=' . rawurlencode($mid)) ?>">
+                  <?php /* The course rides along: both qualifications have a KM-01, and the
+                           module page would otherwise open the other one's. */ ?>
+                  <a class="my-mod my-mod-<?= e($state) ?>" href="<?= e('module?m=' . rawurlencode($mid)
+                        . ($slug === 'project-management' ? '' : '&c=' . rawurlencode($slug))) ?>">
                     <span class="my-mod-code"><?= e($mid) ?></span>
                     <span class="my-mod-body">
                       <strong><?= e($mod['title']) ?></strong>
@@ -310,6 +325,7 @@ function when_local(?string $utc): string
 <?php chrome_footer('slim'); ?>
 
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script src="<?= e(asset('profile.js')) ?>"></script>
 <script src="<?= e(asset('pm-progress.js')) ?>"></script>
 <script>
@@ -319,19 +335,28 @@ function when_local(?string $utc): string
    jump from 0% to where they actually are. */
 (function () {
   var ESC = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
-  var P = window.PM_PROGRESS, MODS = window.PM_MODULES || [];
+  var P = window.PM_PROGRESS;
 
+  /* One panel per enrolment, and since 16 Sep 2026 a learner can be on two
+     tracked qualifications at once. Each box says which course it is for, and
+     is painted from THAT curriculum and THAT course's ticks — reading one
+     global module list would have shown the Project Manager's eleven modules
+     under the Procurement Officer's heading. */
   function paint() {
     document.querySelectorAll('[data-progress-for]').forEach(function (box) {
+      var slug = box.getAttribute('data-progress-for') || 'project-management';
+      var cur  = (window.ACADEMY_CURRICULA || {})[slug];
+      var MODS = (cur && cur.modules) || [];
+      var q    = slug === 'project-management' ? '' : '&c=' + encodeURIComponent(slug);
       if (!P || !MODS.length) {
         box.innerHTML = '<p class="my-untracked">The module list did not load. ' +
           'Refresh the page, and if it keeps happening tell the academy.</p>';
         return;
       }
-      var o = P.overall(MODS);
+      var o = P.overallFor(slug, MODS);
       var next = null;
       for (var i = 0; i < MODS.length; i++) {
-        var s = P.moduleStats(MODS[i]);
+        var s = P.moduleStatsFor(slug, MODS[i]);
         if (!s.complete) { next = { m: MODS[i], s: s }; break; }
       }
 
@@ -351,7 +376,7 @@ function when_local(?string $utc): string
           ' knowledge credits covered by your own record. The practical and workplace ' +
           'credits are assessed separately, against your work at ' + <?= json_encode(brand("company_short"), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?> + '.</p></div>' +
         (next
-          ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + '">' +
+          ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + q + '">' +
               '<span class="my-next-lbl">Carry on with</span>' +
               '<strong>' + ESC(next.m.id) + ' · ' + ESC(next.m.title) + '</strong>' +
               '<span class="my-next-sub">' + next.s.done + ' of ' + next.s.total +

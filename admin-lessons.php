@@ -303,9 +303,15 @@ $counts = db_optional(fn() => sections_count_for_course($course), []);
 </section>
 
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script>
 (function () {
-  var MODS   = window.PM_MODULES || [];
+  /* The curriculum for the course this page is showing. Two qualifications
+     are carried since 16 Sep 2026 and both have a KM-01, so the module list
+     has to follow the course selector — not a global named after one of
+     them. Falls back to the Project Manager, which is what it always was. */
+  var CUR    = (window.ACADEMY_CURRICULA || {})[<?= json_encode($course, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>] || null;
+  var MODS   = (CUR && CUR.modules) || window.PM_MODULES || [];
   /* Same flags, and the same reason, as admin-quizzes.php: without JSON_HEX_TAG
      any stored text containing a closing script tag would end this block early,
      leaving the page blank with nothing on it to say why. */

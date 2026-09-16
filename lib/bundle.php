@@ -100,9 +100,9 @@ const BUNDLE_MAX_QUESTIONS = 100;       // per topic quiz
  * fail validation — the safe direction, and bundle_import() says so plainly
  * rather than reporting fifty-one topics as unknown.
  */
-function bundle_curriculum_topics(): array
+function bundle_curriculum_topics(string $slug = 'project-management'): array
 {
-    return curriculum_topics();
+    return curriculum_topics($slug);
 }
 
 /**
@@ -493,7 +493,7 @@ function bundle_import(array $file, string $course, bool $publish, int $by): arr
     ['bundle' => $bundle, 'error' => $err] = bundle_read($file);
     if ($bundle === null) return ['problems' => [$err], 'report' => null];
 
-    $topics = bundle_curriculum_topics();
+    $topics = bundle_curriculum_topics($course);
     if (!$topics) {
         return ['problems' => ['The curriculum file (pm-modules.js) could not be read, so there is'
                              . ' nothing to check this bundle against. Nothing was loaded.'],

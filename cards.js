@@ -2,6 +2,7 @@
 (function(){
   var CARDS=[
     ["Occupational Certificate: Project Manager","project-management","1454165804606-c3d57bc86b40"],
+    ["Occupational Certificate: Procurement Officer","procurement-officer","1521737604893-d14cc237f11d"],
     ["AI & Software Development","ai-software-development","1461749280684-dccba630e2f6"],
     ["Procurement Skills","procurement","1521737604893-d14cc237f11d"],
     ["AI Fundamentals for the Workplace","ai-fundamentals","1677442136019-21780ecad995"],

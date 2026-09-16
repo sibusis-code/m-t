@@ -131,7 +131,7 @@ function quiz_tick_topic_on_pass(array $me, string $course, string $code, array 
        module (KM-01); a module-level quiz is keyed by the module itself and
        takes the empty item_code that means "module complete" — see the note on
        item_code in schema.mysql.sql. */
-    $module = curriculum_module_of($code);
+    $module = curriculum_module_of($code, $course);
     $item   = ($module !== '' && $module !== $code) ? $code : '';
     if ($module === '') { $module = $code; $item = ''; }
 

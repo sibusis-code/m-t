@@ -26,25 +26,57 @@ declare(strict_types=1);
 defined('APP_BOOTED') or exit('lib/curriculum.php is not a page.');
 
 /**
- * The eleven modules, in the order the curriculum lists them.
+ * The curriculum file for each tracked course.
+ *
+ * Two qualifications since 16 Sep 2026. A slug that is not here has no module
+ * structure on the site, and every function below then returns nothing — which
+ * the callers already treat as "say less", never as "say something wrong".
+ *
+ * @return array<string,string> course slug => file in the site root
+ */
+function curriculum_files(): array
+{
+    return [
+        'project-management'  => 'pm-modules.js',
+        'procurement-officer' => 'po-modules.js',
+    ];
+}
+
+/**
+ * One course's modules, in the order the curriculum lists them.
  *
  * @return array<string, array{code:string, title:string, credits:int, topics:array<string,string>}>
  *         keyed by module id ("KM-01"); topics are topic code => topic name.
  */
-function curriculum_modules(): array
+function curriculum_modules(string $slug = 'project-management'): array
 {
-    static $cache = null;
-    if ($cache !== null) return $cache;
+    static $cache = [];
+    if (isset($cache[$slug])) return $cache[$slug];
 
-    $js = @file_get_contents(APP_ROOT . '/pm-modules.js');
-    if ($js === false || $js === '') return $cache = [];
+    $file = curriculum_files()[$slug] ?? '';
+    if ($file === '') return $cache[$slug] = [];
+
+    $js = @file_get_contents(APP_ROOT . '/' . $file);
+    if ($js === false || $js === '') return $cache[$slug] = [];
+
+    /* ONLY the MODULES array. Both files end with a registry block that carries
+       the QUALIFICATION's own title and credit total — read straight through,
+       those land on whichever module was parsed last and quietly rename it.
+       That block was added the same day this slice was, and the first run of
+       the parser turned KM-11 into "Occupational Certificate: Project Manager,
+       240 credits". So the text after the array is cut off before parsing. */
+    $start = strpos($js, 'const MODULES = [');
+    if ($start === false) return $cache[$slug] = [];
+    $end = strpos($js, "\n  ];", $start);
+    if ($end === false) return $cache[$slug] = [];
+    $js = substr($js, $start, $end - $start);
 
     /* Only these five keys, and only where they appear as `key: value`. The
        `covers` arrays hold bare strings — no key in front — so they cannot be
        mistaken for a title, which is the whole reason this is anchored on the
        key rather than on the quotes. */
     if (!preg_match_all('/\b(id|title|code|n|credits)\s*:\s*(?:"([^"]*)"|(\d+))/', $js, $m, PREG_SET_ORDER)) {
-        return $cache = [];
+        return $cache[$slug] = [];
     }
 
     $out     = [];
@@ -97,7 +129,7 @@ function curriculum_modules(): array
     // A module with no topics is a parse that went wrong, not a real module.
     $out = array_filter($out, fn(array $mod): bool => $mod['topics'] !== []);
 
-    return $cache = $out;
+    return $cache[$slug] = $out;
 }
 
 /**
@@ -105,19 +137,24 @@ function curriculum_modules(): array
  *
  * @return array<string,string> topic code => module id
  */
-function curriculum_topics(): array
+function curriculum_topics(string $slug = 'project-management'): array
 {
     $out = [];
-    foreach (curriculum_modules() as $mod => $data) {
+    foreach (curriculum_modules($slug) as $mod => $data) {
         foreach (array_keys($data['topics']) as $topic) $out[$topic] = $mod;
     }
     return $out;
 }
 
-/** The module a topic belongs to, or '' if the code is not in the curriculum. */
-function curriculum_module_of(string $topicCode): string
+/**
+ * The module a topic belongs to, or '' if the code is not in that curriculum.
+ *
+ * The course matters: both qualifications have a KM-01-KT01, and answering from
+ * the wrong one would file a learner's result against the wrong module.
+ */
+function curriculum_module_of(string $topicCode, string $slug = 'project-management'): string
 {
-    return curriculum_topics()[$topicCode] ?? '';
+    return curriculum_topics($slug)[$topicCode] ?? '';
 }
 
 /**
@@ -127,22 +164,22 @@ function curriculum_module_of(string $topicCode): string
  * that says "KM-07" is merely terse, while one that says "Unknown module" or
  * prints an empty heading looks broken to the person reading it.
  */
-function curriculum_module_title(string $moduleId): string
+function curriculum_module_title(string $moduleId, string $slug = 'project-management'): string
 {
-    $t = curriculum_modules()[$moduleId]['title'] ?? '';
+    $t = curriculum_modules($slug)[$moduleId]['title'] ?? '';
     return $t !== '' ? $t : $moduleId;
 }
 
 /** A topic's name, falling back to the bare code, for the same reason. */
-function curriculum_topic_title(string $topicCode): string
+function curriculum_topic_title(string $topicCode, string $slug = 'project-management'): string
 {
-    $mod = curriculum_module_of($topicCode);
-    $t   = $mod !== '' ? (curriculum_modules()[$mod]['topics'][$topicCode] ?? '') : '';
+    $mod = curriculum_module_of($topicCode, $slug);
+    $t   = $mod !== '' ? (curriculum_modules($slug)[$mod]['topics'][$topicCode] ?? '') : '';
     return $t !== '' ? $t : $topicCode;
 }
 
 /** The topic codes of one module, in curriculum order. */
-function curriculum_module_topics(string $moduleId): array
+function curriculum_module_topics(string $moduleId, string $slug = 'project-management'): array
 {
-    return array_keys(curriculum_modules()[$moduleId]['topics'] ?? []);
+    return array_keys(curriculum_modules($slug)[$moduleId]['topics'] ?? []);
 }

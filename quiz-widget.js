@@ -39,10 +39,11 @@
   var code   = (params.get('m') || '').toUpperCase();
   if (!code) return;
 
-  /* Same constant as materials.js, for the same reason — one course carries a
-     tracked curriculum today, and adding a second is a visible change here and
-     in learner_catalogue(), not an inference that quietly breaks. */
-  var COURSE = 'project-management';
+  /* Same source as materials.js — course-context.js, since 16 Sep 2026. Both
+     qualifications have a KM-01-KT01, so a quiz asked for without the course
+     would be the wrong qualification's questions marked against the wrong
+     learner record. */
+  var COURSE = window.ACADEMY_COURSE || 'project-management';
 
   var section = document.getElementById('m-quizsec');
   var host    = document.getElementById('m-quiz');

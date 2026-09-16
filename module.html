@@ -29,8 +29,8 @@
   <div class="wrap">
     <div class="crumb">
       <a href="./">Home</a><span>/</span><a href="courses">Courses</a><span>/</span>
-      <a href="course?c=project-management">Project Manager</a><span>/</span>
-      <a href="pm-schedule">Study plan</a><span>/</span>
+      <a href="course?c=project-management" id="m-course">Project Manager</a><span>/</span>
+      <span id="m-plancrumb"><a href="pm-schedule">Study plan</a><span>/</span></span>
       <span id="m-crumb" style="color:#fff;margin:0"></span>
     </div>
     <div class="tags" id="m-tags"></div>
@@ -45,7 +45,7 @@
     <div class="sec-head reveal">
       <span class="eyebrow">Your documents</span>
       <h2>What you work from</h2>
-      <p>The learner guide carries the full notes for this module; the workbook holds the activities and self-assessments you hand to your facilitator for your portfolio of evidence.</p>
+      <p id="m-docsintro">The learner guide carries the full notes for this module; the workbook holds the activities and self-assessments you hand to your facilitator for your portfolio of evidence.</p>
     </div>
     <div class="dgrid two-up reveal" id="m-docs"></div>
     <p class="sg-caveat reveal" style="max-width:820px;margin-top:26px"><strong>These documents aren't hosted on this site.</strong> They're Centenary's material and are shared with enrolled learners directly, so the links above go to the controlled copy rather than a public download. If a link isn't working for you, <a href="mailto:kgomotso@centenarynetworks.com">ask HR</a> — don't pass copies around, because the version you're assessed against has to be the current one.</p>
@@ -84,7 +84,7 @@
     <div class="features">
       <div class="feat reveal">
         <h3>Inside the module</h3>
-        <p>Activities, exercises and self-assessments from the workbook. You hand these to your facilitator and they go into your portfolio of evidence, signed off as your own work.</p>
+        <p id="m-inside">Activities, exercises and self-assessments from the workbook. You hand these to your facilitator and they go into your portfolio of evidence, signed off as your own work.</p>
       </div>
       <div class="feat reveal">
         <h3>At the end of the module</h3>
@@ -95,7 +95,7 @@
         <p>The External Integrated Summative Assessment (EISA), set by the QCTO across the whole qualification. Passing individual modules is not the same as holding the certificate — the EISA is what awards it.</p>
       </div>
     </div>
-    <p class="sg-caveat reveal" style="max-width:820px;margin-top:28px"><strong>Already doing this work?</strong> If you can demonstrate this module's content from experience, Recognition of Prior Learning may credit it without you studying it again — and if you have done the Google Project Management Certificate, part of this theory may already be covered. <a href="rpl" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">How RPL works</a> · <a href="pm-pathway" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">The Google pathway</a></p>
+    <p class="sg-caveat reveal" id="m-rpl" style="max-width:820px;margin-top:28px"><strong>Already doing this work?</strong> If you can demonstrate this module's content from experience, Recognition of Prior Learning may credit it without you studying it again — and if you have done the Google Project Management Certificate, part of this theory may already be covered. <a href="rpl" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">How RPL works</a> · <a href="pm-pathway" style="color:var(--orange-deep);font-weight:700;text-decoration:underline">The Google pathway</a></p>
   </div>
 </section>
 
@@ -128,14 +128,26 @@
   </div>
 </footer>
 
-<script src="pm-modules.js?v=20260820"></script>
+<script src="pm-modules.js?v=20260916"></script>
+<script src="po-modules.js?v=20260916"></script>
+<script src="course-context.js?v=20260916"></script>
 <script src="profile.js?v=20260820"></script>
 <script src="pm-progress.js?v=20260911"></script>
 <script>
 (function(){
   const ESC=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const MODS=window.PM_MODULES||[];
-  const BY=window.PM_MODULE_BY_ID||{};
+
+  /* Two qualifications are carried here since 16 Sep 2026, and both of them
+     have a KM-01. course-context.js resolves ?c= against the curricula that
+     actually loaded and falls back to the Project Manager, so an unknown slug
+     shows the Project Manager's KM-01 rather than an empty page. */
+  const CUR  = window.ACADEMY_CURRICULUM || window.ACADEMY_CURRICULA['project-management'];
+  const SLUG = window.ACADEMY_COURSE || 'project-management';
+  const MODS = CUR.modules;
+  const BY   = CUR.byId;
+  /* Every link out of this page has to carry the course, or it lands on the
+     other qualification's module of the same code. */
+  const Q = SLUG === 'project-management' ? '' : '&c=' + encodeURIComponent(SLUG);
 
   /* ?m=KM-02. An unknown or missing id falls back to the first module rather
      than rendering an empty page. */
@@ -150,20 +162,33 @@
 
   document.title=m.id+' '+m.title+' — M&T Academy';
   document.getElementById('m-crumb').textContent=m.id;
+
+  /* The crumb names the qualification this module belongs to, and only offers
+     the study planner where one has been written — it is the Project Manager's
+     schedule, and pointing the Procurement Officer at it would be a plan for
+     the wrong curriculum. */
+  const courseLink=document.getElementById('m-course');
+  courseLink.href='course?c='+encodeURIComponent(SLUG);
+  courseLink.textContent=CUR.short||CUR.title;
+  const planCrumb=document.getElementById('m-plancrumb');
+  if(CUR.plan){ planCrumb.querySelector('a').href=CUR.plan; } else { planCrumb.remove(); }
   document.getElementById('m-h1').textContent=m.title;
   document.getElementById('m-lead').textContent=
     m.purpose ? m.purpose.charAt(0).toUpperCase()+m.purpose.slice(1) : '';
 
+  /* NQF level per MODULE, not per qualification: the Procurement Officer's
+     sourcing and negotiation modules are registered at Level 6 inside a Level 5
+     qualification. */
   document.getElementById('m-tags').innerHTML=
     '<span class="accred">Knowledge module</span>'+
-    '<span>'+ESC(m.id)+'</span><span>NQF 5</span><span>'+m.credits+' credits</span>';
+    '<span>'+ESC(m.id)+'</span><span>NQF '+(m.nqf||CUR.nqf)+'</span><span>'+m.credits+' credits</span>';
 
   document.getElementById('m-facts').innerHTML=[
     ['Module code',m.code],
     ['Credits',m.credits],
     ['Notional hours',m.hours],
     ['Topics',m.topics.length],
-    ['Part of','Knowledge — 80 credits']
+    ['Part of','Knowledge — '+CUR.knowledgeCredits+' credits']
   ].map(f=>'<div><span>'+f[0]+'</span><strong>'+ESC(String(f[1]))+'</strong></div>').join('');
 
   /* ---- documents ----
@@ -184,13 +209,41 @@
       ? '<a class="dcard" href="'+ESC(href)+'" target="_blank" rel="noopener noreferrer">'+inner+'</a>'
       : '<div class="dcard">'+inner+'</div>';
   }
+  /* The workbook card only where the provider's pack actually has workbooks.
+     The Procurement Officer pack is learner guides only, and a card promising a
+     workbook that does not exist would send people to HR for nothing. */
   document.getElementById('m-docs').innerHTML=
     docCard('Learner Guide',
       'The full notes for '+m.id+' — every topic written out, with the examples and diagrams.',
       m.docs.guide)+
-    docCard('Learner Workbook',
-      'The activities, exercises and self-assessments for this module. Completed and handed to your facilitator.',
-      m.docs.workbook);
+    (CUR.workbooks
+      ? docCard('Learner Workbook',
+          'The activities, exercises and self-assessments for this module. Completed and handed to your facilitator.',
+          m.docs.workbook)
+      : '');
+  document.getElementById('m-docs').classList.toggle('two-up', !!CUR.workbooks);
+
+  /* The RPL note ends on the Google certificate, which maps onto the Project
+     Manager's modules and nothing else. RPL itself applies to any of them, so
+     the sentence stays and only the Google half goes. */
+  if(SLUG!=='project-management'){
+    document.getElementById('m-rpl').innerHTML=
+      '<strong>Already doing this work?</strong> If you can demonstrate this module\'s content '+
+      'from experience, Recognition of Prior Learning may credit it without you studying it '+
+      'again. Ask the academy what evidence they would want to see.';
+  }
+
+  /* Two paragraphs of standing copy describe a workbook as well. Both are
+     rewritten where the pack has none, rather than left to promise a document
+     the provider did not supply. */
+  if(!CUR.workbooks){
+    document.getElementById('m-docsintro').textContent=
+      'The learner guide carries the full notes for this module — every topic written out, '+
+      'with the examples and diagrams. It is what you study from and what you are assessed against.';
+    document.getElementById('m-inside').textContent=
+      'Formative activities set by your facilitator as you work through the module. You hand '+
+      'these in and they go into your portfolio of evidence, signed off as your own work.';
+  }
 
   /* ---- topics ----
      Reuses the .module accordion as static always-open markup, the same way the
@@ -224,7 +277,7 @@
     const nextM  = MODS[idx+1];
     const isLast = i === m.topics.length - 1;
     const nextT  = isLast ? null : m.topics[i+1];
-    const nextHref  = nextT ? '#'+ESC(nextT.code) : (nextM ? 'module?m='+ESC(nextM.id) : '');
+    const nextHref  = nextT ? '#'+ESC(nextT.code) : (nextM ? 'module?m='+ESC(nextM.id)+Q : '');
     const nextLabel = nextT ? nextT.n : (nextM ? nextM.id+' · '+nextM.title : '');
     const nav = nextHref
       ? '<div class="topic-next"><a href="'+nextHref+'">'+
@@ -305,9 +358,9 @@
   /* ---- previous / next ---- */
   const prev=MODS[idx-1], next=MODS[idx+1];
   document.getElementById('m-nav').innerHTML=
-    (prev?'<a class="modnav-l" href="module?m='+prev.id+'"><span>← Previous</span><strong>'+ESC(prev.id+' · '+prev.title)+'</strong></a>':'<span></span>')+
+    (prev?'<a class="modnav-l" href="module?m='+prev.id+Q+'"><span>← Previous</span><strong>'+ESC(prev.id+' · '+prev.title)+'</strong></a>':'<span></span>')+
     '<a class="modnav-c" href="pm-schedule">Study plan &amp; calendar</a>'+
-    (next?'<a class="modnav-r" href="module?m='+next.id+'"><span>Next →</span><strong>'+ESC(next.id+' · '+next.title)+'</strong></a>':'<span></span>');
+    (next?'<a class="modnav-r" href="module?m='+next.id+Q+'"><span>Next →</span><strong>'+ESC(next.id+' · '+next.title)+'</strong></a>':'<span></span>');
 })();
 </script>
 <script src="materials.js?v=20260820"></script>

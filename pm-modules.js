@@ -595,6 +595,26 @@
   window.PM_MODULES = MODULES;
   window.PM_MODULE_BY_ID = MODULES.reduce(function (a, m) { a[m.id] = m; return a; }, {});
 
+  /* The curriculum registry, added 16 Sep 2026 when Procurement Officer became
+     the second qualification on the site. Pages ask for the course they are
+     showing; the globals above stay because several pages still read them, and
+     they are this same array. */
+  window.ACADEMY_CURRICULA = window.ACADEMY_CURRICULA || {};
+  window.ACADEMY_CURRICULA["project-management"] = {
+    slug: "project-management",
+    title: "Occupational Certificate: Project Manager",
+    short: "Project Manager",
+    saqa: "101869",
+    curriculum: "121905000",
+    nqf: 5,
+    credits: 240,            // the whole qualification
+    knowledgeCredits: 80,    // what is studied on the site
+    workbooks: true,         // this pack has a learner workbook per module
+    plan: "pm-schedule",     // the study planner, which is written for this one
+    modules: MODULES,
+    byId: window.PM_MODULE_BY_ID
+  };
+
   /* ---- self-check: the registered figures, verified in the browser ----
      These are regulated numbers. If an edit breaks one, say so loudly rather
      than rendering a qualification with the wrong credit total. */

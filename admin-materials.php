@@ -323,9 +323,15 @@ $uploadCapBytes = material_file_effective_upload_cap();
 </section>
 
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
+<script src="<?= e(asset('po-modules.js')) ?>"></script>
 <script>
 (function () {
-  var MODS  = window.PM_MODULES || [];
+  /* The curriculum for the course this page is showing. Two qualifications
+     are carried since 16 Sep 2026 and both have a KM-01, so the module list
+     has to follow the course selector — not a global named after one of
+     them. Falls back to the Project Manager, which is what it always was. */
+  var CUR   = (window.ACADEMY_CURRICULA || {})[<?= json_encode($course, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>] || null;
+  var MODS  = (CUR && CUR.modules) || window.PM_MODULES || [];
   /* JSON_HEX_TAG and friends: a file whose name contains a closing script tag
      would otherwise end this block early and leave the page blank with no
      explanation — see the fuller note on the same line in admin-quizzes.php,
@@ -336,6 +342,11 @@ $uploadCapBytes = material_file_effective_upload_cap();
     ['workbook', 'Workbook',      'Activities and self-assessments'],
     ['video',    'Recording',     'A facilitator session, if there is one']
   ];
+  /* Not every provider's pack has workbooks — the Procurement Officer's does
+     not — and an empty slot reads as one somebody forgot to fill. */
+  if (CUR && CUR.workbooks === false) {
+    KINDS = KINDS.filter(function (k) { return k[0] !== 'workbook'; });
+  }
   var rows = document.getElementById('mat-rows');
   if (!rows || !MODS.length) return;
 
