@@ -326,6 +326,7 @@ function when_local(?string $utc): string
 
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
+<script src="<?= e(asset('nvc-modules.js')) ?>"></script>
 <script src="<?= e(asset('profile.js')) ?>"></script>
 <script src="<?= e(asset('pm-progress.js')) ?>"></script>
 <script>
@@ -336,6 +337,7 @@ function when_local(?string $utc): string
 (function () {
   var ESC = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
   var P = window.PM_PROGRESS;
+  var COMPANY = <?= json_encode(brand("company_short"), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
   /* One panel per enrolment, and since 16 Sep 2026 a learner can be on two
      tracked qualifications at once. Each box says which course it is for, and
@@ -354,6 +356,18 @@ function when_local(?string $utc): string
         return;
       }
       var o = P.overallFor(slug, MODS);
+
+      /* The heading above the bar and the sentence below it. A unit-standard
+         qualification has no knowledge/practical/workplace split and no EISA,
+         so both come off the curriculum where it sets them, and fall back to
+         the occupational-certificate wording where it does not. Getting this
+         wrong is not cosmetic: it would tell a New Venture Creation learner
+         that credits they have already covered are "assessed separately". */
+      var lbl  = cur.progressLabel || 'Knowledge modules';
+      var note = cur.progressNote  ||
+        ('knowledge credits covered by your own record. The practical and ' +
+         'workplace credits are assessed separately, against your work at ' +
+         COMPANY + '.');
       var next = null;
       for (var i = 0; i < MODS.length; i++) {
         var s = P.moduleStatsFor(slug, MODS[i]);
@@ -366,22 +380,21 @@ function when_local(?string $utc): string
          a contradiction until you find the small print. */
       box.innerHTML =
         '<div class="prog"><div class="prog-top">' +
-          '<div><span class="prog-lbl">Knowledge modules</span><strong>' +
+          '<div><span class="prog-lbl">' + ESC(lbl) + '</span><strong>' +
             o.topicsDone + ' of ' + o.topicsTotal + ' topics ticked off</strong></div>' +
           '<div class="prog-pct">' + o.pct + '%</div>' +
         '</div>' +
         '<div class="prog-bar"><i style="width:' + o.pct + '%"></i></div>' +
         '<p class="prog-note">' + o.modulesComplete + ' of ' + o.modulesTotal +
           ' modules marked complete · ' + o.creditsClaimed + ' of ' + o.creditsTotal +
-          ' knowledge credits covered by your own record. The practical and workplace ' +
-          'credits are assessed separately, against your work at ' + <?= json_encode(brand("company_short"), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?> + '.</p></div>' +
+          ' ' + ESC(note) + '</p></div>' +
         (next
           ? '<a class="my-next" href="module?m=' + encodeURIComponent(next.m.id) + q + '">' +
               '<span class="my-next-lbl">Carry on with</span>' +
               '<strong>' + ESC(next.m.id) + ' · ' + ESC(next.m.title) + '</strong>' +
               '<span class="my-next-sub">' + next.s.done + ' of ' + next.s.total +
                 ' topics done · ' + next.m.credits + ' credits</span></a>'
-          : '<p class="my-done">Every knowledge module is marked complete. Send the academy ' +
+          : '<p class="my-done">Every module on this course is marked complete. Send the academy ' +
             'a dated record from the progress report page, and speak to them about your ' +
             'portfolio of evidence.</p>');
     });

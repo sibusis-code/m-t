@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knowledge module — M&amp;T Academy</title>
-<meta name="description" content="A knowledge module of the Occupational Certificate: Project Manager (SAQA 101869) — what it covers topic by topic, how each topic is weighted, and the documents you work from.">
+<meta name="description" content="A module of an accredited qualification — Occupational Certificate: Project Manager (SAQA 101869), Procurement Officer (SAQA 111445), or FETC: New Venture Creation (SAQA 66249). What it covers topic by topic and the documents you work from.">
 <link rel="stylesheet" href="styles.css?v=20260913c">
 </head>
 <body>
@@ -57,7 +57,7 @@
     <div class="sec-head reveal">
       <span class="eyebrow">The syllabus</span>
       <h2 id="m-topictitle">What this module covers</h2>
-      <p>These are the registered topics for this module, with the weighting the curriculum gives each one. The percentages are worth reading as a study plan — they tell you where the marks actually are.</p>
+      <p id="m-syllabusnote">These are the registered topics for this module, with the weighting the curriculum gives each one. The percentages are worth reading as a study plan — they tell you where the marks actually are.</p>
     </div>
     <div id="m-progress" class="reveal"></div>
     <div class="modules reveal" id="m-topics"></div>
@@ -90,7 +90,7 @@
         <h3>At the end of the module</h3>
         <p>A summative assessment set for this module. It is written and marked under the provider's assessment rules — the paper and its marking guide are not published anywhere, here included.</p>
       </div>
-      <div class="feat reveal">
+      <div class="feat reveal" id="m-final">
         <h3>At the end of everything</h3>
         <p>The External Integrated Summative Assessment (EISA), set by the QCTO across the whole qualification. Passing individual modules is not the same as holding the certificate — the EISA is what awards it.</p>
       </div>
@@ -124,12 +124,13 @@
       <strong>Accreditation</strong>
       <span>Accredited qualifications are delivered in association with Centenary Networks (Pty) Ltd, accredited by the Quality Council for Trades and Occupations (QCTO) as a Skills Development Provider. Accreditation No. 07-QCTO/SDP180526182035, valid 15 May 2026 – 14 May 2031.</span>
     </div>
-    <p class="disclaimer">M&amp;T Academy is the in-house training academy of M&amp;T, for M&amp;T employees. Module codes, credit values and topic weightings on this page are the registered curriculum for SAQA qualification 101869, curriculum code 121905000. Learner documents are Centenary's material and are shared with enrolled learners directly; assessment papers and their marking guides are not published. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. M&amp;T Academy operates in association with Centenary Networks. © 2026 M&amp;T Development. All rights reserved.</p>
+    <p class="disclaimer">M&amp;T Academy is the in-house training academy of M&amp;T, for M&amp;T employees. <span id="m-disc">Module codes, credit values and topic weightings on this page are the registered curriculum for SAQA qualification 101869, curriculum code 121905000.</span> Learner documents are Centenary's material and are shared with enrolled learners directly; assessment papers and their marking guides are not published. RPL outcomes depend on assessment and on the accreditation scope held for each qualification. M&amp;T Academy operates in association with Centenary Networks. © 2026 M&amp;T Development. All rights reserved.</p>
   </div>
 </footer>
 
 <script src="pm-modules.js?v=20260916"></script>
 <script src="po-modules.js?v=20260916"></script>
+<script src="nvc-modules.js?v=20260923"></script>
 <script src="course-context.js?v=20260916"></script>
 <script src="profile.js?v=20260820"></script>
 <script src="pm-progress.js?v=20260911"></script>
@@ -178,18 +179,26 @@
 
   /* NQF level per MODULE, not per qualification: the Procurement Officer's
      sourcing and negotiation modules are registered at Level 6 inside a Level 5
-     qualification. */
+     qualification.
+
+     "Knowledge module" is not universal either. New Venture Creation has no
+     knowledge modules — it has sections of a learner guide, each aligned to one
+     unit standard — so the noun comes off the curriculum. */
   document.getElementById('m-tags').innerHTML=
-    '<span class="accred">Knowledge module</span>'+
+    '<span class="accred">'+ESC(CUR.moduleNoun||'Knowledge module')+'</span>'+
     '<span>'+ESC(m.id)+'</span><span>NQF '+(m.nqf||CUR.nqf)+'</span><span>'+m.credits+' credits</span>';
 
-  document.getElementById('m-facts').innerHTML=[
-    ['Module code',m.code],
-    ['Credits',m.credits],
-    ['Notional hours',m.hours],
-    ['Topics',m.topics.length],
-    ['Part of','Knowledge — '+CUR.knowledgeCredits+' credits']
-  ].map(f=>'<div><span>'+f[0]+'</span><strong>'+ESC(String(f[1]))+'</strong></div>').join('');
+  /* Notional hours are registered per module by the QCTO curricula and not at
+     all by a unit-standard one, so the row is dropped rather than printed
+     empty. Same reasoning for the code label and for what the module is part
+     of: "Knowledge — 80 credits" means nothing on a qualification that has no
+     knowledge component. */
+  const facts=[[CUR.codeLabel||'Module code',m.code],['Credits',m.credits]];
+  if(m.hours)facts.push(['Notional hours',m.hours]);
+  facts.push(['Topics',m.topics.length],
+             ['Part of',CUR.partOf||('Knowledge — '+CUR.knowledgeCredits+' credits')]);
+  document.getElementById('m-facts').innerHTML=
+    facts.map(f=>'<div><span>'+ESC(f[0])+'</span><strong>'+ESC(String(f[1]))+'</strong></div>').join('');
 
   /* ---- documents ----
      A null link means the document exists but has no sharing link set yet. That
@@ -217,8 +226,11 @@
       'The full notes for '+m.id+' — every topic written out, with the examples and diagrams.',
       m.docs.guide)+
     (CUR.workbooks
-      ? docCard('Learner Workbook',
-          'The activities, exercises and self-assessments for this module. Completed and handed to your facilitator.',
+      /* Called what the provider calls it. New Venture Creation pairs the guide
+         with a Workplace Guide, and a card labelled "Workbook" would send a
+         learner to HR asking for a document by a name nobody there uses. */
+      ? docCard(CUR.workbookName||'Learner Workbook',
+          CUR.workbookDesc||'The activities, exercises and self-assessments for this module. Completed and handed to your facilitator.',
           m.docs.workbook)
       : '');
   document.getElementById('m-docs').classList.toggle('two-up', !!CUR.workbooks);
@@ -245,11 +257,41 @@
       'these in and they go into your portfolio of evidence, signed off as your own work.';
   }
 
+  /* The last two paragraphs of standing copy that assume a QCTO curriculum:
+     the EISA at the end, and the footer naming SAQA 101869. Both were stated
+     as constants and both were already wrong on the Procurement Officer's
+     pages before this qualification existed. */
+  if(CUR.finalAssess){
+    const fa=document.getElementById('m-final');
+    if(fa){
+      fa.querySelector('h3').textContent=CUR.finalAssess.h;
+      fa.querySelector('p').textContent=CUR.finalAssess.p;
+    }
+  }
+  const disc=document.getElementById('m-disc');
+  if(disc){
+    disc.textContent=CUR.discNote||('Module codes, credit values and topic weightings '+
+      'on this page are the registered curriculum for SAQA qualification '+CUR.saqa+
+      (CUR.curriculum?', curriculum code '+CUR.curriculum:'')+'.');
+  }
+
   /* ---- topics ----
      Reuses the .module accordion as static always-open markup, the same way the
      pathway page does, so no new component is introduced. */
   document.getElementById('m-topictitle').textContent=
-    m.topics.length+' topics across '+m.hours+' notional hours';
+    m.hours ? m.topics.length+' topics across '+m.hours+' notional hours'
+            : m.topics.length+' topics';
+
+  /* The paragraph over the list promises weightings. Two of the three curricula
+     register them; the third registers none, and a page that shows invented
+     percentages would be telling a learner where the marks are on no authority
+     at all. */
+  if(CUR.weighted===false){
+    const syl=document.getElementById('m-syllabusnote');
+    if(syl)syl.textContent='These are the topics of this section, in the order the learner '+
+      'guide sets them out, with the areas each one covers. This qualification registers no '+
+      'topic weightings, so none are shown — the credits sit on the unit standard as a whole.';
+  }
 
   document.getElementById('m-topics').innerHTML=m.topics.map(function(t,i){
     const covers=t.covers.length
@@ -289,9 +331,11 @@
       '<div class="module-head" style="cursor:default">'+
         '<span class="module-num">'+(i+1)+'</span>'+
         '<div class="mt"><h4>'+ESC(t.n)+'</h4>'+
-          '<div class="meta">'+ESC(t.code)+' · '+t.w+'% of the module'+
+          '<div class="meta">'+ESC(t.code)+
+            (typeof t.w==='number' ? ' · '+t.w+'% of the module'
+                                   : (t.ref?' · learner guide §'+ESC(t.ref):''))+
             (t.covers.length?' · '+t.covers.length+' areas':'')+'</div></div>'+
-        '<span class="topic-w" aria-hidden="true">'+t.w+'%</span>'+
+        (typeof t.w==='number'?'<span class="topic-w" aria-hidden="true">'+t.w+'%</span>':'')+
       '</div>'+
       key+covers+tick+nav+
     '</div>';
@@ -359,7 +403,13 @@
   const prev=MODS[idx-1], next=MODS[idx+1];
   document.getElementById('m-nav').innerHTML=
     (prev?'<a class="modnav-l" href="module?m='+prev.id+Q+'"><span>← Previous</span><strong>'+ESC(prev.id+' · '+prev.title)+'</strong></a>':'<span></span>')+
-    '<a class="modnav-c" href="pm-schedule">Study plan &amp; calendar</a>'+
+    /* The middle link went to the Project Manager's planner whatever course you
+       were on — a plan for the wrong curriculum on any other one, which is what
+       it has been doing on the Procurement Officer's pages since 16 Sep 2026.
+       Where a curriculum has no planner it goes back to the course instead. */
+    (CUR.plan
+      ? '<a class="modnav-c" href="'+ESC(CUR.plan)+'">Study plan &amp; calendar</a>'
+      : '<a class="modnav-c" href="course?c='+encodeURIComponent(SLUG)+'">See the whole course</a>')+
     (next?'<a class="modnav-r" href="module?m='+next.id+Q+'"><span>Next →</span><strong>'+ESC(next.id+' · '+next.title)+'</strong></a>':'<span></span>');
 })();
 </script>

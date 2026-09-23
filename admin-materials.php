@@ -324,6 +324,7 @@ $uploadCapBytes = material_file_effective_upload_cap();
 
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
+<script src="<?= e(asset('nvc-modules.js')) ?>"></script>
 <script>
 (function () {
   /* The curriculum for the course this page is showing. Two qualifications
@@ -346,6 +347,14 @@ $uploadCapBytes = material_file_effective_upload_cap();
      not — and an empty slot reads as one somebody forgot to fill. */
   if (CUR && CUR.workbooks === false) {
     KINDS = KINDS.filter(function (k) { return k[0] !== 'workbook'; });
+  }
+  /* And where a pack calls it something else — New Venture Creation pairs the
+     guide with a Workplace Guide — the slot is labelled the provider's way, so
+     nobody has to guess whether the two are the same document. */
+  if (CUR && CUR.workbookName) {
+    KINDS = KINDS.map(function (k) {
+      return k[0] === 'workbook' ? ['workbook', CUR.workbookName, k[2]] : k;
+    });
   }
   var rows = document.getElementById('mat-rows');
   if (!rows || !MODS.length) return;

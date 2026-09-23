@@ -150,6 +150,7 @@
 <script src="locks.js?v=20260820"></script>
 <script src="pm-modules.js?v=20260916"></script>
 <script src="po-modules.js?v=20260916"></script>
+<script src="nvc-modules.js?v=20260923"></script>
 <!-- Loaded here, BEFORE the catalogue script below, because that script calls
      render() synchronously and the facilitator panel asks this file who may be
      named. Loaded later, the check would silently find nothing and the panel
@@ -375,6 +376,29 @@
       ["WM-03","Processes for monitoring and evaluating procurement and supply operational schedules",14]
     ]}
   ];
+  /* FETC: New Venture Creation, SAQA 66249. Skills Programme 1 of the
+     qualification — "Start and Run a New Venture" — from the unit standard
+     alignment table on page 10 of Centenary's curriculum guide, read on
+     23 Sep 2026. These are the registered unit standard IDs, titles and credit
+     values. The six sections are the ones studied on the site and their topics
+     live in nvc-modules.js.
+
+     ONE GROUP, not three. This is a legacy unit-standard qualification: it has
+     no knowledge/practical/workplace split and no EISA. The other 118 of its
+     149 credits are the later skills programmes, which we have no material for
+     — the lead and the note under the accordion say so, rather than a padded
+     row implying we do. m[3] is the row's code label, because there is no
+     curriculum code to prefix and what a learner needs to see is the standard. */
+  const NVC_SKILLS_PROGRAMME_1=[
+    {c:"Skills Programme 1 — Start and Run a New Venture",cr:31,note:"Six sections, one unit standard each.",mods:[
+      ["SP1-01","Innovative thinking",4,"US 114600"],
+      ["SP1-02","Research a new business opportunity",5,"US 114596"],
+      ["SP1-03","Understanding entrepreneurship",5,"US 263356"],
+      ["SP1-04","Fundamental knowledge for a business plan",8,"US 114592"],
+      ["SP1-05","Prepare a business plan",4,"US 263534"],
+      ["SP1-06","Understanding the function of the market",5,"US 263514"]
+    ]}
+  ];
 
   const MOD_AISD=[
     {t:"How Software Actually Gets Built",lessons:["What a codebase is, and how to read one","Version control and why every change is a branch","Code review, and what \"done\" means","Environments: local, staging, production"]},
@@ -416,6 +440,7 @@
   const COURSES={
     "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",regOpen:true,pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "procurement-officer":{title:"Occupational Certificate: Procurement Officer",cat:"Procurement",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"111445",credits:"180",code:"332302-001-01-00",qcto:QCTO_PROCUREMENT_OFFICER,img:"1521737604893-d14cc237f11d",regOpen:true,learn:["Develop and coordinate the implementation of operational schedules for procurement and supply","Manage procurement and supply relationships, negotiations and contracts","Monitor and measure procurement and supply performance","Work to the legislative, regulatory and organisational rules that govern sourcing"],lead:"The accredited procurement qualification, registered on the NQF at Level 5 — 180 credits, SAQA ID 111445. It runs in three parts: eight knowledge modules covering supply chain, sourcing, inventory, negotiation, contracts and performance; seven practical modules; and three workplace modules logged in a real procurement function. Not to be confused with the Procurement Skills course, which is a short course and is not accredited."},
+    "new-venture-creation":{title:"FETC: New Venture Creation",cat:"Entrepreneurship",mode:"Online or in person",level:"NQF 4",acc:"local",qid:"66249",credits:"149",code:"",qcto:NVC_SKILLS_PROGRAMME_1,img:"1526374965328-7f61d4dc18c5",regOpen:true,partsLabel:"6 sections in Skills Programme 1",facts:[["NQF level","4"],["Qualification credits","149"],["SAQA qualification ID","66249"],["Unit standards","6 · 31 credits"],["Open now","Skills Programme 1"],["Certified by","Assessor, moderator, SETA verification"]],learnNote:"Six unit standards, one to a section of the learner guide. Each is assessed in its own right and carries its own credits, and the six together are Skills Programme 1 of the qualification.",modNote:"Each section is aligned to one unit standard and assessed against it. Skills Programme 1 is 31 of the qualification's 149 credits — the remaining skills programmes follow, and are not open yet.",certTitle:"Credits now, the certificate at the end",certBody:"Passing these six unit standards is recorded as 31 credits towards the qualification. The certificate itself is awarded once all 149 are held.",learn:["Apply innovative thinking, and use creative and lateral thinking tools to generate venture ideas","Research a venture idea and test whether it is viable — market, competition, risk and price","Describe what an entrepreneur is, and assess your own entrepreneurial profile honestly","Produce a business plan for a new venture, with the financial and marketing plans behind it","Design and implement an action plan: premises, operating systems, financial controls and insurance","Explain how the market works — demand, supply, price, money and the business cycle"],lead:"The national entrepreneurship qualification, registered on the NQF at Level 4 — 149 credits, SAQA ID 66249. It is built from unit standards and delivered in skills programmes. Skills Programme 1, Start and Run a New Venture, is open now: six unit standards worth 31 credits, covering innovative thinking, researching an opportunity, entrepreneurship, the business plan and how the market works. Not to be confused with AI &amp; New Venture Creation further down the catalogue, which is a short course and is not accredited."},
     "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
     "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,facilitator:FAC_WARIA,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
@@ -460,13 +485,18 @@
     document.getElementById('c-crumb').textContent=c.title;
     document.getElementById('c-h1').textContent=c.title;
     document.getElementById('c-lead').textContent=c.lead;
-    document.getElementById('c-modtitle').textContent=c.qcto
+    /* A qualification may name its own parts. "Three components" is the QCTO
+       shape; New Venture Creation has one skills programme of six sections. */
+    document.getElementById('c-modtitle').textContent=c.partsLabel?c.partsLabel:c.qcto
       ? nMods(c)+" modules across three components"
       : "Video lessons across "+modules.length+" modules";
 
     // tags
     const tags=[];
-    if(c.acc==="local")tags.push('<span class="accred">Locally accredited · NQF 5</span>');
+    /* The level comes off the course record. This said "NQF 5" until 23 Sep
+       2026 — true of both qualifications then on the site, and wrong the
+       moment a third arrived at Level 4. */
+    if(c.acc==="local")tags.push('<span class="accred">Locally accredited · '+ESC(c.level)+'</span>');
     if(c.acc==="intl")tags.push('<span class="accred">Internationally accredited</span>');
     tags.push('<span>'+ESC(c.cat)+'</span>','<span>'+ESC(c.mode)+'</span>','<span>'+ESC(c.level)+'</span>');
     if(c.avail)tags.push('<span>'+ESC(c.avail)+'</span>');
@@ -475,7 +505,13 @@
     // facts
     let nLessons=0;modules.forEach(m=>nLessons+=m.lessons.length);
     let facts;
-    if(c.qcto){
+    if(c.facts){
+      /* A qualification whose facts are not the QCTO six. New Venture Creation
+         is unit-standard based: no curriculum code, no three components and no
+         EISA, so it states its own rather than having blanks pushed into a grid
+         built for something else. */
+      facts=c.facts;
+    } else if(c.qcto){
       /* Only what the QCTO documents actually state. Duration is left out on
          purpose — the provider sets it, and Form 3 ships with that field blank. */
       facts=[["NQF level",c.level.replace(/^NQF\s*/,'')],["Credits",c.credits],
@@ -637,13 +673,17 @@
       const w=document.getElementById('c-watch');
       if(w)w.remove();
       stripHeroPlay();
-      document.getElementById('c-learnnote').textContent=
+      /* Four sentences that describe a QCTO qualification. A course record may
+         replace any of them, because a unit-standard qualification has no
+         practicals, no workplace modules and no EISA — and telling a learner
+         otherwise is not a wording problem, it is the wrong assessment route. */
+      document.getElementById('c-learnnote').textContent=c.learnNote||
         'Knowledge modules build the theory, practicals apply it, and the workplace modules are logged on real projects — the three together are what the qualification assesses.';
       const cert=document.getElementById('c-certcard');
-      cert.querySelector('h4').textContent='Nationally recognised certificate';
-      cert.querySelector('p').textContent='Awarded by the QCTO on completion of the external assessment.';
+      cert.querySelector('h4').textContent=c.certTitle||'Nationally recognised certificate';
+      cert.querySelector('p').textContent=c.certBody||'Awarded by the QCTO on completion of the external assessment.';
       cert.querySelector('.dl').textContent='SAQA ID '+c.qid;
-      document.getElementById('c-modnote').textContent=
+      document.getElementById('c-modnote').textContent=c.modNote||
         'Each module is assessed in its own right. The qualification itself is awarded only after the External Integrated Summative Assessment set by the QCTO.';
       return bind();
     }
@@ -696,9 +736,14 @@
         '<button class="module-head"><span class="module-num">'+(gi+1)+'</span>'+
         '<div class="mt"><h4>'+ESC(g.c)+'</h4><div class="meta">'+g.mods.length+' modules · '+g.cr+' credits · '+ESC(g.note)+'</div></div>'+CHEV+'</button>'+
         '<div class="module-body">'+ g.mods.map(m=>{
+          /* The code column. An occupational certificate prints the registered
+             module code, "121905000-KM-01". A unit-standard qualification has no
+             curriculum code to prefix and what a learner needs to see is the unit
+             standard, so a row may carry its own label as m[3]. */
+          const tag=m[3]||(c.code?c.code+'-'+m[0]:m[0]);
           const inner=
             '<span class="lname">'+ESC(m[1])+'</span>'+
-            '<span class="lmeta"><span class="ltag">'+c.code+'-'+m[0]+'</span>'+
+            '<span class="lmeta"><span class="ltag">'+ESC(tag)+'</span>'+
             '<span class="ldur">'+m[2]+' cr</span></span>';
           return built[m[0]]
             ? '<a class="lesson lesson-link" href="module?m='+m[0]+q+'">'+inner+'</a>'

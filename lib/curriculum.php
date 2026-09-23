@@ -28,17 +28,24 @@ defined('APP_BOOTED') or exit('lib/curriculum.php is not a page.');
 /**
  * The curriculum file for each tracked course.
  *
- * Two qualifications since 16 Sep 2026. A slug that is not here has no module
+ * Three qualifications since 23 Sep 2026. A slug that is not here has no module
  * structure on the site, and every function below then returns nothing — which
  * the callers already treat as "say less", never as "say something wrong".
+ *
+ * The parser below is shape-agnostic on purpose. New Venture Creation is not a
+ * QCTO qualification: its modules are the sections of a learner guide, its
+ * codes are unit standards rather than "121905000-KM-01", and it registers no
+ * topic weightings. None of that matters here, because all this reads is the
+ * module id, the module code, the credits, and each topic's code and name.
  *
  * @return array<string,string> course slug => file in the site root
  */
 function curriculum_files(): array
 {
     return [
-        'project-management'  => 'pm-modules.js',
-        'procurement-officer' => 'po-modules.js',
+        'project-management'   => 'pm-modules.js',
+        'procurement-officer'  => 'po-modules.js',
+        'new-venture-creation' => 'nvc-modules.js',
     ];
 }
 

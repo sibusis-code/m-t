@@ -342,6 +342,7 @@ function qs(array $over = []): string
 <?php if ($view !== 'results'): ?>
 <script src="<?= e(asset('pm-modules.js')) ?>"></script>
 <script src="<?= e(asset('po-modules.js')) ?>"></script>
+<script src="<?= e(asset('nvc-modules.js')) ?>"></script>
 <script>
 (function () {
   /* The curriculum for the course this page is showing. Two qualifications

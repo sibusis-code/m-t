@@ -98,6 +98,24 @@ function learner_catalogue(): array
             'note'    => 'NQF 5 · 180 credits · SAQA 111445',
             'tracked' => true,
         ],
+        /* The third accredited qualification, added 23 Sep 2026 when Centenary's
+           curriculum guide for it arrived. Its module structure is
+           nvc-modules.js.
+
+           NOT an occupational certificate, and the note says so in numbers: it
+           is a legacy unit-standard qualification of 149 credits, and what we
+           hold material for is Skills Programme 1 — six unit standards, 31 of
+           those credits. Do not round that up to 149 anywhere. The remaining
+           skills programmes have to come from the provider first.
+
+           NOT the same thing as the 'new-venture' short course in the
+           catalogue, which is an AI course of a similar name and carries no
+           credits. They are told apart by slug everywhere. */
+        'new-venture-creation' => [
+            'title'   => 'FETC: New Venture Creation',
+            'note'    => 'NQF 4 · SAQA 66249 · Skills Programme 1, 31 of 149 credits',
+            'tracked' => true,
+        ],
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
             'note'    => 'A professional programme, not an accredited qualification',

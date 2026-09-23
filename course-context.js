@@ -12,6 +12,13 @@
  * code, so the records cannot collide — but only if the page sends the right
  * slug. That is what this file decides, in one place, for all of them.
  *
+ * New Venture Creation (SAQA 66249) is the third, from 23 Sep 2026. Its module
+ * codes are its own — SP1-01 rather than KM-01 — so it could not collide with
+ * the other two even by accident. It still comes through here, because the
+ * curriculum a page resolves decides more than the module list now: a
+ * unit-standard qualification has no knowledge modules, no notional hours and
+ * no EISA, and the wording for that is carried on the curriculum too.
+ *
  * THE RULE: a slug is honoured only if a curriculum file for it has actually
  * loaded. Anything else — a typo, a stale bookmark, a slug someone invents in
  * the address bar — falls back to the Project Manager, which is what every one
