@@ -95,7 +95,7 @@ jobs:
           # personal information — and they are all siblings in one public_html,
           # so the only thing between them is this list.
           case "$DIR" in
-            public_html/spsacademy|public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy|public_html/cricketsaacademy)
+            public_html/spsacademy|public_html/fungiacademy|public_html/mazivacademy|public_html/equinixacademy|public_html/cricketsaacademy|public_html/inhanceacademy)
               echo "::error::That is another academy's directory. This repository deploys only to public_html/mtacademy."
               exit 1 ;;
           esac
@@ -147,7 +147,7 @@ jobs:
           else
             echo "::warning::Could not fetch the client homepage beforehand; the after-check will be skipped."
           fi
-          for nb in spsacademy fungiacademy mazivacademy equinixacademy cricketsaacademy; do
+          for nb in spsacademy fungiacademy mazivacademy equinixacademy cricketsaacademy inhanceacademy; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
                    "https://centenarynetworks.com/$nb/" || echo 000)
             echo "before_$nb=$code" >> "$GITHUB_ENV"
@@ -214,7 +214,7 @@ jobs:
           # The other academies are other companies' learner records, sitting in
           # sibling directories. If this deploy touched one of them, that has to
           # stop the build.
-          for nb in spsacademy fungiacademy mazivacademy equinixacademy cricketsaacademy; do
+          for nb in spsacademy fungiacademy mazivacademy equinixacademy cricketsaacademy inhanceacademy; do
             code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
                    "https://centenarynetworks.com/$nb/" || echo 000)
             prev=$(printenv "before_$nb" || echo '')
@@ -315,7 +315,7 @@ jobs:
           # to name is the one that leaks.
           home=$(curl -sS --max-time 30 "$base/contact" || echo '')
           leak=""
-          for other in "SPS Academy" "Sustainable Power" "Fungi Academy" "Maziv Academy" "Equinix Academy" "Cricket SA Academy"; do
+          for other in "SPS Academy" "Sustainable Power" "Fungi Academy" "Maziv Academy" "Equinix Academy" "Cricket SA Academy" "Inhance Academy"; do
             case "$home" in *"$other"*) leak="$leak $other" ;; esac
           done
           if [ -n "$leak" ]; then
