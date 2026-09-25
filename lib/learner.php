@@ -87,6 +87,7 @@ function learner_catalogue(): array
             'title'   => 'Occupational Certificate: Project Manager',
             'note'    => 'NQF 5 · 240 credits · SAQA 101869',
             'tracked' => true,
+            'assessed' => 'the qualification is awarded by the QCTO after the EISA',
         ],
         /* The second accredited qualification, added 16 Sep 2026 when the
            provider's pack arrived. Its module structure is po-modules.js.
@@ -97,6 +98,7 @@ function learner_catalogue(): array
             'title'   => 'Occupational Certificate: Procurement Officer',
             'note'    => 'NQF 5 · 180 credits · SAQA 111445',
             'tracked' => true,
+            'assessed' => 'the qualification is awarded by the QCTO after the EISA',
         ],
         /* The third accredited qualification, added 23 Sep 2026 when Centenary's
            curriculum guide for it arrived. Its module structure is
@@ -115,6 +117,9 @@ function learner_catalogue(): array
             'title'   => 'FETC: New Venture Creation',
             'note'    => 'NQF 4 · SAQA 66249 · Skills Programme 1, 31 of 149 credits',
             'tracked' => true,
+            /* NOT the QCTO and NOT an EISA. This one is assessed by a registered
+               assessor, moderated, and verified by the SETA. */
+            'assessed' => 'competence is decided by a registered assessor and confirmed by a moderator',
         ],
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
@@ -140,6 +145,32 @@ function learner_catalogue(): array
 function learner_course_valid(string $slug): bool
 {
     return array_key_exists($slug, learner_catalogue());
+}
+
+/**
+ * The sentence that says who actually decides competence on a course, for the
+ * many places that disclaim a self-check score, a progress bar or a letter.
+ *
+ * WHY THIS IS NOT ONE CONSTANT ANY MORE
+ *
+ * It was, and it said "the qualification is awarded by the QCTO after the EISA"
+ * — true of both occupational certificates and written into quiz.php,
+ * lib/letters.php, my.php and privacy.php as a fact about the platform. FETC:
+ * New Venture Creation is a legacy unit-standard qualification: there is no
+ * EISA and the QCTO does not award it. A registered assessor decides, a
+ * moderator confirms, the SETA verifies.
+ *
+ * Telling a learner the wrong awarding body is not a wording slip. It is the
+ * wrong answer to "what do I have to do to pass", so the sentence comes off the
+ * course, from learner_catalogue()['assessed'], and the fallback says only what
+ * is true of every course on the platform.
+ */
+function learner_assessment_route(string $slug): string
+{
+    $cat = learner_catalogue()[$slug] ?? null;
+    $tail = $cat['assessed'] ?? null;
+    return 'Being found competent is Centenary’s decision after the real assessment'
+        . ($tail ? ', and ' . $tail : '') . '.';
 }
 
 /** The title to store on the enrolment, given the slug and what was registered for. */

@@ -356,3 +356,80 @@ CREATE TABLE IF NOT EXISTS class_attendance (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_attend_once ON class_attendance (tenant_id, class_id, user_id);
 CREATE INDEX IF NOT EXISTS ix_attend_user ON class_attendance (tenant_id, user_id);
+
+-- Live sessions hosted in Google Classroom. See the long note in
+-- schema.mysql.sql for why the link is its own table rather than a column on
+-- classes, and why an online session is inferred from having a link.
+CREATE TABLE IF NOT EXISTS course_links (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT    NOT NULL,
+  kind        TEXT    NOT NULL,
+  url         TEXT    NOT NULL,
+  label       TEXT        NULL,
+  updated_at  TEXT    NOT NULL,
+  updated_by  INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_courselink_slot ON course_links (tenant_id, course_slug, kind);
+
+CREATE TABLE IF NOT EXISTS class_links (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  class_id   INTEGER NOT NULL REFERENCES classes (id),
+  url        TEXT    NOT NULL,
+  updated_at TEXT    NOT NULL,
+  updated_by INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_classlink_once ON class_links (tenant_id, class_id);
+
+-- The logbook the learner types and prints for signature. Not the evidence —
+-- the signed printout is. See schema.mysql.sql for the full reasoning, including
+-- why minutes rather than hours and why entry_date is not created_at.
+CREATE TABLE IF NOT EXISTS logbook_entries (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  user_id     INTEGER NOT NULL REFERENCES users (id),
+  course_slug TEXT    NOT NULL,
+  unit_code   TEXT        NULL,
+  entry_date  TEXT    NOT NULL,
+  minutes     INTEGER     NULL,
+  activity    TEXT    NOT NULL,
+  evidence    TEXT        NULL,
+  created_at  TEXT    NOT NULL,
+  updated_at  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_logbook_user ON logbook_entries (tenant_id, user_id, course_slug, entry_date);
+
+-- Where the paper is: who has handed in which workbook and logbook, who took it
+-- and when. Not the submissions themselves — every submission on this
+-- qualification is physical. See schema.mysql.sql.
+CREATE TABLE IF NOT EXISTS poe_submissions (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id   INTEGER NOT NULL REFERENCES tenants (id),
+  course_slug TEXT    NOT NULL,
+  module_code TEXT    NOT NULL,
+  user_id     INTEGER NOT NULL REFERENCES users (id),
+  kind        TEXT    NOT NULL,
+  status      TEXT    NOT NULL,
+  on_date     TEXT        NULL,
+  note        TEXT        NULL,
+  updated_at  TEXT    NOT NULL,
+  updated_by  INTEGER     NULL REFERENCES users (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_poe_slot ON poe_submissions (tenant_id, course_slug, module_code, user_id, kind);
+CREATE INDEX IF NOT EXISTS ix_poe_course ON poe_submissions (tenant_id, course_slug, module_code);
+CREATE INDEX IF NOT EXISTS ix_poe_user ON poe_submissions (tenant_id, user_id);
+
+-- One row per extra self-check try granted to a learner, by a named person.
+-- Append-only and counted, never a decremented "tries left" column — see
+-- schema.mysql.sql.
+CREATE TABLE IF NOT EXISTS quiz_attempt_grants (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id  INTEGER NOT NULL REFERENCES tenants (id),
+  quiz_id    INTEGER NOT NULL REFERENCES quizzes (id),
+  user_id    INTEGER NOT NULL REFERENCES users (id),
+  note       TEXT        NULL,
+  granted_at TEXT    NOT NULL,
+  granted_by INTEGER     NULL REFERENCES users (id)
+);
+CREATE INDEX IF NOT EXISTS ix_qgrant_quiz_user ON quiz_attempt_grants (tenant_id, quiz_id, user_id);

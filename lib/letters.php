@@ -173,6 +173,25 @@ function letter_shell(string $title, string $content, string $footNote = ''): st
 }
 
 /** A paragraph in a letter. */
+/**
+ * A sentence written for the HTML half, rendered for the plain-text half.
+ *
+ * The text bodies in this file are deliberately ASCII — every one of them writes
+ * "Centenary's" and "--" rather than the curly apostrophe and em dash the HTML
+ * uses, because a plain-text part that arrives as "Centenaryâ€™s" in an older
+ * client is worse than one that never had the nice typography. Shared copy
+ * (learner_assessment_route(), for one) is written once with real punctuation
+ * and passed through here for the text part.
+ */
+function letter_plain(string $s): string
+{
+    return str_replace(
+        ['’', '‘', '“', '”', '—', '–', '·', 'é'],
+        ["'", "'", '"', '"', '--', '-', '-', 'e'],
+        $s
+    );
+}
+
 function letter_p(string $html): string
 {
     return '<p style="margin:0 0 14px;">' . $html . '</p>';
@@ -286,9 +305,9 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
         . 'style="border-left:3px solid #d9d4cc;margin:4px 0 4px;"><tr>'
         . '<td style="padding:2px 0 2px 14px;font-size:14px;color:#5c5c5c;">'
         . 'The quizzes on the site are self-checks the academy built to help you study. '
-        . 'They do not count towards being found competent — that is Centenary’s decision '
-        . 'after the real assessment, and the qualification itself is awarded by the QCTO '
-        . 'after the EISA.'
+        . 'You get two tries at each one and we keep the better score. They do not count '
+        . 'towards being found competent. '
+        . e(learner_assessment_route($slug))
         . '</td></tr></table>';
 
     $h .= letter_p('We are glad to have you with us.');
@@ -326,10 +345,10 @@ function letter_welcome(array $user, string $slug, string $title, ?string $invit
     }
     $t .= 'Once you are in you can read every topic on screen, work through the self-check '
         . 'quizzes, and see your own progress.' . "\n\n"
-        . 'The quizzes on the site are self-checks the academy built to help you study. They '
-        . 'do not count towards being found competent -- that is Centenary\'s decision after '
-        . 'the real assessment, and the qualification itself is awarded by the QCTO after the '
-        . 'EISA.' . "\n\n"
+        . 'The quizzes on the site are self-checks the academy built to help you study. You '
+        . 'get two tries at each one and we keep the better score. They do not count towards '
+        . 'being found competent. '
+        . letter_plain(learner_assessment_route($slug)) . "\n\n"
         . 'We are glad to have you with us.' . "\n\n"
         . '-- ' . $academy . "\n";
 
@@ -411,9 +430,10 @@ function letter_module_results(array $user, string $moduleId, array $rows, strin
         ? 'That is a strong result. Keep the same approach going into the next module.'
         : ($pct >= 50
             ? 'A solid start. It is worth going back over the topics you scored lowest on — '
-              . 'the quizzes can be retaken as many times as you like.'
-            : 'These are worth revisiting. Read those topics again and retake the quizzes — '
-              . 'there is no limit on attempts, and nothing here counts against you.'));
+              . 'it is worth reading them again before you use your second try.'
+            : 'These are worth revisiting. Read those topics again — you have two tries at '
+              . 'each set of questions, and if both are gone your facilitator can open one '
+              . 'more.'));
 
     $my = letter_site_url('my');
     if ($my !== '') $h .= letter_button($my, 'See all my results');
@@ -421,9 +441,8 @@ function letter_module_results(array $user, string $moduleId, array $rows, strin
     $h .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
         . 'style="border-left:3px solid #d9d4cc;margin:4px 0;"><tr>'
         . '<td style="padding:2px 0 2px 14px;font-size:14px;color:#5c5c5c;">'
-        . 'These are self-check scores. They do not count towards being found competent — '
-        . 'that is Centenary’s decision after the real assessment, and the qualification is '
-        . 'awarded by the QCTO after the EISA.'
+        . 'These are self-check scores. They do not count towards being found competent. '
+        . e(learner_assessment_route($courseSlug))
         . '</td></tr></table>';
 
     $h .= letter_p('— ' . e($academy));
@@ -445,13 +464,13 @@ function letter_module_results(array $user, string $moduleId, array $rows, strin
         ? 'That is a strong result. Keep the same approach going into the next module.'
         : ($pct >= 50
             ? 'A solid start. It is worth going back over the topics you scored lowest on -- '
-              . 'the quizzes can be retaken as many times as you like.'
-            : 'These are worth revisiting. Read those topics again and retake the quizzes -- '
-              . 'there is no limit on attempts, and nothing here counts against you.')) . "\n";
+              . 'it is worth reading them again before you use your second try.'
+            : 'These are worth revisiting. Read those topics again -- you have two tries at '
+              . 'each set of questions, and if both are gone your facilitator can open one '
+              . 'more.')) . "\n";
     if ($my !== '') $t .= "\n  " . $my . "\n";
-    $t .= "\n" . 'These are self-check scores. They do not count towards being found competent '
-        . '-- that is Centenary\'s decision after the real assessment, and the qualification is '
-        . 'awarded by the QCTO after the EISA.' . "\n\n"
+    $t .= "\n" . 'These are self-check scores. They do not count towards being found competent. '
+        . letter_plain(learner_assessment_route($courseSlug)) . "\n\n"
         . '-- ' . $academy . "\n";
 
     return [

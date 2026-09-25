@@ -78,23 +78,72 @@
       questions: null,      // fetched on first open, then kept
       passPct: summary.pass_pct || 80,
       best: summary.attempts > 0 ? { pct: summary.best_pct, attempts: summary.attempts } : null,
+      /* Two tries per topic since 25 Sep 2026. NEVER counted here: every
+         server reply carries the current figure and replaces this, because a
+         page left open in another tab would otherwise be confidently wrong
+         about how many tries somebody has left. The fallback is only for a
+         summary served by an older deploy. */
+      tries: summary.tries || { used: summary.attempts || 0, allowed: 2,
+                                left: Math.max(0, 2 - (summary.attempts || 0)),
+                                locked: (summary.attempts || 0) >= 2 },
       busy: false
     };
+
+    /* "1 of 2 tries used". Said in full rather than as "1 left", because a
+       learner deciding whether to answer now or read first needs to know both
+       halves, and because the allowance is not always 2 — a facilitator may
+       have opened another. */
+    function triesLine() {
+      var t = state.tries;
+      if (!t || !t.used) return '';
+      return esc(t.used) + ' of ' + esc(t.allowed) + ' tries used';
+    }
 
     function scoreLine() {
       if (!state.best) {
         return esc(summary.questions) + ' question' + (summary.questions === 1 ? '' : 's') +
-               ' · ' + esc(state.passPct) + '% to pass';
+               ' · ' + esc(state.passPct) + '% to pass' +
+               ' · ' + esc(state.tries.allowed) + ' tries';
       }
       var passed = state.best.pct >= state.passPct;
       return '<strong>' + esc(state.best.pct) + '%</strong> best of ' +
              esc(state.best.attempts) + ' attempt' + (state.best.attempts === 1 ? '' : 's') +
-             ' · ' + (passed ? 'passed' : 'needs ' + esc(state.passPct) + '%');
+             ' · ' + (passed ? 'passed' : 'needs ' + esc(state.passPct) + '%') +
+             (triesLine() ? ' · ' + triesLine() : '');
+    }
+
+    /* What to tell someone who has just not passed. The difference between
+       "try again" and "you are out of tries" is the whole reason the server
+       sends the count back with the result. */
+    function retryAdvice(d) {
+      var t = d.tries || state.tries;
+      if (t && t.locked) {
+        return '. You have used ' + (t.allowed === 1 ? 'your try' : 'both tries') +
+               ' at this one — speak to your facilitator and they can open it again.';
+      }
+      return '. Read the topic again, then use your last try: ' +
+             esc(t ? t.left : 1) + ' left.';
     }
 
     function idle() {
       var passed = state.best && state.best.pct >= state.passPct;
-      wrap.className = 'qz-topic' + (passed ? ' qz-topic-passed' : '');
+      var out    = state.tries && state.tries.locked;
+      wrap.className = 'qz-topic' + (passed ? ' qz-topic-passed' : (out ? ' qz-topic-spent' : ''));
+
+      /* Out of tries: no button, and a sentence naming who can help rather
+         than a disabled control with no explanation. A learner who has passed
+         is not "out" of anything — the tick is theirs and the score stands —
+         so the two cases read differently even though both offer no retry. */
+      if (out) {
+        wrap.innerHTML =
+          '<span class="qz-topic-score">' + scoreLine() + '</span>' +
+          '<span class="qz-topic-spent-say">' +
+            (passed ? 'Both tries used.'
+                    : 'Both tries used — your facilitator can open this again.') +
+          '</span>';
+        return;
+      }
+
       wrap.innerHTML =
         '<span class="qz-topic-score">' + scoreLine() + '</span>' +
         '<button type="button" class="btn btn-ghost qz-start">' +
@@ -191,6 +240,13 @@
         .then(function (d) {
           state.busy = false;
           if (!d || !d.graded) {
+            /* A refusal for being out of tries is not a connection problem and
+               must not be offered a retry: take the server's count and close
+               the topic, so the page agrees with what the next POST would do. */
+            if (d && d.locked) {
+              if (d.tries) state.tries = d.tries;
+              return idle();
+            }
             err.textContent = (d && d.message) ||
               'That could not be marked just now. Check your connection and try again.';
             err.hidden = false;
@@ -201,6 +257,7 @@
             pct: (state.best && state.best.pct > d.pct) ? state.best.pct : d.pct,
             attempts: (state.best ? state.best.attempts : 0) + 1
           };
+          if (d.tries) state.tries = d.tries;   // the server's count, never ours
           result(d);
         })
         .catch(function () {
@@ -244,8 +301,7 @@
       h.push('<div class="qz-result-say"><strong>' +
                (d.pass ? 'Passed — topic ticked off.' : 'Not yet — you need ' + esc(d.pass_pct) + '%.') +
              '</strong><span>' + esc(d.score_count) + ' of ' + esc(d.question_count) +
-             ' correct' + (d.pass ? '' : '. Read the topic again, then try these once more — ' +
-             'you can retake them as often as you like.') + '</span></div>');
+             ' correct' + (d.pass ? '' : retryAdvice(d)) + '</span></div>');
       h.push('</div>');
 
       var wrong = state.questions.filter(function (q) {
@@ -268,17 +324,24 @@
         h.push('</div>');
       }
 
+      var spent = (d.tries || state.tries || {}).locked;
+
       h.push('<div class="qz-actions">');
       if (!d.pass) h.push('<button type="button" class="btn btn-ghost qz-reread">Read the topic again</button>');
-      h.push('<button type="button" class="btn ' + (d.pass ? 'btn-ghost' : 'btn-primary') + ' qz-retry">' +
-             (d.pass ? 'Answer them again' : 'Try these again') + '</button>');
+      /* No button for a try that does not exist. The server would refuse it,
+         and offering it would make the refusal look like a fault. */
+      if (!spent) {
+        h.push('<button type="button" class="btn ' + (d.pass ? 'btn-ghost' : 'btn-primary') + ' qz-retry">' +
+               (d.pass ? 'Answer them again' : 'Try these again') + '</button>');
+      }
       h.push('<button type="button" class="btn btn-ghost qz-close">Close</button>');
       h.push('</div>');
 
       wrap.className = 'qz-topic qz-topic-open' + (d.pass ? ' qz-topic-passed' : '');
       wrap.innerHTML = h.join('');
 
-      wrap.querySelector('.qz-retry').addEventListener('click', paint);
+      var again = wrap.querySelector('.qz-retry');
+      if (again) again.addEventListener('click', paint);
       wrap.querySelector('.qz-close').addEventListener('click', idle);
 
       var rr = wrap.querySelector('.qz-reread');

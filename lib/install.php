@@ -44,7 +44,9 @@ function install_tables(): array
             'progress_reports', 'materials', 'material_files', 'quizzes',
             'quiz_questions', 'quiz_choices', 'quiz_attempts',
             'quiz_attempt_answers', 'topic_sections', 'letters_sent', 'trainer_courses',
-            'classes', 'class_attendance'];
+            'classes', 'class_attendance',
+            'course_links', 'class_links', 'logbook_entries',
+            'poe_submissions', 'quiz_attempt_grants'];
 }
 
 /** Which of the expected tables are not there yet. */

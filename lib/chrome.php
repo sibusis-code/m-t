@@ -206,7 +206,12 @@ function chrome_nav(string $variant, array $o = []): void
         echo '    <div class="nav-links" id="navLinks">' . "\n";
         echo '      <a href="./" data-nav="home">Home</a>' . "\n";
         echo '      <a href="courses" data-nav="courses">Courses</a>' . "\n";
-        echo '      <a href="my" class="active">My learning</a>' . "\n";
+        /* "My learning" is no longer always the current page in this variant —
+           logbook.php uses the same nav — so the active link is chosen rather
+           than assumed. Defaulting to 'my' keeps every existing caller right. */
+        $here = (string) ($o['active'] ?? 'my');
+        echo '      <a href="my"' . ($here === 'my' ? ' class="active"' : '') . '>My learning</a>' . "\n";
+        echo '      <a href="logbook"' . ($here === 'logbook' ? ' class="active"' : '') . '>My logbook</a>' . "\n";
         /* A trainer needs the same way through from the learner pages that an
            administrator has, or the only route to their own page is typing the
            URL. Two keys rather than one so the link can say where it goes. */
@@ -242,7 +247,13 @@ function chrome_nav(string $variant, array $o = []): void
            and a trainer marks the register of the ones they facilitate. It is
            the one page in this nav where a trainer can write — the narrow
            exception argued for in lib/classes.php. */
-        echo '      <a href="admin-classes"' . $on('classes') . '>In-person</a>' . "\n";
+        echo '      <a href="admin-classes"' . $on('classes') . '>Classes</a>' . "\n";
+        /* Offered to both for the same reason: an admin reads the whole grid and a
+           facilitator records the hand-ins on their own courses. The narrow write
+           is argued for at poe_may_record() in lib/logbook.php. Called "Files"
+           rather than "POE" because that is the word used out loud about the
+           physical folder this page tracks. */
+        echo '      <a href="admin-poe"' . $on('poe') . '>Files</a>' . "\n";
         /* HR only, on Kgomotso's instruction of 25 Aug 2026 — it is in the admin
            nav and nowhere else. It was briefly in the public footer; if you find
            yourself adding it back to the 'site' variant above, re-read the note

@@ -7,12 +7,19 @@ declare(strict_types=1);
  * THIS IS NOT THE QCTO ASSESSMENT
  *
  * A quiz here is multiple choice, auto-graded, and exists to help someone
- * study — unlimited attempts, best score kept, exactly like the site tells a
- * learner on quiz.php. Nothing that reads a score off this page should be
- * mistaken for competence: that is Centenary's decision after the real
- * assessment, and the qualification is the QCTO's after the EISA. Write
- * questions with that in mind, the same way admin-materials.php asks
- * administrators to keep assessment material off that page entirely.
+ * study — TWO tries since 25 Sep 2026, best score kept, exactly like the site
+ * tells a learner on quiz.php. Nothing that reads a score off this page should
+ * be mistaken for competence: that is Centenary's decision after the real
+ * assessment, and who awards the qualification depends on the course — see
+ * learner_assessment_route(), because one of the three is not a QCTO
+ * qualification and has no EISA. Write questions with that in mind, the same way
+ * admin-materials.php asks administrators to keep assessment material off that
+ * page entirely.
+ *
+ * The results view is also where a learner who has used both tries is given
+ * another. That write is available to facilitators as well as administrators —
+ * see quiz_may_grant_attempt() for why, and note that it is checked in the POST
+ * branch rather than by whether the button was drawn.
  *
  * WHY THE MODULE LIST IS NOT IN THIS FILE
  *
@@ -92,7 +99,45 @@ function admin_quizzes_reshape(array $raw): array
     return $out;
 }
 
-if (is_post()) {
+/* ---- Opening one more try -------------------------------------------------
+   Handled BEFORE require_write() below, because this one write is deliberately
+   available to a facilitator as well as an administrator — see
+   quiz_may_grant_attempt(), which is the permission, and which is checked here
+   rather than by whether the button was drawn.
+
+   It is its own branch and exits, so nothing about the question editor below can
+   run off the back of it. */
+if (is_post() && ($_POST['do'] ?? '') === 'grant_try') {
+    $grantCourse = post_str('course', 60);
+    $quizId      = (int) ($_POST['quiz_id'] ?? 0);
+    $learnerId   = (int) ($_POST['user_id'] ?? 0);
+
+    if (!isset($courses[$grantCourse]) || !quiz_may_grant_attempt($grantCourse, $me)) {
+        audit('write.denied', 'quiz_attempt_grants', null, $grantCourse . ' — one more try');
+        http_response_code(403);
+        exit('Your account cannot open another try on that course.');
+    }
+    if (!csrf_valid()) {
+        $errors[] = 'That form had expired — nothing was changed. Please try again.';
+    } elseif ($quizId < 1 || $learnerId < 1) {
+        $errors[] = 'That did not name a learner and a quiz.';
+    } else {
+        $quizRow = db_optional(fn() => quiz_get($quizId));
+        /* quiz_get() is tenant-scoped, but the course has to match the one whose
+           permission was just checked — otherwise a posted quiz_id from another
+           course would ride in on a facilitator's access to this one. */
+        if ($quizRow === null || (string) $quizRow['course_slug'] !== $grantCourse) {
+            $errors[] = 'That quiz is not on this course.';
+        } elseif (db_optional(fn() => quiz_grant_attempt($quizId, $learnerId, (int) $me['id']), false)) {
+            $notice = 'One more try opened on ' . $quizRow['module_code'] . '.';
+        } else {
+            $errors[] = 'Could not open another try just now.';
+        }
+        csrf_rotate();
+    }
+}
+
+if (is_post() && ($_POST['do'] ?? '') !== 'grant_try') {
     /* A trainer reaches this page but may not change it. The check is here, on
        the writing side, and not on whether the form was rendered: a hidden
        button is not a permission. */
@@ -262,7 +307,7 @@ function qs(array $over = []): string
 
     <div class="mat-intro">
       <p><strong>This is a self-check the academy built, not the module's summative assessment.</strong>
-        A learner can take it as many times as they like and the site keeps their best score — it is
+        A learner gets two tries at it and the site keeps their best score — it is
         study practice, not an exam. Write questions accordingly, and
         <strong>never use it for anything that should be marked by a person or that decides
         competence</strong> — that stays Centenary's assessment, set against the QCTO curriculum.</p>
@@ -294,15 +339,31 @@ function qs(array $over = []): string
       <?php if ($results === null || !$results['rows']): ?>
         <p class="adm-empty">No attempts yet<?= $resultsQ !== '' ? ' matching that search' : '' ?>.</p>
       <?php else: ?>
+        <?php
+          /* Tries for every learner on this page, in two queries rather than two
+             per row. Keyed "quizId:userId" — see quiz_tries_bulk(). */
+          $tries = db_optional(fn() => quiz_tries_bulk(array_map(
+              static fn($r) => [(int) $r['quiz_id'], (int) $r['user_id']], $results['rows']
+          )), []);
+          $mayGrant = quiz_may_grant_attempt($course, $me);
+          /* One button per learner per quiz, not per attempt. The rows are newest
+             first, so the first time a pair appears is its latest attempt, and
+             that is the row the action belongs on. */
+          $seenPair = [];
+        ?>
         <div class="adm-scroll">
         <table class="adm-table">
-          <thead><tr><th>Module</th><th>Learner</th><th>Submitted</th><th>Score</th><th>Result</th></tr></thead>
+          <thead><tr><th>Module</th><th>Learner</th><th>Submitted</th><th>Score</th><th>Result</th><th>Tries</th></tr></thead>
           <tbody>
           <?php foreach ($results['rows'] as $r): ?>
             <?php
               $qc  = (int) $r['question_count'];
               $pct = $qc > 0 ? (int) round((int) $r['score_count'] / $qc * 100) : 0;
               $pp  = $r['pass_pct'] !== null ? (int) $r['pass_pct'] : null;
+              $key = (int) $r['quiz_id'] . ':' . (int) $r['user_id'];
+              $t   = $tries[$key] ?? null;
+              $latest = !isset($seenPair[$key]);
+              $seenPair[$key] = true;
             ?>
             <tr>
               <td><?= e((string) $r['module_code']) ?></td>
@@ -312,6 +373,35 @@ function qs(array $over = []): string
               <td><?= (int) $r['score_count'] ?>/<?= $qc ?> · <?= $pct ?>%</td>
               <td><?= $pp === null ? '<span class="adm-none">no pass mark set</span>'
                     : ($pct >= $pp ? '<span class="adm-enrolled">Pass</span>' : 'Below ' . $pp . '%') ?></td>
+              <td>
+                <?php if ($t === null): ?>
+                  <span class="adm-none">—</span>
+                <?php else: ?>
+                  <?= (int) $t['used'] ?> of <?= (int) $t['allowed'] ?>
+                  <?php if ($t['extra']): ?>
+                    <span class="adm-sub"><?= (int) $t['extra'] ?> opened since</span>
+                  <?php endif; ?>
+                  <?php
+                    /* Offered only where it is the answer to something: the
+                       learner is out of tries and has not reached the bar. A
+                       button next to somebody who passed would invite undoing a
+                       pass, which this cannot do anyway. */
+                    $stuck = $t['locked'] && $pp !== null && $pct < $pp;
+                  ?>
+                  <?php if ($latest && $mayGrant && $stuck): ?>
+                    <form method="POST" class="adm-act adm-act-try">
+                      <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
+                      <input type="hidden" name="do" value="grant_try">
+                      <input type="hidden" name="course" value="<?= e($course) ?>">
+                      <input type="hidden" name="quiz_id" value="<?= (int) $r['quiz_id'] ?>">
+                      <input type="hidden" name="user_id" value="<?= (int) $r['user_id'] ?>">
+                      <button class="btn btn-ghost" type="submit">Open one more try</button>
+                    </form>
+                  <?php elseif ($latest && $t['locked'] && $pp !== null && $pct >= $pp): ?>
+                    <span class="adm-sub">both used, passed</span>
+                  <?php endif; ?>
+                <?php endif; ?>
+              </td>
             </tr>
           <?php endforeach; ?>
           </tbody>

@@ -40,9 +40,20 @@ require __DIR__ . '/lib/letters.php';
 
 app_session_start();
 
-const QUIZ_DISCLAIMER = 'This is a self-check the academy built to help you study — it does not '
-    . 'count towards being found competent. That is Centenary’s decision after the real '
-    . 'assessment, and the qualification is awarded by the QCTO after the EISA.';
+/**
+ * The sentence that goes next to every score on this page.
+ *
+ * It was a constant, and it named the QCTO and the EISA. That is true of the
+ * two occupational certificates and false of FETC: New Venture Creation, where
+ * a registered assessor decides and a moderator confirms — so the awarding
+ * body comes off the course. See learner_assessment_route().
+ */
+function quiz_disclaimer(string $courseSlug): string
+{
+    return 'This is a self-check the academy built to help you study — it does not '
+         . 'count towards being found competent. '
+         . learner_assessment_route($courseSlug);
+}
 
 /** @param array<string,mixed> $data */
 function qout(array $data, int $status = 200): void
@@ -81,6 +92,10 @@ if ($module === '' && !is_post()) {
             'questions' => $s['questions'],
             'best_pct'  => $s['best']['pct'] ?? null,
             'attempts'  => $s['best']['attempts'] ?? 0,
+            /* Tries left per topic, so the module page can show "1 of 2 used"
+               on fifty cards without asking fifty times, and so a topic whose
+               tries are gone renders closed on first paint. */
+            'tries'     => $s['tries'],
         ];
     }
     qout(['in' => true, 'enrolled' => true, 'course' => $course, 'quizzes' => (object) $out]);
@@ -178,7 +193,10 @@ if ($asJson && !is_post()) {
             ),
         ], array_values($questions)),
         'best' => $best ? ['pct' => (int) $best['pct'], 'attempts' => (int) $best['attempts']] : null,
-        'disclaimer' => QUIZ_DISCLAIMER,
+        'tries' => db_optional(fn() => quiz_tries((int) $me['id'], (int) $quiz['id']),
+                               ['used' => 0, 'allowed' => QUIZ_ATTEMPTS_ALLOWED,
+                                'left' => QUIZ_ATTEMPTS_ALLOWED, 'locked' => false, 'extra' => 0]),
+        'disclaimer' => quiz_disclaimer($course),
     ]);
 }
 
@@ -196,6 +214,17 @@ if ($asJson && is_post()) {
         if (is_numeric($qid) && is_numeric($cid)) $answers[(int) $qid] = (int) $cid;
     }
     $graded = quiz_grade_and_record((int) $quiz['id'], (int) $me['id'], $answers);
+
+    /* Out of tries. Answered here rather than graded: the refusal carries no
+       score and no answer key, so a crafted POST past the hidden button learns
+       nothing it could not already see. */
+    if (!empty($graded['locked'])) {
+        qout(['in' => true, 'available' => true, 'graded' => false, 'locked' => true,
+              'tries' => $graded['tries'],
+              'message' => 'You have used both tries at this one. Your facilitator can open '
+                         . 'it again for you.'], 409);
+    }
+
     $ticked = quiz_tick_topic_on_pass($me, $course, $module, $graded);
     csrf_rotate();
 
@@ -212,6 +241,7 @@ if ($asJson && is_post()) {
         'pct' => $graded['pct'], 'pass' => $graded['pass'], 'pass_pct' => $graded['pass_pct'],
         'score_count' => $graded['score_count'], 'question_count' => $graded['question_count'],
         'ticked' => $ticked,
+        'tries' => $graded['tries'],    // AFTER this attempt; the widget shows it
         'token' => csrf_token(),        // the rotated one, so a retry can post
         'breakdown' => array_map(static fn(array $b) => [
             'question_id' => $b['question_id'],
@@ -233,9 +263,14 @@ if (is_post()) {
             if (is_numeric($qid) && is_numeric($cid)) $answers[(int) $qid] = (int) $cid;
         }
         $result = quiz_grade_and_record((int) $quiz['id'], (int) $me['id'], $answers);
+        if (!empty($result['locked'])) {
+            $error  = 'You have used both tries at this one. Your facilitator can open it '
+                    . 'again for you.';
+            $result = null;
+        }
         /* The same tick the inline widget gets. Without this line a learner
            with JavaScript off could pass and still show the topic untouched. */
-        quiz_tick_topic_on_pass($me, $course, $module, $result);
+        if ($result !== null) quiz_tick_topic_on_pass($me, $course, $module, $result);
         csrf_rotate();
 
         /* If that was the last topic quiz outstanding in this module, post the
@@ -287,7 +322,7 @@ if (!$available && $result === null) http_response_code(!$enrolled ? 403 : 200);
 
     <span class="eyebrow"><?= e($module) ?></span>
     <h2 class="lede-h">Check your knowledge</h2>
-    <p class="qz-disclaimer"><?= e(QUIZ_DISCLAIMER) ?></p>
+    <p class="qz-disclaimer"><?= e(quiz_disclaimer($course)) ?></p>
 
     <?php if ($error !== ''): ?><p class="form-err" role="alert"><?= e($error) ?></p><?php endif; ?>
 
@@ -306,7 +341,7 @@ if (!$available && $result === null) http_response_code(!$enrolled ? 403 : 200);
           <?php if ($result['pass'] !== null): ?>
             <?= $result['pass'] ? '<strong>That meets the pass mark.</strong>' : '<strong>That is below the pass mark.</strong>' ?>
           <?php endif; ?></p>
-        <p class="qz-disclaimer"><?= e(QUIZ_DISCLAIMER) ?></p>
+        <p class="qz-disclaimer"><?= e(quiz_disclaimer($course)) ?></p>
       </div>
 
       <?php /* $questions (not $forDisplay) from here on — grading has already

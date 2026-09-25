@@ -86,7 +86,7 @@ $version = (string) (app_config('policy_version') ?? 'unversioned');
     <p>What you tick is <strong>your own account of what you have studied</strong>. It is not a mark, and it is not an assessment result: being found competent is Centenary's decision after assessment, and the qualification is awarded by the QCTO after the external assessment.</p>
     <p>The academy can see your ticks and their dates, and uses them to know who needs help and to report on how an intake is going. Your line manager sees them only in a progress report that you send.</p>
     <p>Some modules also carry a short <strong>self-check quiz</strong> — multiple choice,
-      marked automatically, that you can take as many times as you like. We keep your best
+      marked automatically, that you can take twice. We keep your best
       score and how many times you attempted it, in the same way and for the same reason as
       your topic ticks: it is your own study record, <strong>not a mark and not an assessment
       result</strong>. Being found competent is still Centenary's decision after the real

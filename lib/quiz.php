@@ -1,19 +1,34 @@
 <?php
 declare(strict_types=1);
 
-/* A self-check quiz, one per module — multiple choice, auto-graded, unlimited
- * attempts with the best kept.
+/* A self-check quiz, one per module — multiple choice, auto-graded, TWO tries
+ * with the best kept.
  *
  * WHAT THIS IS NOT
  *
  * Not the QCTO's assessment, and nothing built on this file may read as
  * though it were. Being found competent is Centenary's decision after the
- * real assessment, and the qualification is the QCTO's after the EISA — the
- * same sentence quiz.php, admin-quizzes.php and my.php all repeat verbatim
- * next to any score this file produces. A quiz here is the academy's own
- * self-check, built to help someone study, and unlimited attempts is part of
- * what keeps it reading that way: there is no incentive to see it as high
- * stakes when retaking it costs nothing.
+ * real assessment — the same sentence quiz.php, admin-quizzes.php and my.php
+ * all repeat verbatim next to any score this file produces. A quiz here is the
+ * academy's own self-check, built to help someone study.
+ *
+ * TWO TRIES, AND WHY THAT CHANGED
+ *
+ * This file used to allow unlimited attempts, and argued for them: retaking
+ * cost nothing, so nothing read as high stakes. The instruction on 25 Sep 2026
+ * was two tries — learners were spending their time redoing quizzes instead of
+ * reading, which is the opposite of what a self-check is for.
+ *
+ * The honest cost of that change is this: with a pass mark gating the topic,
+ * a limit turns a study aid into a gate. A learner who misreads twice cannot
+ * complete the module at all. So the limit ships WITH a way back — one row in
+ * quiz_attempt_grants is one more try, granted by a named person — and the
+ * learner-facing copy says who to speak to rather than just refusing. A limit
+ * with no route past it would have been the wrong change however it was worded.
+ *
+ * The allowance is never stored as a countdown. It is QUIZ_ATTEMPTS_ALLOWED
+ * plus the number of grant rows, measured against the attempts actually in
+ * quiz_attempts, so nothing can drift out of step with the attempt history.
  *
  * WHY GRADING NEVER TRUSTS THE BROWSER
  *
@@ -42,8 +57,24 @@ const QUIZ_MAX_CHOICES = 6;
 
 /* Not a business rule — the most attempts any real learner would plausibly
    rack up practising, rounded well up, so a script pointed at the endpoint
-   fills a log rather than a disk. Same reasoning as LEARNER_PROGRESS_MAX_ROWS. */
+   fills a log rather than a disk. Same reasoning as LEARNER_PROGRESS_MAX_ROWS.
+
+   It is now far above QUIZ_ATTEMPTS_ALLOWED and stays as the backstop it always
+   was: the business limit is enforced below and can be lifted a try at a time,
+   this ceiling cannot and is about the disk. */
 const QUIZ_ATTEMPT_MAX_PER_QUIZ = 200;
+
+/* How many tries a learner gets at one self-check before it closes. Kgomotso's
+   rule, 25 Sep 2026: "we dont want leaners to waste time trying to redo the
+   quizzes over and over".
+ *
+ * A CODE DEFAULT, NOT A COLUMN, for the same reasons written out at length
+ * above QUIZ_DEFAULT_PASS_PCT: a per-quiz column would have meant a data
+ * migration on every site for a number that is the same everywhere, and any
+ * quiz loaded afterwards would have come back null and quietly had no limit.
+ * A quiz that genuinely needs a different number is a code change, and nobody
+ * has asked for one. */
+const QUIZ_ATTEMPTS_ALLOWED = 2;
 
 /* The mark a learner has to reach for a topic to count as done — Kgomotso's
    figure, 11 Sep 2026.
@@ -383,6 +414,22 @@ function quiz_grade_and_record(int $quizId, int $userId, array $posted): array
     $quiz      = quiz_get($quizId);
     $questions = quiz_questions_with_choices($quizId);
 
+    /* THE LIMIT IS ENFORCED HERE, before anything is graded.
+     *
+     * Not in the page, not in the browser: the browser hides the retry button
+     * and the page refuses the POST, but this is the only check that a crafted
+     * POST also meets. And it refuses rather than grading-without-recording,
+     * because a score shown for a third try is a third try however it is
+     * stored — the learner has still had the questions marked. */
+    $tries = quiz_tries($userId, $quizId);
+    if ($tries['locked']) {
+        return [
+            'score_count' => 0, 'question_count' => count($questions), 'pct' => 0,
+            'pass' => null, 'pass_pct' => quiz_pass_pct($quiz),
+            'locked' => true, 'tries' => $tries, 'breakdown' => [],
+        ];
+    }
+
     $scoreCount = 0;
     $breakdown  = [];
     $answerRows = [];
@@ -411,18 +458,15 @@ function quiz_grade_and_record(int $quizId, int $userId, array $posted): array
     }
 
     $questionCount = count($questions);
-    $existingAttempts = (int) db_value(
-        'SELECT COUNT(*) FROM quiz_attempts WHERE tenant_id = ? AND quiz_id = ? AND user_id = ?',
-        [tenant_id(), $quizId, $userId]
-    );
-    if ($existingAttempts >= QUIZ_ATTEMPT_MAX_PER_QUIZ) {
+
+    if ($tries['used'] >= QUIZ_ATTEMPT_MAX_PER_QUIZ) {
         app_log('QUIZ ATTEMPT CAP hit — quiz ' . $quizId . ' user ' . $userId);
         // Grade it for display, but don't write another row past the ceiling.
         $pct = $questionCount > 0 ? (int) round($scoreCount / $questionCount * 100) : 0;
         return [
             'score_count' => $scoreCount, 'question_count' => $questionCount, 'pct' => $pct,
             'pass' => $pct >= quiz_pass_pct($quiz), 'pass_pct' => quiz_pass_pct($quiz),
-            'breakdown' => $breakdown,
+            'locked' => false, 'tries' => $tries, 'breakdown' => $breakdown,
         ];
     }
 
@@ -450,11 +494,181 @@ function quiz_grade_and_record(int $quizId, int $userId, array $posted): array
           $quiz['course_slug'] . ' ' . $quiz['module_code'] . ' — ' . $scoreCount . '/' . $questionCount);
 
     $pct = $questionCount > 0 ? (int) round($scoreCount / $questionCount * 100) : 0;
+
+    /* The count AFTER this attempt, so the page that shows the result can say
+       what is left without asking again — and so "you have used both tries"
+       appears on the second result itself rather than only on the next visit. */
+    $after = [
+        'used'    => $tries['used'] + 1,
+        'allowed' => $tries['allowed'],
+        'left'    => max(0, $tries['allowed'] - $tries['used'] - 1),
+        'extra'   => $tries['extra'],
+    ];
+    $after['locked'] = $after['left'] < 1;
+
     return [
         'score_count' => $scoreCount, 'question_count' => $questionCount, 'pct' => $pct,
         'pass' => $pct >= quiz_pass_pct($quiz), 'pass_pct' => quiz_pass_pct($quiz),
-        'breakdown' => $breakdown,
+        'locked' => false, 'tries' => $after, 'breakdown' => $breakdown,
     ];
+}
+
+/* ---------------------------------------------------------------------------
+   How many tries are left
+
+   Counted, never stored. quiz_attempts is the record of what happened and
+   quiz_attempt_grants is the record of what was allowed; a "tries_remaining"
+   column would be a third opinion, and the one that goes wrong.
+   --------------------------------------------------------------------------- */
+
+/** How many times this learner has already submitted this quiz. */
+function quiz_attempts_used(int $userId, int $quizId): int
+{
+    return (int) db_value(
+        'SELECT COUNT(*) FROM quiz_attempts WHERE tenant_id = ? AND quiz_id = ? AND user_id = ?',
+        [tenant_id(), $quizId, $userId]
+    );
+}
+
+/** Extra tries granted to this learner on this quiz — one row, one try. */
+function quiz_extra_tries(int $userId, int $quizId): int
+{
+    return (int) db_value(
+        'SELECT COUNT(*) FROM quiz_attempt_grants WHERE tenant_id = ? AND quiz_id = ? AND user_id = ?',
+        [tenant_id(), $quizId, $userId]
+    );
+}
+
+/** The standard allowance plus whatever has been opened up for this learner. */
+function quiz_attempts_allowed(int $userId, int $quizId): int
+{
+    return QUIZ_ATTEMPTS_ALLOWED + quiz_extra_tries($userId, $quizId);
+}
+
+/**
+ * Tries left, never below zero.
+ *
+ * One query's worth of state that three surfaces need — the module widget, the
+ * quiz page and the admin results table — so they cannot each count it slightly
+ * differently.
+ *
+ * @return array{used:int, allowed:int, left:int, locked:bool, extra:int}
+ */
+function quiz_tries(int $userId, int $quizId): array
+{
+    $used    = quiz_attempts_used($userId, $quizId);
+    $extra   = quiz_extra_tries($userId, $quizId);
+    $allowed = QUIZ_ATTEMPTS_ALLOWED + $extra;
+    $left    = max(0, $allowed - $used);
+    return ['used' => $used, 'allowed' => $allowed, 'left' => $left,
+            'locked' => $left < 1, 'extra' => $extra];
+}
+
+/**
+ * Tries for many (quiz, learner) pairs at once.
+ *
+ * Two queries whatever the page size, because the admin results table shows
+ * twenty-five attempts and asking per row would be fifty round trips for a
+ * column. Keyed "quizId:userId".
+ *
+ * The IN lists are a cross product, so the result may contain pairs nobody
+ * asked about. That is cheaper than building a row-by-row WHERE and harmless:
+ * callers look up the keys they want.
+ *
+ * @param array<int,array{0:int,1:int}> $pairs
+ * @return array<string,array{used:int, allowed:int, left:int, locked:bool, extra:int}>
+ */
+function quiz_tries_bulk(array $pairs): array
+{
+    if (!$pairs) return [];
+
+    $uniq = [];
+    foreach ($pairs as [$q, $u]) $uniq[$q . ':' . $u] = [(int) $q, (int) $u];
+
+    $qIds = array_values(array_unique(array_map(static fn($p) => $p[0], $uniq)));
+    $uIds = array_values(array_unique(array_map(static fn($p) => $p[1], $uniq)));
+    $qIn  = implode(',', array_fill(0, count($qIds), '?'));
+    $uIn  = implode(',', array_fill(0, count($uIds), '?'));
+    $args = array_merge([tenant_id()], $qIds, $uIds);
+
+    $count = static function (string $table) use ($qIn, $uIn, $args): array {
+        $out = [];
+        foreach (db_all(
+            'SELECT quiz_id, user_id, COUNT(*) AS n FROM ' . $table . '
+              WHERE tenant_id = ? AND quiz_id IN (' . $qIn . ') AND user_id IN (' . $uIn . ')
+              GROUP BY quiz_id, user_id', $args
+        ) as $r) $out[(int) $r['quiz_id'] . ':' . (int) $r['user_id']] = (int) $r['n'];
+        return $out;
+    };
+
+    $used  = $count('quiz_attempts');
+    $extra = $count('quiz_attempt_grants');
+
+    $out = [];
+    foreach ($uniq as $key => $_) {
+        $u       = $used[$key] ?? 0;
+        $x       = $extra[$key] ?? 0;
+        $allowed = QUIZ_ATTEMPTS_ALLOWED + $x;
+        $left    = max(0, $allowed - $u);
+        $out[$key] = ['used' => $u, 'allowed' => $allowed, 'left' => $left,
+                      'locked' => $left < 1, 'extra' => $x];
+    }
+    return $out;
+}
+
+/**
+ * May this person open another try on this course?
+ *
+ * NARROWER THAN require_write(), and for the same reason lib/classes.php carries
+ * class_may_mark() rather than leaning on the general rule: the standing rule is
+ * that trainers teach and the academy writes, but the person who knows whether a
+ * learner deserves another go is the facilitator in the room with them. Making
+ * them queue behind an administrator for something that takes one click would
+ * mean the learner waits days, and the limit was introduced to save their time.
+ *
+ * It grants exactly one thing, on exactly the courses that person is assigned
+ * to, and it is not a general trainer write. Admins are unrestricted as usual.
+ */
+function quiz_may_grant_attempt(string $courseSlug, ?array $u = null): bool
+{
+    /* The PASSED user decides, falling back to the session — see the same note on
+       poe_may_record(). Asking is_admin() here would ignore the argument and
+       answer about whoever is signed in instead. */
+    $u = $u ?? current_user();
+    if ($u === null) return false;
+    if ($u['role'] === 'admin') return true;
+    return $u['role'] === 'trainer' && may_see_course($courseSlug, $u);
+}
+
+/**
+ * Open one more try for one learner on one quiz.
+ *
+ * Deliberately does NOT delete attempts. A reset that wiped the history would
+ * destroy the record of what the learner actually answered, which is the only
+ * thing a facilitator can look at to decide whether another try is fair — and
+ * the audit line afterwards would point at rows that no longer exist.
+ *
+ * Idempotency is not enforced: granting twice grants two tries, because that is
+ * what somebody clicking twice deliberately means here, and the rows say who did
+ * it and when.
+ */
+function quiz_grant_attempt(int $quizId, int $userId, int $by, ?string $note = null): bool
+{
+    $quiz = quiz_get($quizId);
+    if ($quiz === null) return false;
+
+    $id = db_insert('quiz_attempt_grants', [
+        'tenant_id'  => tenant_id(),
+        'quiz_id'    => $quizId,
+        'user_id'    => $userId,
+        'note'       => $note !== null && $note !== '' ? mb_substr($note, 0, 200) : null,
+        'granted_at' => now(),
+        'granted_by' => $by,
+    ]);
+
+    audit('quiz.attempt_granted', 'quiz_attempt_grants', $id,
+          $quiz['course_slug'] . ' ' . $quiz['module_code'] . ' — learner ' . $userId);
+    return $id > 0;
 }
 
 /* ---------------------------------------------------------------------------
@@ -524,6 +738,17 @@ function quiz_results_summary_for_user(int $userId, string $courseSlug): array
     $byQuiz = [];
     foreach ($attempts as $a) $byQuiz[(int) $a['quiz_id']][] = $a;
 
+    /* Grants for the whole course in one query, not one per quiz. This function
+       is what the module page's widget and my.php both read, so it runs on a
+       page showing fifty topics at once. */
+    $grants = [];
+    foreach (db_all(
+        'SELECT quiz_id, COUNT(*) AS n FROM quiz_attempt_grants
+          WHERE tenant_id = ? AND user_id = ? AND quiz_id IN (' . $in . ')
+          GROUP BY quiz_id',
+        array_merge([tenant_id(), $userId], $quizIds)
+    ) as $g) $grants[(int) $g['quiz_id']] = (int) $g['n'];
+
     $out = [];
     foreach ($quizzes as $q) {
         $qid = (int) $q['id'];
@@ -552,6 +777,15 @@ function quiz_results_summary_for_user(int $userId, string $courseSlug): array
             'pass_pct'  => quiz_pass_pct($q),
             'best'      => $best,
             'passed'    => $best !== null && $best['pct'] >= quiz_pass_pct($q),
+            /* Tries left on this one. Carried per topic rather than worked out
+               by the caller, so the widget, the quiz page and my.php cannot
+               each arrive at a different number from the same rows. */
+            'tries'     => (static function (int $used, int $extra): array {
+                $allowed = QUIZ_ATTEMPTS_ALLOWED + $extra;
+                $left    = max(0, $allowed - $used);
+                return ['used' => $used, 'allowed' => $allowed, 'left' => $left,
+                        'locked' => $left < 1, 'extra' => $extra];
+            })(count($byQuiz[$qid] ?? []), $grants[$qid] ?? 0),
         ];
     }
     return $out;

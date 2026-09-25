@@ -1179,7 +1179,42 @@ footer{background:var(--dark);color:#a9a2b4;padding:52px 0 30px;font-size:14px}
   letter-spacing:.02em}
 .my-mod-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
 .my-mod-body strong{font-size:14.5px;font-weight:700;line-height:1.4}
+/* ---- Live sessions on the dashboard (25 Sep 2026) ------------------------
+   Live teaching is in Google Classroom, so the only job of these rows is to get
+   somebody to the right place at the right time. One row per sitting, the "when"
+   first because that is what a learner is scanning for, and the join button last
+   and unmissable. The standing Classroom row is styled the same but quieter — it
+   is always there, so it should not compete with a class that is today. */
+.my-live{margin:0 0 34px}
+.my-live-lede{max-width:72ch;font-size:14px;line-height:1.7;color:var(--ink-soft);margin:0 0 14px}
+.my-live-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:13px 16px;
+  border:1px solid var(--line);border-radius:11px;margin:0 0 9px}
+.my-live-when{flex:0 0 150px;font-size:13px;color:var(--ink)}
+.my-live-when strong{display:block;font-size:13.5px}
+.my-live-what{flex:1 1 220px;min-width:0}
+.my-live-what strong{display:block;font-size:14.5px}
+.my-live-sub{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.my-live-row .btn{flex:0 0 auto;padding:8px 18px;font-size:13px}
+.my-live-note{flex:0 0 auto;font-size:12.5px;color:var(--ink-soft);font-style:italic}
+.my-live-today{display:inline-block;margin-top:3px;padding:2px 8px;border-radius:20px;
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  background:var(--green-tint);color:var(--green-deep)}
+/* A cancelled sitting stays on the list, because "cancelled" is the answer to
+   "is there a class today" and an empty list is not. */
+.my-live-off{opacity:.62}
+.my-live-off .my-live-what strong{text-decoration:line-through}
+.my-live-room{background:var(--bg-soft)}
+.my-live-none{font-size:13.5px;color:var(--ink-soft);font-style:italic;margin:10px 0 0}
+@media (max-width:640px){
+  .my-live-when{flex:1 1 100%}
+  .my-live-row .btn{flex:1 1 100%;text-align:center}
+}
+
 .my-mod-sub{font-size:12.5px;color:var(--ink-soft)}
+/* "2 need another try" — the one thing in this line the learner cannot act on
+   alone, so it is the one thing given emphasis. Not red: nothing has gone
+   wrong, there is just somebody to ask. */
+.my-mod-stuck{color:var(--ink);font-weight:600}
 .my-mod-bar{display:block;height:4px;border-radius:3px;background:var(--line);
   overflow:hidden;margin-top:4px}
 .my-mod-bar i{display:block;height:100%;background:var(--ink-soft);border-radius:3px}
@@ -1793,6 +1828,13 @@ footer{background:var(--dark);color:#a9a2b4;padding:52px 0 30px;font-size:14px}
    standalone quiz.php page, and both must keep their own look. */
 .qz-topic-open{display:block;padding:18px 22px 20px;background:var(--bg-soft)}
 .qz-topic-passed{background:var(--green-tint)}
+
+/* Two tries used up (25 Sep 2026). Deliberately NOT styled as an error: the
+   learner has done nothing wrong, and the way forward is a conversation with
+   their facilitator rather than anything on this page. So it reads as a quiet
+   closed state, and the sentence sits where the button was. */
+.qz-topic-spent{background:var(--bg-soft)}
+.qz-topic-spent-say{flex:0 1 auto;font-size:13px;color:var(--ink-soft);font-style:italic}
 .qz-topic .qz-bar{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft)}
 .qz-topic .qz-bar strong{color:var(--ink)}
 
@@ -1932,6 +1974,86 @@ html{scroll-behavior:auto!important}
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .cls-state-held{background:var(--green-tint);color:var(--green-deep)}
 .cls-state-cancelled{background:#fff0ef;color:var(--err)}
+
+/* A live session hosted in Google Classroom (25 Sep 2026). The badge and the
+   link sit together: the badge says what kind of class it is, the link is for
+   the facilitator who has to be in the room first. */
+.cls-state-online{background:var(--bg-soft);color:var(--ink);border:1px solid var(--line)}
+.cls-join{display:block;margin-top:4px;font-size:12px;font-weight:600}
+/* One course, one Classroom link, one Save. A row rather than a table because
+   there are three of them and a table would imply there is data to compare. */
+.cls-link{display:flex;align-items:flex-end;gap:12px;margin:0 0 12px}
+.cls-link .field{flex:1 1 auto;margin:0}
+.cls-link .btn{flex:0 0 auto}
+@media (max-width:640px){ .cls-link{flex-direction:column;align-items:stretch} }
+
+/* ---- Where the paper is (25 Sep 2026) -----------------------------------
+   A grid of learners by modules. Every submission on these qualifications is
+   physical, so the thing a facilitator needs to see from across a desk is the
+   GAPS — which is why an empty cell is quiet and a filled one is a solid chip,
+   rather than the other way round. */
+.poe-grid th{white-space:nowrap;font-size:11.5px}
+.poe-cell{text-align:center;padding:6px 4px}
+.poe-cell-log{border-left:2px solid var(--line)}
+.poe-mark{display:inline-block;min-width:30px;padding:3px 7px;border-radius:6px;
+  font-size:11.5px;font-weight:700;background:var(--bg-soft);color:var(--ink);
+  border:1px solid var(--line)}
+.poe-handed_in .poe-mark,.poe-mark.poe-handed_in{background:var(--bg-soft)}
+.poe-assessed .poe-mark,.poe-mark.poe-assessed{background:var(--green-tint);color:var(--green-deep);
+  border-color:var(--green-deep)}
+.poe-returned .poe-mark,.poe-mark.poe-returned{background:transparent;color:var(--ink-soft)}
+/* Not an error state. Nothing has gone wrong when a workbook is not in yet; it
+   simply is not in yet, and a page full of red would say otherwise. */
+.poe-empty{display:inline-block;min-width:30px;padding:3px 7px;font-size:12px;
+  color:var(--ink-soft);opacity:.75}
+a.poe-empty:hover,a.poe-mark:hover{border-color:var(--ink-soft)}
+.poe-key{margin:14px 0 0;font-size:12.5px;color:var(--ink-soft);display:flex;
+  flex-wrap:wrap;gap:8px;align-items:center}
+.poe-form{display:flex;flex-direction:column;gap:6px;min-width:190px;text-align:left}
+.poe-form select,.poe-form input{font-size:12.5px;padding:5px 7px}
+.poe-form-act{display:flex;gap:6px}
+.poe-form-act .btn{padding:5px 11px;font-size:12px}
+
+/* ---- The logbook ---------------------------------------------------------
+   Typed on screen, printed to be signed. The print rules are the point of the
+   page: the sheet that comes out is what goes into a portfolio of evidence, so
+   it drops the chrome, the forms and the buttons and keeps the rows, the total
+   and the two signature lines. */
+.lb-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;
+  gap:14px;margin:0 0 18px}
+.lb-who{font-size:13px;color:var(--ink-soft);margin:4px 0 0}
+.lb-head-act{display:flex;gap:10px;align-items:center}
+.lb-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:700px){ .lb-fields{grid-template-columns:1fr} }
+.lb-table td{vertical-align:top}
+.lb-date{white-space:nowrap;font-size:13px}
+.lb-hrs{white-space:nowrap;text-align:right}
+.lb-unit{font-size:12.5px;white-space:nowrap}
+.lb-unit-t{display:block;font-size:11.5px;color:var(--ink-soft);white-space:normal;max-width:16ch}
+.lb-ev{display:block;font-size:12px;color:var(--ink-soft);margin-top:4px;font-style:italic}
+.lb-del{display:inline}
+.lb-sign{margin:26px 0 0;padding:20px 0 0;border-top:1px solid var(--line)}
+.lb-sign-say{font-size:13px;color:var(--ink-soft);margin:0 0 10px}
+.lb-sign-row{display:flex;flex-wrap:wrap;gap:40px;margin:0 0 22px}
+.lb-sign-line{flex:1 1 220px;border-bottom:1px solid var(--ink-soft);padding-bottom:34px;
+  font-size:12px;color:var(--ink-soft)}
+.lb-foot{font-size:11.5px;color:var(--ink-soft);margin:16px 0 0;max-width:80ch}
+.lb-back{margin:22px 0 0;font-size:13.5px}
+
+@media print{
+  /* The printed logbook. Everything that is a control on screen is not on paper,
+     and the table must not be cut in half by a page break in the middle of a
+     row — an entry split across two sheets is an entry a moderator queries. */
+  .lb-printing .nav, .lb-printing nav, .lb-printing .lb-back,
+  .lb-printing .adm-notice, .lb-printing .form-err{display:none !important}
+  .lb-printing .section{padding:0 !important}
+  .lb-printing .wrap{max-width:none;padding:0}
+  .lb-printing .adm-scroll{overflow:visible}
+  .lb-printing .lb-table{font-size:11pt}
+  .lb-printing .lb-table tr{break-inside:avoid;page-break-inside:avoid}
+  .lb-printing .lb-sign{break-inside:avoid;page-break-inside:avoid}
+  .lb-printing a{text-decoration:none;color:inherit}
+}
 
 /* The register. One row per learner, one column per mark — a facilitator
    reads down a column to see who is missing, which is how a room is counted. */

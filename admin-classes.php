@@ -1,7 +1,16 @@
 <?php
 declare(strict_types=1);
 
-/* In-person classes — scheduling them, and finding their registers.
+/* Classes — scheduling them, finding their registers, and saying where the
+ * live ones are held.
+ *
+ * A class here may be in a room or in Google Classroom. Since 25 Sep 2026 live
+ * teaching happens in Classroom rather than anything this platform streams, so a
+ * class can carry a join link, and each course can carry the Classroom it lives
+ * in. A class WITH a link is an online session; one without is in a room. See
+ * lib/sessions.php for why that is inferred from the link rather than stored as a
+ * mode, and for what this platform deliberately does not try to know about
+ * Google.
  *
  * WHO GETS HERE
  *
@@ -27,6 +36,7 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/classes.php';
+require __DIR__ . '/lib/sessions.php';
 require __DIR__ . '/lib/chrome.php';
 
 $me    = require_staff();
@@ -55,8 +65,27 @@ if (is_post()) {
         $res = null;
         if ($action === 'create') {
             $res = db_optional(fn() => class_create($_POST, (int) $me['id']), null);
+            /* The join link is saved against the class that was just made, so it
+               needs its id — which is why class_create() returns one. A failed
+               create leaves no class and no link. */
+            if (is_array($res) && $res[0] && (int) ($res[2] ?? 0) > 0 && isset($_POST['join_url'])) {
+                db_optional(fn() => class_link_set((int) $res[2], (string) $_POST['join_url'], (int) $me['id']), null);
+            }
         } elseif ($action === 'update') {
             $res = db_optional(fn() => class_update((int) ($_POST['id'] ?? 0), $_POST, (int) $me['id']), null);
+            if (is_array($res) && $res[0] && isset($_POST['join_url'])) {
+                /* An emptied box removes the link and puts the class back in a
+                   room. That is why this runs whenever the field was submitted
+                   rather than only when it has something in it. */
+                $link = db_optional(fn() => class_link_set((int) ($_POST['id'] ?? 0),
+                                                          (string) $_POST['join_url'], (int) $me['id']), null);
+                if (is_array($link) && !$link[0]) $res = [false, $link[1], 0];
+            }
+        } elseif ($action === 'course_link') {
+            $res = db_optional(fn() => course_link_set(
+                (string) ($_POST['course_slug'] ?? ''), 'classroom',
+                (string) ($_POST['url'] ?? ''), null, (int) $me['id']
+            ), null);
         }
         if ($res === null && $action !== '') {
             $error = db_schema_notice();
@@ -76,6 +105,14 @@ $courses = learner_catalogue();
 if ($admin && isset($_GET['edit'])) {
     $editing = db_optional(fn() => class_get((int) $_GET['edit']));
 }
+$editingLink = $editing !== null
+    ? db_optional(fn() => class_link_get((int) $editing['id'])) : null;
+
+/* Every class's join link and every course's Classroom, each in one query, for
+   the list and the block below. */
+$classLinks  = db_optional(fn() => class_links_for(array_map(
+    static fn($c) => (int) $c['id'], $classes)), []) ?: [];
+$courseLinks = db_optional(fn() => course_links_all('classroom'), []) ?: [];
 
 audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
 ?>
@@ -84,7 +121,7 @@ audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>In-person classes — <?= e(brand('academy')) ?></title>
+<title>Classes — <?= e(brand('academy')) ?></title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="<?= e(asset('styles.css')) ?>">
 </head>
@@ -96,7 +133,7 @@ audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
 
     <div class="adm-head">
       <div>
-        <span class="eyebrow">In-person</span>
+        <span class="eyebrow">Live and in person</span>
         <h2><?= $admin ? 'Classes and registers' : 'My classes' ?></h2>
       </div>
     </div>
@@ -161,6 +198,15 @@ audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
                      value="<?= e((string) ($editing['venue'] ?? '')) ?>">
             </div>
             <div class="field">
+              <label for="c-join">Join link (optional)</label>
+              <input id="c-join" type="url" name="join_url" maxlength="500"
+                     placeholder="https://classroom.google.com/…"
+                     value="<?= e((string) ($editingLink ?? '')) ?>">
+              <p class="field-hint">Paste the Google Classroom or Meet link and this sitting
+                 shows as a live session learners can join. Leave it empty for a class in a
+                 room. Clearing it puts the class back in the room.</p>
+            </div>
+            <div class="field">
               <label for="c-facil">Facilitator</label>
               <select id="c-facil" name="facilitator_id">
                 <option value="">Nobody yet</option>
@@ -201,6 +247,32 @@ audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
       </div>
     <?php endif; ?>
 
+    <?php if ($admin): ?>
+      <div class="adm-block">
+        <h3>Where each course is taught live</h3>
+        <p class="mat-intro">Live sessions are hosted in Google Classroom rather than on this
+           site. Paste a course's Classroom link here and every learner on that course sees
+           it on their dashboard — including between intakes, when nothing is scheduled.
+           Clearing the box removes it rather than leaving learners a button that goes
+           nowhere.</p>
+        <?php foreach ($courses as $slug => $c): ?>
+          <?php if (empty($c['tracked'])) continue; ?>
+          <form method="POST" class="form cls-link">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="course_link">
+            <input type="hidden" name="course_slug" value="<?= e($slug) ?>">
+            <div class="field">
+              <label for="cl-<?= e($slug) ?>"><?= e((string) ($c['title'] ?? $slug)) ?></label>
+              <input id="cl-<?= e($slug) ?>" type="url" name="url" maxlength="500"
+                     placeholder="https://classroom.google.com/…"
+                     value="<?= e((string) ($courseLinks[$slug]['url'] ?? '')) ?>">
+            </div>
+            <button class="btn btn-ghost" type="submit">Save</button>
+          </form>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
     <div class="adm-block">
       <h3><?= $admin ? 'Every class' : 'Classes on your courses' ?></h3>
 
@@ -235,6 +307,15 @@ audit('classes.viewed', 'classes', null, count($classes) . ' class(es)');
                     if ($c['venue']): ?> · <?= e((string) $c['venue']) ?><?php endif; ?></span>
                   <?php if ((string) $c['status'] !== 'scheduled'): ?>
                     <span class="cls-state cls-state-<?= e((string) $c['status']) ?>"><?= e(ucfirst((string) $c['status'])) ?></span>
+                  <?php endif; ?>
+                  <?php /* A join link means this sitting is online. The facilitator gets the
+                           link itself, not just the badge — they are the one who has to be in
+                           there first, and hunting for it in their email at 09:00 is exactly
+                           the sort of thing this page exists to prevent. */ ?>
+                  <?php if (!empty($classLinks[(int) $c['id']])): ?>
+                    <span class="cls-state cls-state-online">Online</span>
+                    <a class="cls-join" href="<?= e((string) $classLinks[(int) $c['id']]) ?>"
+                       target="_blank" rel="noopener noreferrer">Open the session</a>
                   <?php endif; ?>
                 </td>
                 <td><?= e(class_when((string) $c['held_on'], $c['starts_at'] ?? null, $c['ends_at'] ?? null)) ?></td>

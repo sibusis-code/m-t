@@ -727,3 +727,197 @@ CREATE TABLE IF NOT EXISTS class_attendance (
   CONSTRAINT fk_attend_class  FOREIGN KEY (class_id)  REFERENCES classes (id),
   CONSTRAINT fk_attend_user   FOREIGN KEY (user_id)   REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- LIVE SESSIONS, HOSTED SOMEWHERE ELSE
+--
+-- Added 25 Sep 2026. The academy teaches live, and the decision is that live
+-- teaching happens in Google Classroom rather than in a streaming engine built
+-- here. That is a good decision, and these two tables are the whole of what it
+-- costs us: a link, and a link per session. We do not model the meeting, the
+-- recording, the chat or the roll. Google already has those, and a second copy
+-- of any of them would be the copy that is wrong.
+--
+-- WHY A LINK IS NOT A COLUMN ON `classes`
+--
+-- Because this codebase does not ALTER TABLE. install_apply_schema() re-runs
+-- every CREATE statement on each deploy and has to stay idempotent, and there
+-- is no shell on the hosting to run a migration from. The same constraint is
+-- why a topic quiz reuses quizzes.module_code and why material_files is its own
+-- table. A new fact gets a new table.
+--
+-- TWO TABLES, BECAUSE THEY ANSWER DIFFERENT QUESTIONS
+--
+--   course_links   "where does this course live?" — the standing Google
+--                  Classroom for the course. Set once, changes almost never.
+--   class_links    "where is THIS session?" — an optional per-session link,
+--                  for when a particular sitting has its own meeting.
+--
+-- A class with a row in class_links is an ONLINE session. A class without one
+-- is in a room. That is deliberately inferred from the link rather than stored
+-- as a mode flag: a mode column and a link column can disagree, and then the
+-- page has to decide which to believe in front of a learner who is late.
+--
+-- kind is constrained in PHP, not by an ENUM, so that adding Teams or Zoom
+-- later is a code change rather than a migration nobody can run.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS course_links (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  kind        VARCHAR(20)  NOT NULL,   -- 'classroom' today; see COURSE_LINK_KINDS
+  url         VARCHAR(500) NOT NULL,
+  label       VARCHAR(190)     NULL,
+  updated_at  DATETIME     NOT NULL,
+  updated_by  INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  -- One link per kind per course per tenant. Pasting a second Classroom for a
+  -- course replaces the first rather than quietly giving learners two doors.
+  UNIQUE KEY uq_courselink_slot (tenant_id, course_slug, kind),
+  CONSTRAINT fk_courselink_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_courselink_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS class_links (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id  INT UNSIGNED NOT NULL,
+  class_id   INT UNSIGNED NOT NULL,
+  url        VARCHAR(500) NOT NULL,
+  updated_at DATETIME     NOT NULL,
+  updated_by INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_classlink_once (tenant_id, class_id),
+  CONSTRAINT fk_classlink_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_classlink_class  FOREIGN KEY (class_id)   REFERENCES classes (id),
+  CONSTRAINT fk_classlink_user   FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- THE LOGBOOK
+--
+-- Added 25 Sep 2026. The qualification needs a logbook as well as a workbook,
+-- and a logbook is a dated record of what the learner actually did: the date,
+-- what they did, which unit standard or section it evidences, and how long it
+-- took. The learner types it here; they print it, and their facilitator signs
+-- the printout into the portfolio of evidence.
+--
+-- WHAT THIS TABLE IS NOT
+--
+-- It is not the evidence. The signed printout is. Nothing in here is assessed,
+-- nothing in here is a mark, and no code may present it as either — the same
+-- rule lib/quiz.php sets for a self-check score. It is a record kept so that
+-- the printout is legible, complete and not lost, which is the whole reason to
+-- type it rather than write it in a book on a building site.
+--
+-- WHY TWO DATES
+--
+-- entry_date is the day the work happened, which is not the day it was typed.
+-- Somebody catching up on a fortnight is normal and honest, so the two are kept
+-- apart and both are visible to a facilitator reading it.
+--
+-- MINUTES, NOT HOURS. "2.5" in a DECIMAL and "2h 30m" on a page are the same
+-- fact stored two ways, and rounding a decimal for display is where a logbook
+-- starts disagreeing with itself. Minutes are exact; the page formats them.
+--
+-- unit_code is nullable free text checked against the curriculum, not a foreign
+-- key: a section of the guide, a unit standard, or nothing yet. A learner
+-- mid-entry must be able to save a row before they have decided.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS logbook_entries (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  user_id     INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  unit_code   VARCHAR(30)      NULL,   -- module, topic or unit standard; may be blank
+  entry_date  DATE         NOT NULL,   -- the day the work happened
+  minutes     SMALLINT UNSIGNED NULL,  -- never hours; the page formats these
+  activity    TEXT         NOT NULL,
+  evidence    VARCHAR(190)     NULL,   -- what is in the file to show for it
+  created_at  DATETIME     NOT NULL,
+  updated_at  DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_logbook_user (tenant_id, user_id, course_slug, entry_date),
+  CONSTRAINT fk_logbook_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id),
+  CONSTRAINT fk_logbook_user   FOREIGN KEY (user_id)   REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- WHERE THE PAPER IS
+--
+-- Added 25 Sep 2026. Every submission on this qualification is physical: the
+-- learner completes the workbook and the logbook on paper, hands them to their
+-- facilitator, and the facilitator builds the portfolio of evidence that goes
+-- for assessment, moderation and verification.
+--
+-- So this table does not hold submissions. It holds WHERE THE PAPER IS, which
+-- is the question nobody could answer before: who has handed in section 4,
+-- whose file is two workbooks short, what went to the assessor and when. One
+-- row per learner per module per kind, and its whole content is a status, a
+-- date, and the name of the person who took it.
+--
+-- WHY THERE IS NO 'issued' STATUS
+--
+-- A missing row means not handed in. Inventing a row per learner per module the
+-- moment a material is uploaded would put thousands of rows in here saying
+-- nothing, and would make "not handed in" and "handed in and lost" look the
+-- same — exactly the distinction class_attendance refuses to blur.
+--
+-- WHY updated_by IS RECORDED, same reasoning as class_attendance.marked_by: a
+-- hand-in with nobody's name against it is worth much less than one with a name
+-- and a time, because the point of a physical hand-in is that a named person
+-- took custody of the paper.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS poe_submissions (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id   INT UNSIGNED NOT NULL,
+  course_slug VARCHAR(60)  NOT NULL,
+  module_code VARCHAR(20)  NOT NULL,
+  user_id     INT UNSIGNED NOT NULL,
+  kind        VARCHAR(20)  NOT NULL,   -- workbook | logbook; see POE_KINDS
+  -- handed_in | assessed | returned. No 'issued': see the note above.
+  status      VARCHAR(20)  NOT NULL,
+  on_date     DATE             NULL,   -- the day the paper changed hands
+  note        VARCHAR(200)     NULL,
+  updated_at  DATETIME     NOT NULL,
+  updated_by  INT UNSIGNED     NULL,   -- the person who took or assessed it
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_poe_slot (tenant_id, course_slug, module_code, user_id, kind),
+  KEY ix_poe_course (tenant_id, course_slug, module_code),
+  KEY ix_poe_user (tenant_id, user_id),
+  CONSTRAINT fk_poe_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_poe_user   FOREIGN KEY (user_id)    REFERENCES users (id),
+  CONSTRAINT fk_poe_staff  FOREIGN KEY (updated_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- ONE MORE TRY
+--
+-- Added 25 Sep 2026, with the change from unlimited self-check attempts to two.
+-- Two tries is the rule now: a learner should read the topic and answer it, not
+-- grind the same ten questions until the pattern gives the answers away.
+--
+-- But a topic only counts as done at 80%, so two tries with no way back would
+-- leave a learner who misread twice permanently unable to complete a module. A
+-- row in here is one extra try, granted by a named person.
+--
+-- APPEND-ONLY, AND COUNTED. Not a "tries_remaining" number written down and
+-- decremented: that kind of column drifts, and when it drifts nobody can say
+-- what it should have been. Attempts are counted from quiz_attempts, and the
+-- allowance is QUIZ_ATTEMPTS_ALLOWED plus the number of rows here — so the two
+-- cannot disagree, and the history of who opened what stays readable.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS quiz_attempt_grants (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tenant_id  INT UNSIGNED NOT NULL,
+  quiz_id    INT UNSIGNED NOT NULL,
+  user_id    INT UNSIGNED NOT NULL,
+  note       VARCHAR(200)     NULL,
+  granted_at DATETIME     NOT NULL,
+  granted_by INT UNSIGNED     NULL,
+  PRIMARY KEY (id),
+  KEY ix_qgrant_quiz_user (tenant_id, quiz_id, user_id),
+  CONSTRAINT fk_qgrant_tenant FOREIGN KEY (tenant_id)  REFERENCES tenants (id),
+  CONSTRAINT fk_qgrant_quiz   FOREIGN KEY (quiz_id)    REFERENCES quizzes (id),
+  CONSTRAINT fk_qgrant_user   FOREIGN KEY (user_id)    REFERENCES users (id),
+  CONSTRAINT fk_qgrant_staff  FOREIGN KEY (granted_by) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

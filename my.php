@@ -32,6 +32,8 @@ require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/install.php';   // install_readable_password(), via learner.php
 require __DIR__ . '/lib/learner.php';
 require __DIR__ . '/lib/quiz.php';
+require __DIR__ . '/lib/classes.php';    // class_when(), for the live-session list
+require __DIR__ . '/lib/sessions.php';   // where the live teaching actually happens
 require __DIR__ . '/lib/curriculum.php';   // groups the topic quizzes by module, below
 require __DIR__ . '/lib/chrome.php';
 
@@ -117,6 +119,72 @@ function when_local(?string $utc): string
     <?php endif; ?>
     <?php if ($notice !== ''): ?><p class="adm-notice" role="status"><?= e($notice) ?></p><?php endif; ?>
     <?php if ($error  !== ''): ?><p class="form-err"   role="alert" ><?= e($error)  ?></p><?php endif; ?>
+
+    <?php
+      /* ---- Live sessions (25 Sep 2026) -------------------------------------
+         Live teaching happens in Google Classroom, not here, so this block's
+         whole job is to get somebody to the right place at the right time: the
+         next few sittings, and the standing Classroom for each course.
+
+         BOTH, and not just the next class, because between intakes there is no
+         scheduled class at all and the Classroom is still where the course
+         lives. A learner who opens this page on a quiet week should not be told
+         nothing. */
+      $sessions    = db_optional(fn() => learner_sessions((int) $me['id']), []) ?: [];
+      $courseRooms = db_optional(fn() => learner_course_links((int) $me['id']), []) ?: [];
+    ?>
+    <?php if ($sessions || $courseRooms): ?>
+      <h3 class="my-h">Live sessions</h3>
+      <div class="my-live">
+        <p class="my-live-lede">Live classes are taught in Google Classroom. Attendance is still
+          marked by your facilitator, so join with the account the academy has for you.</p>
+
+        <?php foreach ($sessions as $s): ?>
+          <?php
+            $cancelled = (string) $s['status'] === 'cancelled';
+            $today     = (string) $s['held_on'] === gmdate('Y-m-d');
+          ?>
+          <div class="my-live-row<?= $cancelled ? ' my-live-off' : '' ?>">
+            <span class="my-live-when">
+              <strong><?= e(class_when((string) $s['held_on'], $s['starts_at'], $s['ends_at'])) ?></strong>
+              <?php if ($today && !$cancelled): ?><span class="my-live-today">Today</span><?php endif; ?>
+            </span>
+            <span class="my-live-what">
+              <strong><?= e((string) $s['title']) ?></strong>
+              <span class="my-live-sub"><?= e(learner_course_title((string) $s['course_slug'])) ?><?php
+                if ($s['facilitator'] !== ''): ?> · with <?= e((string) $s['facilitator']) ?><?php endif; ?><?php
+                if (!$s['join_url'] && $s['venue']): ?> · <?= e((string) $s['venue']) ?><?php endif; ?></span>
+            </span>
+            <?php if ($cancelled): ?>
+              <span class="my-live-note">Cancelled</span>
+            <?php elseif ($s['join_url']): ?>
+              <a class="btn btn-primary" href="<?= e((string) $s['join_url']) ?>"
+                 target="_blank" rel="noopener noreferrer">Join</a>
+            <?php else: ?>
+              <span class="my-live-note">In person</span>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+
+        <?php foreach ($courseRooms as $slug => $room): ?>
+          <div class="my-live-row my-live-room">
+            <span class="my-live-when"><strong>Any time</strong></span>
+            <span class="my-live-what">
+              <strong><?= e((string) ($room['label'] ?? 'Google Classroom')) ?></strong>
+              <span class="my-live-sub"><?= e(learner_course_title((string) $slug)) ?> ·
+                materials, announcements and the recordings of past sessions</span>
+            </span>
+            <a class="btn btn-ghost" href="<?= e((string) $room['url']) ?>"
+               target="_blank" rel="noopener noreferrer">Open Classroom</a>
+          </div>
+        <?php endforeach; ?>
+
+        <?php if (!$sessions): ?>
+          <p class="my-live-none">Nothing is scheduled at the moment. Announcements for the next
+            sitting go out in Classroom.</p>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
 
     <h3 class="my-h">Your courses</h3>
 
@@ -210,11 +278,18 @@ function when_local(?string $utc): string
                     $ticked = 0;
                     $passed = 0;
                     $withQuiz = 0;
+                    /* Topics where both tries are gone and the bar was not
+                       reached. Counted here because it is the one thing on this
+                       page a learner cannot fix themselves — it is a sentence
+                       saying "go and speak to your facilitator", and without it
+                       they would sit in front of a card with no button. */
+                    $stuck = 0;
                     foreach ($topics as $tc) {
                         if (!empty($tree[$mid]['topics'][$tc])) $ticked++;
                         if (isset($quizSummary[$tc])) {
                             $withQuiz++;
                             if (!empty($quizSummary[$tc]['passed'])) $passed++;
+                            elseif (!empty($quizSummary[$tc]['tries']['locked'])) $stuck++;
                         }
                     }
                     $total = count($topics);
@@ -230,7 +305,9 @@ function when_local(?string $utc): string
                       <strong><?= e($mod['title']) ?></strong>
                       <span class="my-mod-sub">
                         <?= (int) $ticked ?> of <?= (int) $total ?> topics done<?php
-                          if ($withQuiz > 0): ?> · <?= (int) $passed ?> of <?= (int) $withQuiz ?> quizzes passed<?php endif; ?>
+                          if ($withQuiz > 0): ?> · <?= (int) $passed ?> of <?= (int) $withQuiz ?> quizzes passed<?php endif; ?><?php
+                          if ($stuck > 0): ?> · <span class="my-mod-stuck"><?= (int) $stuck ?>
+                            <?= $stuck === 1 ? 'needs' : 'need' ?> another try</span><?php endif; ?>
                       </span>
                       <span class="my-mod-bar" aria-hidden="true"><i style="width:<?= (int) $pct ?>%"></i></span>
                     </span>
@@ -239,8 +316,10 @@ function when_local(?string $utc): string
                 <?php endforeach; ?>
                 <p class="my-mod-note">A topic ticks itself off when you pass its questions at
                   <?= (int) QUIZ_DEFAULT_PASS_PCT ?>%. You can also tick one yourself on the module page,
-                  and you can retake any set of questions as often as you like — your best
-                  score is the one kept.</p>
+                  and you get two tries at each set of questions — your best
+                  score is the one kept. If both tries are gone and you have not reached
+                  <?= (int) QUIZ_DEFAULT_PASS_PCT ?>%, your facilitator can open the questions again
+                  for you.</p>
               </div>
             <?php endif; ?>
           <?php else: ?>
