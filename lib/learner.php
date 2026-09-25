@@ -403,6 +403,96 @@ function learner_enrol_registration(int $regId, string $courseSlug, string $deli
 }
 
 /**
+ * Read a pasted list of people into rows a bulk add can use.
+ *
+ * WHY THIS IS FORGIVING
+ *
+ * The list arrives in an email, from somebody who is not thinking about format.
+ * Kgomotso's came as bare addresses with the names in a separate line, and a
+ * previous one came as "Name <address>". A parser that insists on one shape
+ * means the administrator reformats eight lines by hand, which is the work this
+ * is supposed to remove. So it accepts, per line:
+ *
+ *     someone@example.com
+ *     Jane Doe <jane@example.com>
+ *     jane@example.com  Jane Doe
+ *     Jane Doe, jane@example.com
+ *     Jane Doe <jane@example.com>   IN1234   Procurement
+ *
+ * The EMAIL is the anchor — it is the only field that must be there, because it
+ * is what they sign in with. Everything else is whatever is left over: the first
+ * leftover word is the first name, the rest the surname.
+ *
+ * A line it cannot read comes back as an error rather than a guess. An account
+ * is a credential; inventing an address to make a line parse would create a
+ * login nobody can use and a person who cannot be told why.
+ *
+ * @return array{rows: list<array{first:string,last:string,email:string}>,
+ *               errors: list<array{line:int, text:string, why:string}>}
+ */
+function learner_parse_people(string $raw): array
+{
+    $rows = [];
+    $errors = [];
+    $seen = [];
+
+    foreach (preg_split('/\r\n|\r|\n/', $raw) as $i => $line) {
+        $n = $i + 1;
+        $text = trim($line);
+        if ($text === '') continue;
+        /* A line of dashes or a heading somebody pasted along with the list. */
+        if (preg_match('/^[-=_*#\s]+$/', $text)) continue;
+
+        if (!preg_match('/[\w.+-]+@[\w.-]+\.\w{2,}/', $text, $m)) {
+            $errors[] = ['line' => $n, 'text' => mb_substr($text, 0, 60),
+                         'why'  => 'no email address on this line'];
+            continue;
+        }
+        $email = mb_strtolower($m[0]);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = ['line' => $n, 'text' => mb_substr($text, 0, 60),
+                         'why'  => 'that address does not look right'];
+            continue;
+        }
+        if (isset($seen[$email])) {
+            $errors[] = ['line' => $n, 'text' => mb_substr($text, 0, 60),
+                         'why'  => 'the same address is on line ' . $seen[$email]];
+            continue;
+        }
+        $seen[$email] = $n;
+
+        /* Whatever is not the address is the name. Punctuation that only ever
+           separated the two is dropped; a hyphen or an apostrophe inside a name
+           is not. */
+        $rest = trim(str_replace($m[0], ' ', $text));
+        $rest = trim(preg_replace('/[<>,;:|]+/', ' ', $rest) ?? '');
+        $rest = trim(preg_replace('/\s+/', ' ', $rest) ?? '');
+
+        [$first, $last] = $rest !== '' ? learner_split_name($rest) : ['', ''];
+        if ($first === '' || $first === 'Learner') {
+            /* No name given. The part before the @ is the best honest guess, and
+               a visible guess beats "Learner" eight times down the account list.
+               Dots and underscores separate names; a HYPHEN does not — it is
+               usually inside one ("sha-sha"), so it stays and is capitalised on
+               both sides. The administrator can type a real name in the box
+               instead; this is only what happens when they paste bare addresses. */
+            $local = (string) strstr($email, '@', true);
+            $local = preg_replace('/[^a-z0-9.\-_]+/i', '', $local) ?? '';
+            $local = trim((string) preg_replace('/[._]+/', ' ', $local));
+            $local = (string) preg_replace_callback('/(^|[\s\-])([a-z])/',
+                        static fn(array $m): string => $m[1] . strtoupper($m[2]), $local);
+            [$first, $last] = learner_split_name($local !== '' ? $local : 'Learner');
+        }
+
+        $rows[] = ['first' => mb_substr($first, 0, 80),
+                   'last'  => mb_substr($last, 0, 80),
+                   'email' => mb_substr($email, 0, 190)];
+    }
+
+    return ['rows' => $rows, 'errors' => $errors];
+}
+
+/**
  * Enrol an account that already exists on a course, with no registration behind it.
  *
  * WHY THIS EXISTS (25 Sep 2026)

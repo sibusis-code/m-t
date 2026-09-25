@@ -46,6 +46,10 @@ $notice = '';
 $error  = '';
 /* Held for this one response only — see the same pattern on admin.php. */
 $fresh  = null;
+/* The same thing for a whole pasted list: one row per person, password and
+   all. Kept separate from $fresh because that one is a single account and is
+   rendered as a sentence; this is a table somebody reads down and copies. */
+$freshList = [];
 
 if (is_post()) {
     if (!csrf_valid()) {
@@ -132,6 +136,80 @@ if (is_post()) {
                     'email'    => $email,
                     'password' => $password,
                 ];
+            }
+
+        /* -------------------------------------------------------------------
+           Adding several people at once.
+
+           A cohort arrives as a list in an email, and adding it one form at a
+           time means the administrator copies eight passwords out of eight
+           separate page loads — and a password is shown ONCE, so one missed
+           copy is an account nobody can sign in to.
+
+           Always learners, never staff: an administrator or a trainer is a
+           deliberate, individual decision, and the single form below is where
+           that decision gets made with its own dropdown in front of you.
+           ------------------------------------------------------------------- */
+        } elseif ($action === 'create_many') {
+            $slug  = post_str('course_slug', 60);
+            $parsed = learner_parse_people((string) ($_POST['people'] ?? ''));
+
+            if (!$parsed['rows'] && !$parsed['errors']) {
+                $error = 'There was nobody in that box.';
+            } else {
+                foreach ($parsed['errors'] as $bad) {
+                    $error = trim($error . ' Line ' . $bad['line'] . ' — ' . $bad['why']
+                                 . ' ("' . $bad['text'] . '").');
+                }
+                $made = 0; $already = 0;
+                foreach ($parsed['rows'] as $r) {
+                    $exists = db_optional(fn() => db_one(
+                        'SELECT id FROM users WHERE tenant_id = ? AND email = ?',
+                        [tenant_id(), $r['email']]), null);
+                    if ($exists !== null) {
+                        /* Never reuse an address silently: that resets a real
+                           person's password and locks them out mid-course. */
+                        $already++;
+                        $freshList[] = ['name' => trim($r['first'] . ' ' . $r['last']),
+                                        'email' => $r['email'], 'password' => null,
+                                        'note' => 'already had an account — left alone'];
+                        continue;
+                    }
+
+                    $password = install_readable_password();
+                    $newId = db_optional(fn() => db_insert('users', [
+                        'tenant_id'     => tenant_id(),
+                        'email'         => $r['email'],
+                        'password_hash' => auth_hash($password),
+                        'first_name'    => $r['first'],
+                        'last_name'     => $r['last'],
+                        'employee_no'   => null,
+                        'department'    => null,
+                        'role'          => 'learner',
+                        'status'        => 'active',
+                        'created_at'    => now(),
+                    ]), 0);
+                    if (!$newId) {
+                        $freshList[] = ['name' => trim($r['first'] . ' ' . $r['last']),
+                                        'email' => $r['email'], 'password' => null,
+                                        'note' => 'could not be created'];
+                        continue;
+                    }
+                    audit('user.created', 'users', $newId, 'role: learner (bulk)');
+                    $made++;
+
+                    $note = 'not on a course yet';
+                    if ($slug !== '') {
+                        $en = db_optional(fn() => learner_enrol_user($newId, $slug), null);
+                        $note = ($en !== null && $en['ok']) ? 'enrolled' : 'account made, NOT enrolled';
+                    }
+                    $freshList[] = ['name' => trim($r['first'] . ' ' . $r['last']),
+                                    'email' => $r['email'], 'password' => $password,
+                                    'note' => $note];
+                }
+                $notice = $made . ' account' . ($made === 1 ? '' : 's') . ' created'
+                        . ($slug !== '' ? ' and enrolled on ' . learner_course_title($slug) : '')
+                        . ($already ? ', ' . $already . ' already existed and were left alone' : '') . '.';
             }
 
         /* -------------------------------------------------------------------
@@ -392,6 +470,37 @@ function when_u(?string $utc): string
       </div>
     <?php endif; ?>
 
+    <?php /* A whole cohort's credentials, once. Deliberately a table rather than
+             a run of sentences: this is read down a column and copied, and the
+             passwords are not recoverable, so the warning is the heading. */ ?>
+    <?php if ($freshList): ?>
+      <div class="adm-creds" role="alert">
+        <h3>Sign-in details for <?= count($freshList) ?> <?= count($freshList) === 1 ? 'person' : 'people' ?></h3>
+        <p><strong>Copy this table now — these passwords are not shown again.</strong>
+          Hand them over in person or by phone, not by email. Everyone here can change
+          their own password from their dashboard once they are in.</p>
+        <p>Sign-in page:
+          <?= e('https://' . ($_SERVER['HTTP_HOST'] ?? 'centenarynetworks.com') . app_base_path() . 'login') ?></p>
+        <div class="adm-scroll">
+          <table class="adm-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Password</th><th></th></tr></thead>
+            <tbody>
+              <?php foreach ($freshList as $f): ?>
+                <tr>
+                  <td><?= e((string) $f['name']) ?></td>
+                  <td><?= e((string) $f['email']) ?></td>
+                  <td class="adm-pass"><?= $f['password'] !== null
+                        ? e((string) $f['password'])
+                        : '<span class="adm-none">unchanged</span>' ?></td>
+                  <td class="adm-sub"><?= e((string) $f['note']) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <?php /* Closed by default. This page is read many times a day to look
              somebody up and used to add an account rarely, so the form that is
              wanted once a month should not be the first thing above the list
@@ -442,6 +551,46 @@ function when_u(?string $utc): string
         <button type="submit" class="btn btn-primary">Create the account</button>
         <p class="field-hint">A password is generated and shown to you once, on this page. Nothing
           is emailed — give it to them in person or over the phone.</p>
+      </form>
+    </details>
+
+    <?php /* The same thing for a cohort. Separate from the form above rather than
+             a mode of it: that one makes ONE account and can make staff, this one
+             makes many and only ever makes learners. Folding them together would
+             put a role dropdown next to a box holding eight strangers. */ ?>
+    <details class="adm-add">
+      <summary>Add several people at once</summary>
+      <p class="adm-add-lede">For a cohort that arrives as a list — testers, or an intake the
+        academy is enrolling itself. Paste one person per line. Everyone added here is a
+        <strong>learner</strong>; an administrator or a trainer is made one at a time, above.</p>
+      <form method="POST" class="form adm-add-form">
+        <?= csrf_field() ?>
+        <input type="hidden" name="a" value="create_many">
+        <div class="field">
+          <label for="n-people">The list</label>
+          <textarea id="n-people" name="people" rows="8" required
+placeholder="babalwa@sps.africa
+Khudu Pitje &lt;khudu.pitje@newgx.co.za&gt;
+Jane Doe, jane@example.com"></textarea>
+          <p class="field-hint">An email address on each line is all that is required. A name
+            before or after it is used if you give one; otherwise the address is used to make a
+            sensible one you can see on the list below. A line with no address is reported rather
+            than guessed at.</p>
+        </div>
+        <div class="field">
+          <label for="n-people-course">Put them all on a course</label>
+          <select id="n-people-course" name="course_slug">
+            <option value="">Not yet</option>
+            <?php foreach (learner_catalogue() as $slug => $c): ?>
+              <?php if (($c['title'] ?? null) === null) continue; ?>
+              <option value="<?= e($slug) ?>"><?= e((string) $c['title']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Create the accounts</button>
+        <p class="field-hint">Every password is generated and shown once, in one table. Anyone who
+          already has an account is listed and <strong>left completely alone</strong> — their
+          password is never reset by this.</p>
       </form>
     </details>
 
