@@ -109,11 +109,48 @@ if (is_post()) {
                 audit('user.created', 'users', $newId, 'role: ' . $role);
                 $notice = trim($first . ' ' . $last) . ' can now sign in'
                         . ($role === 'admin' ? ' and administer the academy.' : '.');
+
+                /* Put them on a course in the same press, if one was chosen.
+                   An account made here has no registration behind it, so without
+                   this the person signs in to an empty dashboard and somebody
+                   has to type a registration on their behalf to fix it. Only
+                   ever a learner: learner_enrol_user() refuses staff, and says
+                   why. */
+                $wantCourse = post_str('course_slug', 60);
+                if ($wantCourse !== '' && $role === 'learner') {
+                    $enrol = db_optional(fn() => learner_enrol_user($newId, $wantCourse), null);
+                    if ($enrol === null) {
+                        $error = db_schema_notice();
+                    } elseif ($enrol['ok']) {
+                        $notice .= ' ' . $enrol['message'];
+                    } else {
+                        $error = $enrol['message'];
+                    }
+                }
                 $fresh = [
                     'name'     => trim($first . ' ' . $last),
                     'email'    => $email,
                     'password' => $password,
                 ];
+            }
+
+        /* -------------------------------------------------------------------
+           Enrolling an existing account on a course.
+
+           The pair to the course box on the form above, for somebody who was
+           added before it existed or who needs a second course. It is the only
+           way to enrol an account with no registration behind it — see
+           learner_enrol_user() for why a registration is not invented instead.
+           ------------------------------------------------------------------- */
+        } elseif ($action === 'enrol' && $target !== null) {
+            $slug  = post_str('course_slug', 60);
+            $enrol = db_optional(fn() => learner_enrol_user((int) $target['id'], $slug), null);
+            if ($enrol === null) {
+                $error = db_schema_notice();
+            } elseif ($enrol['ok']) {
+                $notice = $enrol['message'];
+            } else {
+                $error = $enrol['message'];
             }
 
         } elseif ($target === null) {
@@ -390,6 +427,18 @@ function when_u(?string $utc): string
           <div class="field"><label for="n-dept">Department / team</label>
             <input id="n-dept" type="text" name="department" placeholder="<?= e(brand('dept_example')) ?>"></div>
         </div>
+        <div class="field">
+          <label for="n-course">Put them on a course</label>
+          <select id="n-course" name="course_slug">
+            <option value="">Not yet</option>
+            <?php foreach (learner_catalogue() as $slug => $c): ?>
+              <?php if (($c['title'] ?? null) === null) continue; ?>
+              <option value="<?= e($slug) ?>"><?= e((string) $c['title']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <p class="field-hint">Without this they sign in to an empty dashboard. Staff accounts are
+            not enrolled — they already see the courses they are assigned to.</p>
+        </div>
         <button type="submit" class="btn btn-primary">Create the account</button>
         <p class="field-hint">A password is generated and shown to you once, on this page. Nothing
           is emailed — give it to them in person or over the phone.</p>
@@ -429,7 +478,25 @@ function when_u(?string $utc): string
               <?php $mine = $enrolByUser[(int) $u['id']] ?? []; ?>
               <?php if (!$mine): ?>
                 <span class="adm-none">no courses</span>
-              <?php else: foreach ($mine as $en): ?>
+              <?php endif; ?>
+              <?php /* Enrolling from here is the only route for an account with no
+                       registration behind it. Offered on learners only: staff see a
+                       course because they are assigned to it, not enrolled on it. */ ?>
+              <?php if ($u['role'] === 'learner'): ?>
+                <form method="POST" class="adm-act adm-enrol">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="a" value="enrol">
+                  <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                  <select name="course_slug" aria-label="Course to enrol on">
+                    <?php foreach (learner_catalogue() as $slug => $c): ?>
+                      <?php if (($c['title'] ?? null) === null) continue; ?>
+                      <option value="<?= e($slug) ?>"><?= e((string) $c['title']) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                  <button type="submit" class="btn btn-ghost">Enrol</button>
+                </form>
+              <?php endif; ?>
+              <?php if ($mine): foreach ($mine as $en): ?>
                 <span class="adm-enrolled"><?= e((string) $en['course_title']) ?></span>
                 <?php
                   $slug = (string) $en['course_slug'];

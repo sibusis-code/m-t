@@ -402,6 +402,98 @@ function learner_enrol_registration(int $regId, string $courseSlug, string $deli
     ];
 }
 
+/**
+ * Enrol an account that already exists on a course, with no registration behind it.
+ *
+ * WHY THIS EXISTS (25 Sep 2026)
+ *
+ * Every enrolment used to come from a registration: somebody filled the form in,
+ * an administrator pressed Enrol, and the two were joined up. That is the right
+ * default and it stays the default — learner_enrol_registration() above is still
+ * how a real learner arrives, and admin-users.php says so above its own form.
+ *
+ * But "Add someone" on that page creates an account with no registration, for a
+ * colleague or a tester, and there was then NO way to put that person on a
+ * course: the account existed, saw an empty dashboard, and the only route out
+ * was to type a registration on their behalf and enrol that. Inventing a
+ * registration to record something that never happened is worse than a nullable
+ * column — registrations are evidence of somebody asking.
+ *
+ * So registration_id stays null here, which is exactly what it means: nobody
+ * applied. Everything else is identical, including the audit line and the
+ * welcome letter, because from the learner's side nothing is different.
+ *
+ * Idempotent: enrolling twice is a slip, and the unique key says so anyway.
+ * Never touches a password — that is Set a new password, on the same page.
+ *
+ * @return array{ok: bool, message: string, enrolment_created: bool}
+ */
+function learner_enrol_user(int $userId, string $courseSlug): array
+{
+    $fail = static fn(string $m): array =>
+        ['ok' => false, 'message' => $m, 'enrolment_created' => false];
+
+    if (!learner_course_valid($courseSlug)) {
+        return $fail('That is not a course anyone can be enrolled on.');
+    }
+
+    // Tenant-scoped, like every other lookup here: never trust a bare id.
+    $user = db_one('SELECT * FROM users WHERE id = ? AND tenant_id = ?', [$userId, tenant_id()]);
+    if ($user === null)                return $fail('That account no longer exists.');
+    if ($user['role'] !== 'learner') {
+        /* A trainer or an administrator on a course list would show up in that
+           course's learner counts, its registers and its portfolio grid. Their
+           access comes from their role, not from an enrolment. */
+        return $fail('Only a learner account can be enrolled on a course. '
+                   . 'Staff already see every course they are assigned to.');
+    }
+
+    $title = learner_course_title($courseSlug);
+
+    $already = db_value('SELECT id FROM enrolments WHERE tenant_id = ? AND user_id = ? AND course_slug = ?',
+                        [tenant_id(), $userId, $courseSlug]);
+    if ($already !== null) {
+        return ['ok' => true, 'enrolment_created' => false,
+                'message' => trim($user['first_name'] . ' ' . $user['last_name'])
+                           . ' was already on ' . $title . '. Nothing was changed.'];
+    }
+
+    try {
+        $enrolId = db_insert('enrolments', [
+            'tenant_id'       => tenant_id(),
+            'user_id'         => $userId,
+            'course_slug'     => $courseSlug,
+            'course_title'    => $title,
+            'registration_id' => null,        // nobody applied; see the note above
+            'status'          => 'active',
+            'enrolled_at'     => now(),
+            'enrolled_by'     => current_user()['id'] ?? null,
+            'completed_at'    => null,
+        ]);
+    } catch (Throwable $ex) {
+        app_log('DIRECT ENROL FAILED (user ' . $userId . ', ' . $courseSlug . '): ' . $ex->getMessage());
+        return $fail('That enrolment could not be saved. Nothing was changed — please try again.');
+    }
+
+    audit('learner.enrolled', 'enrolments', $enrolId,
+          'user ' . $userId . ' · ' . $courseSlug . ' — ' . $title . ' (no registration)');
+
+    /* The same confirmation a learner gets when an administrator enrols them off
+       a registration, and wrapped the same way: an email problem must never
+       fail an enrolment that is already committed. */
+    if (function_exists('letter_send_welcome')) {
+        try {
+            letter_send_welcome($user, $courseSlug, $title, null);
+        } catch (Throwable $e) {
+            app_log('WELCOME LETTER FAILED (user ' . $userId . '): ' . $e->getMessage());
+        }
+    }
+
+    return ['ok' => true, 'enrolment_created' => true,
+            'message' => trim($user['first_name'] . ' ' . $user['last_name'])
+                       . ' is now enrolled on ' . $title . '.'];
+}
+
 /** Everything this learner is on, newest first. */
 function learner_enrolments(int $userId): array
 {
