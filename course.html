@@ -437,10 +437,29 @@
     {t:"Risk and Governance",lessons:["Risk across the procurement cycle","Governance: delegation of authority, and who signs","Conflict of interest, gifts and fraud red flags","The audit file, and the trail that protects you"]},
     {t:"Cost Models",lessons:["What a cost model is, and when to build one","Breaking a supplier's price into its parts","Benchmarking, and what it should cost","Tracking the saving after the deal is signed"]}
   ];
+  /* The two candidacy routes — a sequence, not a syllabus.
+     Candidacy is mentoring on engineering work the candidate is already doing,
+     so what sits under each route is the order the programme runs in: the gap
+     analysis first, because what somebody still needs depends on what they have
+     already done.
+     ECSA's own competency outcomes are deliberately NOT restated here. They
+     belong to ECSA, they differ by registration category, and we do not hold
+     the standard — inventing them would tell a candidate to collect the wrong
+     evidence for years. draftSyllabus stays TRUE until Kgomotso signs the
+     programme off and the mentor arrangements are confirmed. */
+  const MOD_CAND=[
+    {t:"If you are employed (18.1) with less than 3 years of experience",lessons:["Gap analysis and assessment","Candidacy programme, to make sure your projects and experience are relevant","Registration process with ECSA"]},
+    {t:"If you are employed (18.1) with 3 years of experience or more",lessons:["Gap analysis","One-year candidacy programme","Registration process with ECSA"]}
+  ];
   const COURSES={
     "project-management":{title:"Occupational Certificate: Project Manager",cat:"Project Management",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"101869",credits:"240",code:"121905000",qcto:QCTO_PROJECT_MANAGER,img:"1454165804606-c3d57bc86b40",regOpen:true,pathway:{href:"pm-pathway",lead:"Done the Google certificate?",body:"Centenary puts the overlap at about half the course content — seven of the eleven knowledge modules are closely matched. It carries no NQF credits on its own, so any credit is claimed through RPL and assessed by the provider.",cta:"How the two fit together"},plan:{href:"pm-schedule",lead:"This qualification is self-paced.",body:"That suits shift work, and it is also how good intentions quietly become two years. Set the hours you can actually commit, see when each module lands, and put the sessions in your diary.",cta:"Build your study plan"},lead:"The full project-management qualification, registered on the NQF at Level 5 — 240 credits, SAQA ID 101869. It runs in three parts: eleven knowledge modules, thirteen practicals, and four workplace modules built on real projects."},
     "procurement-officer":{title:"Occupational Certificate: Procurement Officer",cat:"Procurement",mode:"Online or in person",level:"NQF 5",acc:"local",qid:"111445",credits:"180",code:"332302-001-01-00",qcto:QCTO_PROCUREMENT_OFFICER,img:"1521737604893-d14cc237f11d",regOpen:true,learn:["Develop and coordinate the implementation of operational schedules for procurement and supply","Manage procurement and supply relationships, negotiations and contracts","Monitor and measure procurement and supply performance","Work to the legislative, regulatory and organisational rules that govern sourcing"],lead:"The accredited procurement qualification, registered on the NQF at Level 5 — 180 credits, SAQA ID 111445. It runs in three parts: eight knowledge modules covering supply chain, sourcing, inventory, negotiation, contracts and performance; seven practical modules; and three workplace modules logged in a real procurement function. Not to be confused with the Procurement Skills course, which is a short course and is not accredited."},
     "new-venture-creation":{title:"FETC: New Venture Creation",cat:"Entrepreneurship",mode:"Online or in person",level:"NQF 4",acc:"local",qid:"66249",credits:"149",code:"",qcto:NVC_SKILLS_PROGRAMME_1,img:"1526374965328-7f61d4dc18c5",regOpen:true,partsLabel:"6 sections in Skills Programme 1",facts:[["NQF level","4"],["Qualification credits","149"],["SAQA qualification ID","66249"],["Unit standards","6 · 31 credits"],["Open now","Skills Programme 1"],["Certified by","Assessor, moderator, SETA verification"]],learnNote:"Six unit standards, one to a section of the learner guide. Each is assessed in its own right and carries its own credits, and the six together are Skills Programme 1 of the qualification.",modNote:"Each section is aligned to one unit standard and assessed against it. Skills Programme 1 is 31 of the qualification's 149 credits — the remaining skills programmes follow, and are not open yet.",certTitle:"Credits now, the certificate at the end",certBody:"Passing these six unit standards is recorded as 31 credits towards the qualification. The certificate itself is awarded once all 149 are held.",learn:["Apply innovative thinking, and use creative and lateral thinking tools to generate venture ideas","Research a venture idea and test whether it is viable — market, competition, risk and price","Describe what an entrepreneur is, and assess your own entrepreneurial profile honestly","Produce a business plan for a new venture, with the financial and marketing plans behind it","Design and implement an action plan: premises, operating systems, financial controls and insurance","Explain how the market works — demand, supply, price, money and the business cycle"],lead:"The national entrepreneurship qualification, registered on the NQF at Level 4 — 149 credits, SAQA ID 66249. It is built from unit standards and delivered in skills programmes. Skills Programme 1, Start and Run a New Venture, is open now: six unit standards worth 31 credits, covering innovative thinking, researching an opportunity, entrepreneurship, the business plan and how the market works. Not to be confused with AI &amp; New Venture Creation further down the catalogue, which is a short course and is not accredited."},
+    /* The first thing in this catalogue that is a REGISTRATION, not a course.
+       acc is deliberately unset: "Locally accredited" on this site means the
+       QCTO accreditation named in the footer, and ECSA registration is neither
+       that nor an NQF qualification. Saying so plainly is the whole job here. */
+    "engineering-candidacy":{title:"Engineering Candidacy Programme",cat:"Engineering",mode:"Online or in person",level:"Professional registration",img:"images/hero.jpg",draftSyllabus:true,steps:true,regOpen:true,partsLabel:"Two routes, by experience",modules:MOD_CAND,facts:[["Programme type","Candidacy"],["Duration","1 to more than 3 years"],["Registration category","Professional Engineering Technician"],["Entry","N Diploma (TVET) or National Diploma in engineering"],["Delivery","Group and individual mentoring sessions"],["Registered by","ECSA, on its own assessment"]],learnNote:"Candidacy is not a syllabus. It is structured mentoring on the engineering work you are already doing, so that what you have done adds up to what ECSA asks of a candidate technician.",learn:["Where you stand against what ECSA asks of a candidate technician \u2014 the gap analysis comes first","Which of the projects you have worked on count as engineering work, and which do not","How to record experience so that it reads as evidence rather than as a job description","How your work maps to the competency outcomes for the category you are registering in","What reports, references and records ECSA asks a candidate to submit","How the professional review works, and how to prepare for it"],modNote:"Both routes begin with a gap analysis, because what you still need depends on the engineering work you have already done. The candidacy programme fills the gaps, and the last step is the application itself \u2014 which ECSA assesses.",certTitle:"Registration, not a certificate",certBody:"Finishing the candidacy programme does not register you. It prepares the application. Registration as a Professional Engineering Technician is the Engineering Council of South Africa\u2019s decision, on its own assessment of your evidence.",lead:"The structured route to registering with the Engineering Council of South Africa as a Professional Engineering Technician. It is open to technicians holding a National N Diploma (TVET) or a National Diploma in engineering, and it runs on the engineering work you are already doing: a gap analysis first, then mentoring in group and individual sessions until your projects and experience match what ECSA asks of a candidate, then the registration application itself. Registration is ECSA\u2019s own decision \u2014 this programme prepares you for it and does not award it. Not an NQF qualification, and it carries no credits."},
     "ai-software-development":{title:"AI & Software Development",cat:"Software Development",mode:"Online or in person",level:"Intermediate",img:"1461749280684-dccba630e2f6",draftSyllabus:true,modules:MOD_AISD,lead:"Build software, and build it with AI. Eight modules taking you from how a codebase works through to shipping an AI-powered feature and keeping it running — no development background assumed."},
     "procurement":{title:"Procurement Skills",cat:"Procurement",mode:"Online or in person",level:"Intermediate",img:"1521737604893-d14cc237f11d",draftSyllabus:true,avail:"Coming Soon",modules:MOD_PROC,facilitator:FAC_WARIA,lead:"Procurement, taught by someone who has run it. Eight modules — fundamentals, strategic sourcing and category strategy, tender and bid management, bid evaluation, contracts and SLAs, negotiations, risk and governance, and cost models — delivered as masterclasses with coaching and mentoring alongside. Built for procurement teams, and open to external learners working for suppliers. A skills course — customised, and not accredited. No prior qualification needed."},
     "ai-fundamentals":{title:"AI Fundamentals for the Workplace",cat:"Business",mode:"Online or in person",level:"Beginner",img:"1677442136019-21780ecad995",lead:"A practical, video-led introduction to artificial intelligence for non-technical staff — what it is, how it works, and how to use everyday AI tools confidently and responsibly.",modules:MOD_FUND},
@@ -645,6 +664,20 @@
 
     // modules + flatten lessons for gallery
     let li=0;const flat=[];
+    /* A STEPS course is a sequence, not a playlist. Engineering candidacy runs
+       for a year or more on the candidate's own engineering work: no video sits
+       behind a stage, there is no running time to quote and there is no
+       workbook. The renderer below would invent all three, so this one exists
+       instead. */
+    const stepHtml=modules.map((m,mi)=>
+      '<div class="module'+(mi===0?' open':'')+'">'+
+      '<button class="module-head"><span class="module-num">'+(mi+1)+'</span>'+
+      '<div class="mt"><h4>'+ESC(m.t)+'</h4><div class="meta">'+m.lessons.length+
+      ' stages</div></div>'+CHEV+'</button>'+
+      '<div class="module-body">'+m.lessons.map(name=>
+        '<div class="lesson"><span class="lp">'+CHECK+'</span>'+
+        '<span class="lname">'+ESC(name)+'</span></div>').join('')+
+      '</div></div>').join('');
     const modHtml=modules.map((m,mi)=>{
       const rows=m.lessons.map(name=>{
         const dur=DUR[li%DUR.length];const src=li<3?'SAMPLE':'';
@@ -659,13 +692,34 @@
         '<div class="mt"><h4>'+ESC(m.t)+'</h4><div class="meta">'+m.lessons.length+' lessons · ~'+mins+' min · workbook included</div></div>'+CHEV+'</button>'+
         '<div class="module-body">'+rows+'</div></div>';
     }).join('');
-    document.getElementById('c-modules').innerHTML=c.qcto?qctoHtml(c):modHtml;
+    document.getElementById('c-modules').innerHTML=c.qcto?qctoHtml(c):(c.steps?stepHtml:modHtml);
 
     /* A registered qualification has no sample lessons to show, and its
        certificate comes from the external assessment rather than from
-       finishing a playlist — so both of those blocks step aside. */
-    if(c.qcto){
+       finishing a playlist — so both of those blocks step aside.
+
+       A `steps` course takes the same exits, and for a stronger reason: it is
+       not assessed by anybody here. There is no sample lesson to show and no
+       certificate at the end of it, so neither block may render its default. */
+    if(c.qcto||c.steps){
       document.getElementById('c-gallery-sec').hidden=true;
+      if(c.steps){
+        /* There is no course pack, and five placeholder PDFs titled "Course
+           Workbook" and "Lecture Slides" would promise one. The certificate
+           card is kept deliberately — on a steps course it is the sentence
+           saying we award nothing. */
+        document.querySelectorAll('.dgrid a.dcard').forEach(a=>a.remove());
+        const cc=document.getElementById('c-certcard');
+        const rh=cc&&cc.closest('section')?cc.closest('section').querySelector('.sec-head'):null;
+        if(rh){
+          const eb=rh.querySelector('.eyebrow'),h2=rh.querySelector('h2'),p=rh.querySelector('p');
+          if(eb)eb.textContent='At the end of it';
+          if(h2)h2.textContent='What you get, and what you do not';
+          if(p)p.textContent='There is no course pack to download. Candidacy runs on the '+
+            'engineering work you are already doing, and what you build is the evidence '+
+            'ECSA asks a candidate to submit.';
+        }
+      }
       /* the intro clip is a stock placeholder — offering it as this
          qualification's introduction would misrepresent it.
          Removed rather than hidden: .btn sets display:inline-flex, which
@@ -677,14 +731,18 @@
          replace any of them, because a unit-standard qualification has no
          practicals, no workplace modules and no EISA — and telling a learner
          otherwise is not a wording problem, it is the wrong assessment route. */
-      document.getElementById('c-learnnote').textContent=c.learnNote||
-        'Knowledge modules build the theory, practicals apply it, and the workplace modules are logged on real projects — the three together are what the qualification assesses.';
+      document.getElementById('c-learnnote').textContent=c.learnNote||(c.steps?'':
+        'Knowledge modules build the theory, practicals apply it, and the workplace modules are logged on real projects — the three together are what the qualification assesses.');
       const cert=document.getElementById('c-certcard');
       cert.querySelector('h4').textContent=c.certTitle||'Nationally recognised certificate';
       cert.querySelector('p').textContent=c.certBody||'Awarded by the QCTO on completion of the external assessment.';
-      cert.querySelector('.dl').textContent='SAQA ID '+c.qid;
-      document.getElementById('c-modnote').textContent=c.modNote||
-        'Each module is assessed in its own right. The qualification itself is awarded only after the External Integrated Summative Assessment set by the QCTO.';
+      /* A registration route has no SAQA id, because it is not a
+         qualification. "SAQA ID undefined" under a certificate card would be
+         exactly the claim this course must not make. */
+      const dl=cert.querySelector('.dl');
+      if(c.qid){dl.textContent='SAQA ID '+c.qid;}else{dl.remove();}
+      document.getElementById('c-modnote').textContent=c.modNote||(c.steps?'':
+        'Each module is assessed in its own right. The qualification itself is awarded only after the External Integrated Summative Assessment set by the QCTO.');
       return bind();
     }
 

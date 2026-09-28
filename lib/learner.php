@@ -121,6 +121,34 @@ function learner_catalogue(): array
                assessor, moderated, and verified by the SETA. */
             'assessed' => 'competence is decided by a registered assessor and confirmed by a moderator',
         ],
+        /* A professional REGISTRATION route, added 28 Sep 2026 — the first thing
+           in this catalogue that is not a course and never becomes one.
+           Candidacy is structured mentoring on engineering work a candidate is
+           already doing, so that it adds up to what the Engineering Council of
+           South Africa asks. ECSA registers people. Centenary prepares them and
+           awards nothing at the end of it.
+
+           TECHNICIAN CATEGORY ONLY (Sibusiso, 28 Sep 2026). The programme this
+           was modelled on lists technologist and engineer routes as well; we
+           hold neither, and a candidate who reads otherwise collects the wrong
+           evidence for years before anyone notices.
+
+           tracked => false, and it must stay that way until ECSA's own
+           competency standard for the technician category is in hand. There is
+           no module structure to parse, and an invented one would be a
+           curriculum for a registration that nobody assesses that way. */
+        'engineering-candidacy' => [
+            'title'   => 'Engineering Candidacy Programme',
+            'note'    => 'Professional registration with ECSA · Technician category · not an NQF qualification',
+            'tracked' => false,
+            /* Not 'assessed'. See learner_assessment_route(): 'assessed' adds a
+               clause to a sentence that opens with Centenary deciding, and on
+               this one Centenary decides nothing at all — so this replaces the
+               whole sentence, capital and full stop included. */
+            'route'   => 'Registration as a Professional Engineering Technician is the '
+                       . 'Engineering Council of South Africa’s decision, on its own '
+                       . 'assessment of your evidence.',
+        ],
         'ai-software-development' => [
             'title'   => 'AI & Software Development',
             'note'    => 'A professional programme, not an accredited qualification',
@@ -168,6 +196,16 @@ function learner_course_valid(string $slug): bool
 function learner_assessment_route(string $slug): string
 {
     $cat = learner_catalogue()[$slug] ?? null;
+
+    /* AND WHEN CENTENARY DECIDES NOTHING AT ALL
+       'assessed' extends a sentence whose opening clause is "Being found
+       competent is Centenary's decision". The engineering candidacy programme
+       is not assessed by Centenary in any sense: ECSA registers, on its own
+       assessment, after its own review. Appending a clause there would leave
+       the untrue half standing, so 'route' replaces the sentence outright. It
+       is a whole sentence in the catalogue, punctuation and all. */
+    if (isset($cat['route']) && $cat['route'] !== '') return (string) $cat['route'];
+
     $tail = $cat['assessed'] ?? null;
     return 'Being found competent is Centenary’s decision after the real assessment'
         . ($tail ? ', and ' . $tail : '') . '.';
