@@ -71,14 +71,112 @@ function install_apply_schema(): int
     $sql = file_get_contents($file);
     if ($sql === false) app_fail('Cannot read ' . $file);
 
-    $sql = preg_replace('/^\s*--.*$/m', '', $sql);
-
     $applied = 0;
-    foreach (array_filter(array_map('trim', explode(';', $sql))) as $statement) {
+    foreach (install_sql_statements($sql) as $statement) {
+        /* The file's own contract, checked rather than trusted. Everything in
+           it creates; nothing drops, alters or writes rows. A fragment that is
+           not a CREATE means the splitter or the file is wrong, and stopping
+           here with the fragment in hand beats handing the database something
+           nobody wrote. */
+        if (!preg_match('/^CREATE\b/i', $statement)) {
+            app_fail('Refusing to run a schema statement that is not a CREATE: '
+                   . substr(preg_replace('/\s+/', ' ', $statement), 0, 120));
+        }
         db()->exec($statement);
         $applied++;
     }
     return $applied;
+}
+
+/**
+ * Split a schema file into statements.
+ *
+ * WHY THIS IS NOT explode(';').
+ *
+ * It was, over a file stripped of whole-line `--` comments — and a TRAILING
+ * comment was left in place, semicolon and all:
+ *
+ *     kind VARCHAR(20) NOT NULL,   -- 'classroom' today; see COURSE_LINK_KINDS
+ *
+ * The split landed inside that comment and cut the CREATE in half, so MySQL was
+ * handed `... NOT NULL, -- 'classroom' today` and then `see COURSE_LINK_KINDS
+ * url VARCHAR(500) ...`. Both are syntax errors, setup.php died on the first
+ * one, and the browser got a 500 with nothing to go on. Three of the tables
+ * added on 28 Sep 2026 carried such a comment; SQLite's schema did not, so
+ * every local run passed and only the live MySQL install failed.
+ *
+ * This is the third time a semicolon inside human text has broken a naive scan
+ * in this codebase (M&amp;T's entity in the workflow guards, twice). So this
+ * walks the file rather than pattern-matching it: quoted strings and both
+ * comment styles are consumed whole, and only a `;` at top level ends a
+ * statement. A comment may now say whatever it likes.
+ *
+ * @return string[] statements, trimmed, comments removed, no empties
+ */
+function install_sql_statements(string $sql): array
+{
+    $out = [];
+    $buf = '';
+    $n   = strlen($sql);
+    $i   = 0;
+
+    while ($i < $n) {
+        $c   = $sql[$i];
+        $two = substr($sql, $i, 2);
+
+        /* `--` starts a comment only when whitespace or the end of the line
+           follows it, which is MySQL's own rule and leaves `a--b` as
+           arithmetic rather than swallowing the rest of the line. */
+        if ($two === '--' && ($i + 2 >= $n || ctype_space($sql[$i + 2]))) {
+            $j    = strpos($sql, "\n", $i);
+            $i    = $j === false ? $n : $j + 1;
+            $buf .= "\n";
+            continue;
+        }
+        if ($two === '/*') {
+            $j    = strpos($sql, '*/', $i + 2);
+            $i    = $j === false ? $n : $j + 2;
+            $buf .= ' ';
+            continue;
+        }
+        /* Quoted text is copied through untouched — a `;` or a `--` inside a
+           string literal or a backticked identifier is data, not syntax. */
+        if ($c === "'" || $c === '"' || $c === '`') {
+            $q    = $c;
+            $buf .= $c;
+            $i++;
+            while ($i < $n) {
+                $ch = $sql[$i];
+                if ($ch === '\\' && $q !== '`' && $i + 1 < $n) {   // \' and \"
+                    $buf .= substr($sql, $i, 2);
+                    $i   += 2;
+                    continue;
+                }
+                $buf .= $ch;
+                $i++;
+                if ($ch === $q) {
+                    if ($i < $n && $sql[$i] === $q) {   // '' and `` double up
+                        $buf .= $q;
+                        $i++;
+                        continue;
+                    }
+                    break;
+                }
+            }
+            continue;
+        }
+        if ($c === ';') {
+            $out[] = $buf;
+            $buf   = '';
+            $i++;
+            continue;
+        }
+        $buf .= $c;
+        $i++;
+    }
+    $out[] = $buf;
+
+    return array_values(array_filter(array_map('trim', $out), fn($s) => $s !== ''));
 }
 
 /**
@@ -116,6 +214,12 @@ function install_seed_tenants(?string $contact = null): int
            the Cricket World Cup volunteer portal Centenary also built for them,
            which is a separate application with its own database. */
         ['cricketsa', 'Cricket South Africa',            'Cricket SA Academy'],
+        /* Inhance Supply Chain Solutions, the eighth, started 25 Sep 2026 after
+           Kgomotso introduced them as a white-label prospect. Seeded everywhere
+           for the same reason as Tracker: the tenants table describes the
+           platform, not the installation, so if it is sold, standing the site up
+           is configuration rather than a migration. */
+        ['inhance', 'Inhance Supply Chain Solutions',    'Inhance Academy'],
     ];
 
     $added = 0;
