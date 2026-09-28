@@ -189,7 +189,11 @@
       role: 'Technical, artisan and renewable energy training',
       org: 'Chief Executive Officer, Fisha Renaissance NPC',
       creds: 'ECSA Pr. Eng. Tech · BTech Electrical Engineering · MBA · Postgrad in Business Management',
-      teaches: [['programmes', 'Technical & Artisan Programmes']],
+      /* The candidacy programme added 28 Sep 2026, on Sibusiso's word that
+         Fiston teaches it. It suits him on the record already here: he is
+         himself ECSA-registered, a category above the technicians it registers. */
+      teaches: [['programmes', 'Technical & Artisan Programmes'],
+                ['engineering-candidacy', 'Engineering Candidacy Programme']],
       bio: 'Chief Executive of Fisha Renaissance NPC, a Johannesburg training organisation ' +
            'working across artisan development, electrical compliance, renewable energy, ' +
            'welding and fabrication, plumbing, and workplace and employability programmes. ' +
@@ -326,7 +330,12 @@
      back to its "the academy team" wording — it fails closed, which is the only
      acceptable direction for this particular check. */
   window.ACADEMY_TRAINERS = shown.map(function (t) {
-    return { name: t.name, role: t.role, org: t.org, creds: t.creds };
+    /* `bio` joined the projection 28 Sep 2026 so a course page can show the
+       person's own words instead of keeping a second copy of them. It is the
+       same sentence this page already prints, past the same consent filter —
+       `shown` — so it publishes nothing new, and it means a bio corrected here
+       is corrected on the course pages too. */
+    return { name: t.name, role: t.role, org: t.org, creds: t.creds, bio: t.bio };
   });
 
   var host = document.getElementById('trainers');
